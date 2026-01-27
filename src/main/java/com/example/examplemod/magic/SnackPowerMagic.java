@@ -38,7 +38,7 @@ public class SnackPowerMagic extends MobEffect {
                 0,
                 false,
                 false,
-                false));
+                true));
     }
 
     /**

@@ -47,5 +47,10 @@
   "effect.chen_mod.horse_power": "Horse Power",
   "effect.chen_mod.ox_power": "Ox Power",
   "effect.chen_mod.rooster_power": "Rooster Power",
-  "effect.chen_mod.monkey_power": "Monkey Power"
+  "effect.chen_mod.monkey_power": "Monkey Power",
+  "effect.chen_mod.tiger_power": "Tiger Power",
+  "entity.chen_mod.tiger_clone": "Shadow Clone",
+  "item.chen_mod.dragon_talisman": "Dragon Talisman",
+  "item.chen_mod.dragon_talisman.desc": "Dragon Blast! Shoots a fire pillar forward, explodes on impact.",
+  "entity.chen_mod.dragon_fireball": "Dragon Blast"
 }
