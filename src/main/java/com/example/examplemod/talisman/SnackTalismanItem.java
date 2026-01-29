@@ -1,6 +1,7 @@
 package com.example.examplemod.talisman;
 
 import com.example.examplemod.ChenMod;
+import com.example.examplemod.magic.SnackPowerMagic;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -38,8 +39,8 @@ public class SnackTalismanItem extends Item {
         ItemStack itemStack = player.getItemInHand(usedHand);
 
         if (!level.isClientSide) {
-            // 给予蛇符咒效果
-            player.addEffect(new MobEffectInstance(ChenMod.SNACK_POWER, MAGIC_DURATION, 0, true, true, true));
+            // 给予蛇符咒效果 (无粒子)
+            SnackPowerMagic.grantSnackPower(player, MAGIC_DURATION);
             
             // 添加冷却时间
             player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);

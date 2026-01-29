@@ -8,12 +8,16 @@ import com.example.examplemod.talisman.DogTalismanItem;
 import com.example.examplemod.talisman.RoosterTalismanItem;
 import com.example.examplemod.talisman.MonkeyTalismanItem;
 import com.example.examplemod.talisman.TigerTalismanItem;
+import com.example.examplemod.talisman.DragonTalismanItem;
+import com.example.examplemod.entity.DragonFireballEntity;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
 
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
 import com.example.examplemod.magic.RabbitPowerMagic;
 import com.example.examplemod.magic.HorsePowerMagic;
 import com.example.examplemod.magic.OxPowerMagic;
@@ -22,6 +26,7 @@ import com.example.examplemod.magic.DogPowerMagic;
 import com.example.examplemod.magic.RoosterPowerMagic;
 import com.example.examplemod.magic.MonkeyPowerMagic;
 import com.example.examplemod.magic.TigerPowerMagic;
+import com.example.examplemod.entity.TigerCloneEntity;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -65,6 +70,8 @@ public class ChenMod {
     public static final DeferredItem<MonkeyTalismanItem> MONKEY_TALISMAN = ITEMS.register("monkey_talisman", MonkeyTalismanItem::new);
     // 注册虎符咒物品
     public static final DeferredItem<TigerTalismanItem> TIGER_TALISMAN = ITEMS.register("tiger_talisman", TigerTalismanItem::new);
+    // 注册龙符咒物品
+    public static final DeferredItem<DragonTalismanItem> DRAGON_TALISMAN = ITEMS.register("dragon_talisman", DragonTalismanItem::new);
 
     /*
         注册魔法效果
@@ -87,15 +94,32 @@ public class ChenMod {
     // 虎的魔法效果
     public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, TigerPowerMagic> TIGER_POWER = MOB_EFFECTS.register("tiger_power", TigerPowerMagic::new);
 
+    // 实体注册
+    public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(net.minecraft.core.registries.Registries.ENTITY_TYPE, MODID);
+
+    public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<TigerCloneEntity>> TIGER_CLONE = ENTITIES.register("tiger_clone", () ->
+            EntityType.Builder.of(TigerCloneEntity::new, MobCategory.MONSTER)
+                    .sized(0.6F, 1.95F)
+                    .build("tiger_clone"));
+
+    public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<DragonFireballEntity>> DRAGON_FIREBALL = ENTITIES.register("dragon_fireball", () ->
+            EntityType.Builder.<DragonFireballEntity>of(DragonFireballEntity::new, MobCategory.MISC)
+                    .sized(1.0F, 1.0F)
+                    .clientTrackingRange(4)
+                    .updateInterval(10)
+                    .build("dragon_fireball"));
+
     // Mod 类的构造函数是 Mod 加载时运行的第一段代码。
     public ChenMod(IEventBus modEventBus, ModContainer modContainer) {
 
         // 注册 commonSetup 方法以进行 Mod 加载
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(this::addEntityAttributes);
 
         // 将 Deferred Register 注册到 Mod 事件总线，以便注册物品
         ITEMS.register(modEventBus);
         MOB_EFFECTS.register(modEventBus);
+        ENTITIES.register(modEventBus);
 
         // 注册我们自己以关注服务器和其他感兴趣的游戏事件。
         NeoForge.EVENT_BUS.register(this);
@@ -127,6 +151,10 @@ public class ChenMod {
         LOGGER.info("ChenMod common setup complete.");
     }
 
+    private void addEntityAttributes(net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent event) {
+        event.put(TIGER_CLONE.get(), TigerCloneEntity.createAttributes().build());
+    }
+
     // 将物品添加到创造模式标签页
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
         // 将羊符咒添加到战斗（武器）标签页
@@ -139,6 +167,7 @@ public class ChenMod {
             event.accept(ROOSTER_TALISMAN);
             event.accept(MONKEY_TALISMAN);
             event.accept(TIGER_TALISMAN);
+            event.accept(DRAGON_TALISMAN);
         }
     }
 

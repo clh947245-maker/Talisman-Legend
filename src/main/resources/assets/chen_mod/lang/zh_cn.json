@@ -13,6 +13,8 @@
   "item.chen_mod.rooster_talisman.desc": "你可以飞了 (按住 Shift 下降，配合兔符咒可悬停/高速飞行)",
   "item.chen_mod.monkey_talisman": "猴符咒",
   "item.chen_mod.monkey_talisman.desc": "猴子七十二变 (按住 TAB + 滚轮 选择形态)",
+  "item.chen_mod.tiger_talisman": "虎符咒",
+  "item.chen_mod.tiger_talisman.desc": "平衡善恶，分裂出一个攻击所有人的分身",
   "item.chen_mod.monkey_talisman.selected": "当前选择: %s",
   "item.chen_mod.tiger_talisman": "虎符咒",
   "item.chen_mod.tiger_talisman.desc": "阴阳平衡，善恶分离",
@@ -55,5 +57,9 @@
   "effect.chen_mod.ox_power": "牛的力量",
   "effect.chen_mod.rooster_power": "鸡的力量",
   "effect.chen_mod.monkey_power": "猴的力量",
-  "effect.chen_mod.tiger_power": "虎的力量"
+  "effect.chen_mod.tiger_power": "虎的力量",
+  "entity.chen_mod.tiger_clone": "暗影分身",
+  "item.chen_mod.dragon_talisman": "龙符咒",
+  "item.chen_mod.dragon_talisman.desc": "龙爆破！向前方发射一道火柱，碰到障碍物爆炸",
+  "entity.chen_mod.dragon_fireball": "龙爆破"
 }
