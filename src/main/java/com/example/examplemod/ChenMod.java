@@ -7,6 +7,7 @@ import com.example.examplemod.talisman.SnackTalismanItem;
 import com.example.examplemod.talisman.DogTalismanItem;
 import com.example.examplemod.talisman.RoosterTalismanItem;
 import com.example.examplemod.talisman.MonkeyTalismanItem;
+import com.example.examplemod.talisman.TigerTalismanItem;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -20,6 +21,7 @@ import com.example.examplemod.magic.SnackPowerMagic;
 import com.example.examplemod.magic.DogPowerMagic;
 import com.example.examplemod.magic.RoosterPowerMagic;
 import com.example.examplemod.magic.MonkeyPowerMagic;
+import com.example.examplemod.magic.TigerPowerMagic;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -61,6 +63,8 @@ public class ChenMod {
     public static final DeferredItem<RoosterTalismanItem> ROOSTER_TALISMAN = ITEMS.register("rooster_talisman", RoosterTalismanItem::new);
     // 注册猴符咒物品
     public static final DeferredItem<MonkeyTalismanItem> MONKEY_TALISMAN = ITEMS.register("monkey_talisman", MonkeyTalismanItem::new);
+    // 注册虎符咒物品
+    public static final DeferredItem<TigerTalismanItem> TIGER_TALISMAN = ITEMS.register("tiger_talisman", TigerTalismanItem::new);
 
     /*
         注册魔法效果
@@ -80,6 +84,8 @@ public class ChenMod {
     public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, RoosterPowerMagic> ROOSTER_POWER = MOB_EFFECTS.register("rooster_power", RoosterPowerMagic::new);
     // 猴的魔法效果
     public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, MonkeyPowerMagic> MONKEY_POWER = MOB_EFFECTS.register("monkey_power", MonkeyPowerMagic::new);
+    // 虎的魔法效果
+    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, TigerPowerMagic> TIGER_POWER = MOB_EFFECTS.register("tiger_power", TigerPowerMagic::new);
 
     // Mod 类的构造函数是 Mod 加载时运行的第一段代码。
     public ChenMod(IEventBus modEventBus, ModContainer modContainer) {
@@ -132,6 +138,7 @@ public class ChenMod {
             event.accept(DOG_TALISMAN);
             event.accept(ROOSTER_TALISMAN);
             event.accept(MONKEY_TALISMAN);
+            event.accept(TIGER_TALISMAN);
         }
     }
 

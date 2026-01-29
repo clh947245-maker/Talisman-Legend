@@ -62,6 +62,11 @@ public class TalismanInventoryHandler {
         if (ChenMod.MONKEY_POWER.isBound() && player.hasEffect(ChenMod.MONKEY_POWER)) {
             checkTalismanInInventory(player, ChenMod.MONKEY_POWER, ChenMod.MONKEY_TALISMAN.get());
         }
+
+        // 检测虎符咒
+        if (ChenMod.TIGER_POWER.isBound() && player.hasEffect(ChenMod.TIGER_POWER)) {
+            checkTalismanInInventory(player, ChenMod.TIGER_POWER, ChenMod.TIGER_TALISMAN.get());
+        }
     }
 
     /**

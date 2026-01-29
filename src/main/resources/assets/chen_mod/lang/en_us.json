@@ -14,6 +14,9 @@
   "item.chen_mod.monkey_talisman": "Monkey Talisman",
   "item.chen_mod.monkey_talisman.desc": "Shape Shifting (Hold TAB + Scroll to Select)",
   "item.chen_mod.monkey_talisman.selected": "Selected Form: %s",
+  "item.chen_mod.tiger_talisman": "Tiger Talisman",
+  "item.chen_mod.tiger_talisman.desc": "Balance of Yin and Yang, Separation of Good and Evil",
+  "entity.chen_mod.tiger_clone": "%s's Dark Side",
   "gui.chen_mod.select": "Select",
   "transformation.chen_mod.chicken": "Chicken",
   "transformation.chen_mod.sheep": "Sheep",
@@ -47,5 +50,6 @@
   "effect.chen_mod.horse_power": "Horse Power",
   "effect.chen_mod.ox_power": "Ox Power",
   "effect.chen_mod.rooster_power": "Rooster Power",
-  "effect.chen_mod.monkey_power": "Monkey Power"
+  "effect.chen_mod.monkey_power": "Monkey Power",
+  "effect.chen_mod.tiger_power": "Tiger Power"
 }
