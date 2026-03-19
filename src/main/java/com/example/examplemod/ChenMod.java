@@ -9,7 +9,9 @@ import com.example.examplemod.talisman.RoosterTalismanItem;
 import com.example.examplemod.talisman.MonkeyTalismanItem;
 import com.example.examplemod.talisman.TigerTalismanItem;
 import com.example.examplemod.talisman.DragonTalismanItem;
+import com.example.examplemod.talisman.PigTalismanItem;
 import com.example.examplemod.entity.DragonFireballEntity;
+import com.example.examplemod.entity.PigLaserEntity;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -72,6 +74,8 @@ public class ChenMod {
     public static final DeferredItem<TigerTalismanItem> TIGER_TALISMAN = ITEMS.register("tiger_talisman", TigerTalismanItem::new);
     // 注册龙符咒物品
     public static final DeferredItem<DragonTalismanItem> DRAGON_TALISMAN = ITEMS.register("dragon_talisman", DragonTalismanItem::new);
+    // 注册猪符咒物品
+    public static final DeferredItem<PigTalismanItem> PIG_TALISMAN = ITEMS.register("pig_talisman", PigTalismanItem::new);
 
     /*
         注册魔法效果
@@ -108,6 +112,13 @@ public class ChenMod {
                     .clientTrackingRange(4)
                     .updateInterval(10)
                     .build("dragon_fireball"));
+
+    public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<PigLaserEntity>> PIG_LASER = ENTITIES.register("pig_laser", () ->
+            EntityType.Builder.<PigLaserEntity>of(PigLaserEntity::new, MobCategory.MISC)
+                    .sized(0.5F, 0.5F)
+                    .clientTrackingRange(64)
+                    .updateInterval(1)
+                    .build("pig_laser"));
 
     // Mod 类的构造函数是 Mod 加载时运行的第一段代码。
     public ChenMod(IEventBus modEventBus, ModContainer modContainer) {
@@ -168,6 +179,7 @@ public class ChenMod {
             event.accept(MONKEY_TALISMAN);
             event.accept(TIGER_TALISMAN);
             event.accept(DRAGON_TALISMAN);
+            event.accept(PIG_TALISMAN);
         }
     }
 

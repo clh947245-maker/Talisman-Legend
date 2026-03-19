@@ -6,17 +6,17 @@
       "request": "launch",
       "name": "Client",
       "presentation": {
-        "group": "Mod Development - 1.21.1-neo-forge",
+        "group": "Mod Development - 1.21.1NeoForge",
         "order": 0
       },
-      "projectName": "1.21.1-neo-forge",
+      "projectName": "1.21.1NeoForge",
       "mainClass": "net.neoforged.devlaunch.Main",
       "args": [
-        "@E:\\desk\\1.21.1-neo-forge\\build\\moddev\\clientRunProgramArgs.txt"
+        "@E:\\desk\\1.21.1NeoForge\\build\\moddev\\clientRunProgramArgs.txt"
       ],
       "vmArgs": [
-        "@E:\\desk\\1.21.1-neo-forge\\build\\moddev\\clientRunVmArgs.txt",
-        "-Dfml.modFolders\u003dchen_mod%%E:\\desk\\1.21.1-neo-forge\\bin\\main"
+        "@E:\\desk\\1.21.1NeoForge\\build\\moddev\\clientRunVmArgs.txt",
+        "-Dfml.modFolders\u003dchen_mod%%E:\\desk\\1.21.1NeoForge\\bin\\main"
       ],
       "cwd": "${workspaceFolder}\\run",
       "env": {},
@@ -28,17 +28,17 @@
       "request": "launch",
       "name": "Data",
       "presentation": {
-        "group": "Mod Development - 1.21.1-neo-forge",
+        "group": "Mod Development - 1.21.1NeoForge",
         "order": 1
       },
-      "projectName": "1.21.1-neo-forge",
+      "projectName": "1.21.1NeoForge",
       "mainClass": "net.neoforged.devlaunch.Main",
       "args": [
-        "@E:\\desk\\1.21.1-neo-forge\\build\\moddev\\dataRunProgramArgs.txt"
+        "@E:\\desk\\1.21.1NeoForge\\build\\moddev\\dataRunProgramArgs.txt"
       ],
       "vmArgs": [
-        "@E:\\desk\\1.21.1-neo-forge\\build\\moddev\\dataRunVmArgs.txt",
-        "-Dfml.modFolders\u003dchen_mod%%E:\\desk\\1.21.1-neo-forge\\bin\\main"
+        "@E:\\desk\\1.21.1NeoForge\\build\\moddev\\dataRunVmArgs.txt",
+        "-Dfml.modFolders\u003dchen_mod%%E:\\desk\\1.21.1NeoForge\\bin\\main"
       ],
       "cwd": "${workspaceFolder}\\run",
       "env": {},
@@ -50,17 +50,17 @@
       "request": "launch",
       "name": "GameTestServer",
       "presentation": {
-        "group": "Mod Development - 1.21.1-neo-forge",
+        "group": "Mod Development - 1.21.1NeoForge",
         "order": 2
       },
-      "projectName": "1.21.1-neo-forge",
+      "projectName": "1.21.1NeoForge",
       "mainClass": "net.neoforged.devlaunch.Main",
       "args": [
-        "@E:\\desk\\1.21.1-neo-forge\\build\\moddev\\gameTestServerRunProgramArgs.txt"
+        "@E:\\desk\\1.21.1NeoForge\\build\\moddev\\gameTestServerRunProgramArgs.txt"
       ],
       "vmArgs": [
-        "@E:\\desk\\1.21.1-neo-forge\\build\\moddev\\gameTestServerRunVmArgs.txt",
-        "-Dfml.modFolders\u003dchen_mod%%E:\\desk\\1.21.1-neo-forge\\bin\\main"
+        "@E:\\desk\\1.21.1NeoForge\\build\\moddev\\gameTestServerRunVmArgs.txt",
+        "-Dfml.modFolders\u003dchen_mod%%E:\\desk\\1.21.1NeoForge\\bin\\main"
       ],
       "cwd": "${workspaceFolder}\\run",
       "env": {},
@@ -72,17 +72,17 @@
       "request": "launch",
       "name": "Server",
       "presentation": {
-        "group": "Mod Development - 1.21.1-neo-forge",
+        "group": "Mod Development - 1.21.1NeoForge",
         "order": 3
       },
-      "projectName": "1.21.1-neo-forge",
+      "projectName": "1.21.1NeoForge",
       "mainClass": "net.neoforged.devlaunch.Main",
       "args": [
-        "@E:\\desk\\1.21.1-neo-forge\\build\\moddev\\serverRunProgramArgs.txt"
+        "@E:\\desk\\1.21.1NeoForge\\build\\moddev\\serverRunProgramArgs.txt"
       ],
       "vmArgs": [
-        "@E:\\desk\\1.21.1-neo-forge\\build\\moddev\\serverRunVmArgs.txt",
-        "-Dfml.modFolders\u003dchen_mod%%E:\\desk\\1.21.1-neo-forge\\bin\\main"
+        "@E:\\desk\\1.21.1NeoForge\\build\\moddev\\serverRunVmArgs.txt",
+        "-Dfml.modFolders\u003dchen_mod%%E:\\desk\\1.21.1NeoForge\\bin\\main"
       ],
       "cwd": "${workspaceFolder}\\run",
       "env": {},

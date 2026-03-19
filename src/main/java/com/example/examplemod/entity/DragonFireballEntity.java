@@ -3,6 +3,10 @@ package com.example.examplemod.entity;
 import com.example.examplemod.ChenMod;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ItemSupplier;
@@ -13,7 +17,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.HitResult;
 
+import javax.annotation.Nullable;
+
 public class DragonFireballEntity extends LargeFireball implements ItemSupplier {
+
+    private static final EntityDataAccessor<Integer> DATA_OWNER_ENTITY_ID = SynchedEntityData.defineId(DragonFireballEntity.class, EntityDataSerializers.INT);
 
     public DragonFireballEntity(EntityType<? extends LargeFireball> type, Level level) {
         super(type, level);
@@ -44,6 +52,40 @@ public class DragonFireballEntity extends LargeFireball implements ItemSupplier 
         
         // this.explosionPower = 2; // 默认爆炸威力 (private 无法访问，在 onHit 中自定义爆炸逻辑即可)
     }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_OWNER_ENTITY_ID, -1);
+    }
+
+    @Override
+    public void setOwner(@Nullable Entity owner) {
+        super.setOwner(owner);
+        if (owner != null) {
+            this.entityData.set(DATA_OWNER_ENTITY_ID, owner.getId());
+        } else {
+            this.entityData.set(DATA_OWNER_ENTITY_ID, -1);
+        }
+    }
+
+    @Nullable
+    public Entity getOwnerForRender() {
+        Entity owner = this.getOwner();
+        if (owner != null) {
+            return owner;
+        }
+        int ownerId = this.entityData.get(DATA_OWNER_ENTITY_ID);
+        if (ownerId != -1 && this.level() != null) {
+            return this.level().getEntity(ownerId);
+        }
+        return null;
+    }
+
+    @Override
+    public ItemStack getItem() {
+        return new ItemStack(Items.FIRE_CHARGE);
+    }
     
     // 如果没有 xPower 字段，我们需要手动维持飞行速度
     @Override
@@ -61,52 +103,6 @@ public class DragonFireballEntity extends LargeFireball implements ItemSupplier 
         }
         
         super.tick();
-        // 在客户端生成特效，模拟火柱效果
-        if (this.level().isClientSide) {
-            // 生成密集的火焰粒子，形成“火柱”拖尾
-            // 沿飞行反方向生成多层粒子
-            net.minecraft.world.phys.Vec3 motion = this.getDeltaMovement();
-            double speed = motion.length();
-            
-            // 火柱半径 (控制粗细)
-            double radius = 0.8; 
-            
-            // 插值步长，越小粒子越密集
-            int steps = 20; 
-
-            for (int i = 0; i < steps; i++) {
-                double progress = i / (double)steps;
-                // 插值位置：从当前位置向后延伸
-                double x = this.getX() - motion.x * progress;
-                double y = this.getY() - motion.y * progress;
-                double z = this.getZ() - motion.z * progress;
-                
-                // 1. 核心高亮火焰 (较窄)
-                if (this.random.nextFloat() < 0.5F) {
-                    this.level().addParticle(ParticleTypes.FLAME, 
-                        x + (this.random.nextDouble() - 0.5) * 0.3, 
-                        y + (this.random.nextDouble() - 0.5) * 0.3, 
-                        z + (this.random.nextDouble() - 0.5) * 0.3, 
-                        0, 0, 0);
-                }
-
-                // 2. 外层扩散火焰 (较宽，形成粗壮感)
-                this.level().addParticle(ParticleTypes.FLAME, 
-                    x + (this.random.nextDouble() - 0.5) * radius * 2, 
-                    y + (this.random.nextDouble() - 0.5) * radius * 2, 
-                    z + (this.random.nextDouble() - 0.5) * radius * 2, 
-                    0, 0, 0);
-                    
-                // 3. 边缘烟雾 (增加体积感)
-                if (this.random.nextFloat() < 0.3F) {
-                    this.level().addParticle(ParticleTypes.LARGE_SMOKE, 
-                        x + (this.random.nextDouble() - 0.5) * radius * 2.5, 
-                        y + (this.random.nextDouble() - 0.5) * radius * 2.5, 
-                        z + (this.random.nextDouble() - 0.5) * radius * 2.5, 
-                        0, 0, 0);
-                }
-            }
-        }
     }
 
     @Override
@@ -117,8 +113,8 @@ public class DragonFireballEntity extends LargeFireball implements ItemSupplier 
         
         if (!this.level().isClientSide) {
             // 自定义爆炸：造成伤害并破坏方块
-            // 2.0F 是爆炸半径，true 表示产生火焰
-            this.level().explode(this, this.getX(), this.getY(), this.getZ(), 2.0F, true, Level.ExplosionInteraction.MOB);
+            // 4.0F 是爆炸半径 (与TNT一致)，true 表示产生火焰
+            this.level().explode(this, this.getX(), this.getY(), this.getZ(), 4.0F, true, Level.ExplosionInteraction.MOB);
 
             // 生成火柱
             createFirePillar(this.blockPosition());

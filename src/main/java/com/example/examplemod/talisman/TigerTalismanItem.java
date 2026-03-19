@@ -92,8 +92,8 @@ public class TigerTalismanItem extends Item {
             clone.setPos(player.getX(), player.getY(), player.getZ());
             // 设置分身的主人，用于后续逻辑判断（如融合、消失等）
             clone.setOwnerUUID(player.getUUID());
-            // 设置分身的名字，格式为 "PlayerName's Shadow"
-            clone.setCustomName(Component.literal(player.getName().getString() + "'s Shadow"));
+            // 设置分身的名字，和本体一样
+            clone.setCustomName(player.getName());
             // 始终显示名字标签
             clone.setCustomNameVisible(true);
 
