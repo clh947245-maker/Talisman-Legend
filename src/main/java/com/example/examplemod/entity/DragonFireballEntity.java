@@ -2,14 +2,12 @@ package com.example.examplemod.entity;
 
 import com.example.examplemod.ChenMod;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.ItemSupplier;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -19,7 +17,7 @@ import net.minecraft.world.phys.HitResult;
 
 import javax.annotation.Nullable;
 
-public class DragonFireballEntity extends LargeFireball implements ItemSupplier {
+public class DragonFireballEntity extends LargeFireball {
 
     private static final EntityDataAccessor<Integer> DATA_OWNER_ENTITY_ID = SynchedEntityData.defineId(DragonFireballEntity.class, EntityDataSerializers.INT);
 
@@ -140,7 +138,7 @@ public class DragonFireballEntity extends LargeFireball implements ItemSupplier 
             for (int z = -1; z <= 1; z++) {
                 if (x == 0 && z == 0) continue;
                 BlockPos groundPos = center.offset(x, 0, z);
-                 if (this.level().isEmptyBlock(groundPos) && !this.level().isEmptyBlock(groundPos.below())) {
+                if (this.level().isEmptyBlock(groundPos) && !this.level().isEmptyBlock(groundPos.below())) {
                     this.level().setBlockAndUpdate(groundPos, Blocks.FIRE.defaultBlockState());
                 }
             }

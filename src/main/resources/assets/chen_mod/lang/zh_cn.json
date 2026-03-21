@@ -56,8 +56,6 @@
   "effect.chen_mod.rooster_power": "鸡的力量",
   "effect.chen_mod.monkey_power": "猴的力量",
   "effect.chen_mod.tiger_power": "虎的力量",
-  "item.chen_mod.pig_talisman": "猪符咒",
-  "item.chen_mod.pig_talisman.desc": "眼睛射出黄金色的激光，攻击所有敌人",
   "item.chen_mod.dragon_talisman": "龙符咒",
   "item.chen_mod.dragon_talisman.desc": "龙爆破！向前方发射一道火柱，碰到障碍物爆炸",
   "entity.chen_mod.dragon_fireball": "龙爆破"

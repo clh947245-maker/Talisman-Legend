@@ -1,6 +1,5 @@
 package com.example.examplemod.talisman;
 
-import com.example.examplemod.ChenMod;
 import com.example.examplemod.entity.DragonFireballEntity;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;

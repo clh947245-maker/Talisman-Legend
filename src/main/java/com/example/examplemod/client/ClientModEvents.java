@@ -7,9 +7,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import com.example.examplemod.client.renderer.TigerCloneRenderer;
 import com.example.examplemod.client.renderer.DragonFireballRenderer;
-import com.example.examplemod.client.renderer.PigLaserRenderer;
-import net.minecraft.client.renderer.entity.ThrownItemRenderer;
-import net.minecraft.client.renderer.entity.ZombieRenderer;
 
 @EventBusSubscriber(modid = ChenMod.MODID, value = Dist.CLIENT)
 public class ClientModEvents {
@@ -22,7 +19,6 @@ public class ClientModEvents {
         // 注册龙爆破实体的渲染器 (使用自定义的光束渲染器)
         event.registerEntityRenderer(ChenMod.DRAGON_FIREBALL.get(), DragonFireballRenderer::new);
 
-        // 注册猪符咒激光实体的渲染器
-        event.registerEntityRenderer(ChenMod.PIG_LASER.get(), PigLaserRenderer::new);
+
     }
 }
