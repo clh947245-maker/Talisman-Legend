@@ -19,7 +19,6 @@
   "entity.chen_mod.tiger_clone": "%s 的阴暗面",
   "gui.chen_mod.select": "选择",
   "transformation.chen_mod.chicken": "鸡",
-  "transformation.chen_mod.sheep": "羊",
   "transformation.chen_mod.revert": "变回原样",
   "transformation.chen_mod.cow": "牛",
   "transformation.chen_mod.pig": "猪",
@@ -58,5 +57,8 @@
   "effect.chen_mod.tiger_power": "虎的力量",
   "item.chen_mod.dragon_talisman": "龙符咒",
   "item.chen_mod.dragon_talisman.desc": "龙爆破！向前方发射一道火柱，碰到障碍物爆炸",
+  "item.chen_mod.sheep_talisman": "羊符咒",
+  "item.chen_mod.sheep_talisman.desc": "灵魂出窍，让意识脱离肉体自由探索",
+  "effect.chen_mod.sheep_power": "羊的力量",
   "entity.chen_mod.dragon_fireball": "龙爆破"
 }

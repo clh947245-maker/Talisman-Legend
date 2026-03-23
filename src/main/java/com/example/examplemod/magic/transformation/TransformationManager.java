@@ -1,7 +1,6 @@
 package com.example.examplemod.magic.transformation;
 
 import com.example.examplemod.magic.transformation.animal.ChickenTransformation;
-import com.example.examplemod.magic.transformation.animal.SheepTransformation;
 import com.example.examplemod.magic.transformation.animal.CowTransformation;
 import com.example.examplemod.magic.transformation.animal.PigTransformation;
 import com.example.examplemod.magic.transformation.animal.HorseTransformation;
@@ -44,8 +43,7 @@ public class TransformationManager {
     // ID 常量
     public static final int ID_REVERT = 0;
     public static final int ID_CHICKEN = 1;
-    public static final int ID_SHEEP = 2;
-    public static final int ID_COW = 3;
+    public static final int ID_COW = 2;
     public static final int ID_PIG = 4;
     public static final int ID_HORSE = 5;
     public static final int ID_WOLF = 6;
@@ -74,7 +72,6 @@ public class TransformationManager {
     static {
         register(ID_REVERT, new RevertTransformation());
         register(ID_CHICKEN, new ChickenTransformation());
-        register(ID_SHEEP, new SheepTransformation());
         register(ID_COW, new CowTransformation());
         register(ID_PIG, new PigTransformation());
         register(ID_HORSE, new HorseTransformation());

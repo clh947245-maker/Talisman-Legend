@@ -19,7 +19,6 @@
   "entity.chen_mod.tiger_clone": "%s's Dark Side",
   "gui.chen_mod.select": "Select",
   "transformation.chen_mod.chicken": "Chicken",
-  "transformation.chen_mod.sheep": "Sheep",
   "transformation.chen_mod.revert": "Revert to Original",
   "transformation.chen_mod.cow": "Cow",
   "transformation.chen_mod.pig": "Pig",
@@ -54,5 +53,8 @@
   "effect.chen_mod.tiger_power": "Tiger Power",
   "item.chen_mod.dragon_talisman": "Dragon Talisman",
   "item.chen_mod.dragon_talisman.desc": "Dragon Blast! Shoots a fire pillar forward, explodes on impact.",
+  "item.chen_mod.sheep_talisman": "Sheep Talisman",
+  "item.chen_mod.sheep_talisman.desc": "Astral Projection, separate your soul from your body to explore freely",
+  "effect.chen_mod.sheep_power": "Sheep's Power",
   "entity.chen_mod.dragon_fireball": "Dragon Blast"
 }

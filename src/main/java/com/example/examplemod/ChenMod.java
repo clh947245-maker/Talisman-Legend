@@ -9,7 +9,9 @@ import com.example.examplemod.talisman.RoosterTalismanItem;
 import com.example.examplemod.talisman.MonkeyTalismanItem;
 import com.example.examplemod.talisman.TigerTalismanItem;
 import com.example.examplemod.talisman.DragonTalismanItem;
+import com.example.examplemod.talisman.SheepTalismanItem;
 import com.example.examplemod.entity.DragonFireballEntity;
+import com.example.examplemod.entity.PlayerDecoyEntity;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -26,6 +28,7 @@ import com.example.examplemod.magic.DogPowerMagic;
 import com.example.examplemod.magic.RoosterPowerMagic;
 import com.example.examplemod.magic.MonkeyPowerMagic;
 import com.example.examplemod.magic.TigerPowerMagic;
+import com.example.examplemod.magic.SheepPowerMagic;
 import com.example.examplemod.entity.TigerCloneEntity;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -72,6 +75,8 @@ public class ChenMod {
     public static final DeferredItem<TigerTalismanItem> TIGER_TALISMAN = ITEMS.register("tiger_talisman", TigerTalismanItem::new);
     // 注册龙符咒物品
     public static final DeferredItem<DragonTalismanItem> DRAGON_TALISMAN = ITEMS.register("dragon_talisman", DragonTalismanItem::new);
+    // 注册羊符咒物品
+    public static final DeferredItem<SheepTalismanItem> SHEEP_TALISMAN = ITEMS.register("sheep_talisman", SheepTalismanItem::new);
 
     /*
         注册魔法效果
@@ -93,6 +98,8 @@ public class ChenMod {
     public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, MonkeyPowerMagic> MONKEY_POWER = MOB_EFFECTS.register("monkey_power", MonkeyPowerMagic::new);
     // 虎的魔法效果
     public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, TigerPowerMagic> TIGER_POWER = MOB_EFFECTS.register("tiger_power", TigerPowerMagic::new);
+    // 羊的魔法效果
+    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, SheepPowerMagic> SHEEP_POWER = MOB_EFFECTS.register("sheep_power", SheepPowerMagic::new);
 
     // 实体注册
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(net.minecraft.core.registries.Registries.ENTITY_TYPE, MODID);
@@ -108,6 +115,14 @@ public class ChenMod {
                     .clientTrackingRange(4)
                     .updateInterval(10)
                     .build("dragon_fireball"));
+
+    // 注册玩家分身实体
+    public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<PlayerDecoyEntity>> PLAYER_DECOY = ENTITIES.register("player_decoy", () ->
+            EntityType.Builder.<PlayerDecoyEntity>of(PlayerDecoyEntity::new, MobCategory.MISC)
+                    .sized(0.6f, 1.8f)
+                    .clientTrackingRange(64)
+                    .updateInterval(3)
+                    .build("player_decoy"));
 
     // Mod 类的构造函数是 Mod 加载时运行的第一段代码。
     public ChenMod(IEventBus modEventBus, ModContainer modContainer) {
@@ -153,11 +168,11 @@ public class ChenMod {
 
     private void addEntityAttributes(net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent event) {
         event.put(TIGER_CLONE.get(), TigerCloneEntity.createAttributes().build());
+        event.put(PLAYER_DECOY.get(), PlayerDecoyEntity.createAttributes().build());
     }
 
     // 将物品添加到创造模式标签页
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
-        // 将羊符咒添加到战斗（武器）标签页
         if (event.getTabKey() == CreativeModeTabs.COMBAT) {
             event.accept(HORSE_TALISMAN);
             event.accept(OX_TALISMAN);
@@ -168,6 +183,7 @@ public class ChenMod {
             event.accept(MONKEY_TALISMAN);
             event.accept(TIGER_TALISMAN);
             event.accept(DRAGON_TALISMAN);
+            event.accept(SHEEP_TALISMAN);
         }
     }
 
