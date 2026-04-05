@@ -2,15 +2,18 @@ package com.example.examplemod.event;
 
 import com.example.examplemod.ChenMod;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderArmEvent;
 import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
 import net.neoforged.neoforge.client.event.RenderHandEvent;
 import net.neoforged.neoforge.client.event.RenderPlayerEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 import java.lang.reflect.Field;
@@ -87,6 +90,26 @@ public class SheepClientEventHandler {
         Player player = Minecraft.getInstance().player;
         if (player != null && player.hasEffect(ChenMod.SHEEP_POWER)) {
             event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onScreenOpening(ScreenEvent.Opening event) {
+        Player player = Minecraft.getInstance().player;
+        if (player == null || !player.hasEffect(ChenMod.SHEEP_POWER)) return;
+        if (event.getNewScreen() instanceof AbstractContainerScreen<?>) {
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(ClientTickEvent.Post event) {
+        Minecraft minecraft = Minecraft.getInstance();
+        Player player = minecraft.player;
+        if (player == null || !player.hasEffect(ChenMod.SHEEP_POWER)) return;
+        if (minecraft.screen instanceof AbstractContainerScreen<?>) {
+            player.closeContainer();
+            minecraft.setScreen(null);
         }
     }
 }

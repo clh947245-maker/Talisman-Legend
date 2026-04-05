@@ -11,7 +11,6 @@ import com.example.examplemod.talisman.TigerTalismanItem;
 import com.example.examplemod.talisman.DragonTalismanItem;
 import com.example.examplemod.talisman.SheepTalismanItem;
 import com.example.examplemod.entity.DragonFireballEntity;
-import com.example.examplemod.entity.PlayerDecoyEntity;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -116,13 +115,7 @@ public class ChenMod {
                     .updateInterval(10)
                     .build("dragon_fireball"));
 
-    // 注册玩家分身实体
-    public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<PlayerDecoyEntity>> PLAYER_DECOY = ENTITIES.register("player_decoy", () ->
-            EntityType.Builder.<PlayerDecoyEntity>of(PlayerDecoyEntity::new, MobCategory.MISC)
-                    .sized(0.6f, 1.8f)
-                    .clientTrackingRange(64)
-                    .updateInterval(3)
-                    .build("player_decoy"));
+
 
     // Mod 类的构造函数是 Mod 加载时运行的第一段代码。
     public ChenMod(IEventBus modEventBus, ModContainer modContainer) {
@@ -168,7 +161,6 @@ public class ChenMod {
 
     private void addEntityAttributes(net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent event) {
         event.put(TIGER_CLONE.get(), TigerCloneEntity.createAttributes().build());
-        event.put(PLAYER_DECOY.get(), PlayerDecoyEntity.createAttributes().build());
     }
 
     // 将物品添加到创造模式标签页

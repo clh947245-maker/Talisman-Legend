@@ -8,7 +8,7 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import com.example.examplemod.client.renderer.TigerCloneRenderer;
 import com.example.examplemod.client.renderer.DragonFireballRenderer;
 
-@EventBusSubscriber(modid = ChenMod.MODID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = ChenMod.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class ClientModEvents {
 
     @SubscribeEvent
@@ -18,7 +18,5 @@ public class ClientModEvents {
         
         // 注册龙爆破实体的渲染器 (使用自定义的光束渲染器)
         event.registerEntityRenderer(ChenMod.DRAGON_FIREBALL.get(), DragonFireballRenderer::new);
-
-
     }
 }

@@ -19,7 +19,7 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 // @Mod 注解标记这是一个模组入口点，dist = Dist.CLIENT 表示只在客户端加载
 @Mod(value = ChenMod.MODID, dist = Dist.CLIENT)
 // @EventBusSubscriber 自动将此类中的静态 @SubscribeEvent 方法注册到模组事件总线 (Mod Event Bus)
-@EventBusSubscriber(modid = ChenMod.MODID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = ChenMod.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class ChenModClient {
 
     /**

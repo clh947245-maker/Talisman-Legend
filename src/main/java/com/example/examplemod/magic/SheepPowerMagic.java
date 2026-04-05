@@ -20,33 +20,49 @@ import java.util.List;
  * 魔法效果："羊的力量"
  *
  * 灵魂状态效果：
- *   - 穿墙（禁用物理碰撞）
- *   - 飞行（使用 CREATIVE_FLIGHT 属性实现创造模式飞行）
- *   - 单键起飞（按下空格直接飞行）
- *   - 增加水平移动速度
- *   - 穿墙不掉血（屏蔽窒息伤害）
- *   - 无敌状态（屏蔽所有伤害）
- *   - 禁止使用物品、与方块/实体交互（由 SheepPowerEventHandler 拦截）
+ * - 穿墙（禁用物理碰撞）
+ * - 飞行（使用 CREATIVE_FLIGHT 属性实现创造模式飞行）
+ * - 单键起飞（按下空格直接飞行）
+ * - 增加水平移动速度
+ * - 穿墙不掉血（屏蔽窒息伤害）
+ * - 无敌状态（屏蔽所有伤害）
+ * - 禁止使用物品、与方块/实体交互（由 SheepPowerEventHandler 拦截）
  *
- * 飞行实现参考：AbstractFlyingTransformation
+ *
+ * @author ChenMod
  */
 public class SheepPowerMagic extends MobEffect {
 
-    // 飞行属性修饰符的 ID
-    private static final ResourceLocation SHEEP_FLIGHT_ID =
-        ResourceLocation.fromNamespaceAndPath(ChenMod.MODID, "sheep_power_flight");
+    /**
+     * 飞行属性修饰符的资源位置ID。
+     * 用于唯一标识羊的力量提供的创造模式飞行能力。
+     */
+    private static final ResourceLocation SHEEP_FLIGHT_ID = ResourceLocation.fromNamespaceAndPath(ChenMod.MODID,
+            "sheep_power_flight");
 
-    // 水平移动速度修饰符的 ID（倍率叠加，1.5 = 速度提升 150%，即原速度的 2.5 倍）
-    private static final ResourceLocation SHEEP_SPEED_ID =
-        ResourceLocation.fromNamespaceAndPath(ChenMod.MODID, "sheep_power_speed");
+    /**
+     * 速度属性修饰符的资源位置ID。
+     * 用于唯一标识羊的力量提供的移动速度加成。
+     */
+    private static final ResourceLocation SHEEP_SPEED_ID = ResourceLocation.fromNamespaceAndPath(ChenMod.MODID,
+            "sheep_power_speed");
 
-    // 速度倍率：MULTIPLY_TOTAL 模式下 1.5 表示额外 +150%，即最终 2.5 倍原速度
-    // 可按需调整，例如 0.5 = 1.5 倍速，1.0 = 2 倍速
+    /**
+     * 速度倍数。
+     * 玩家的移动速度将增加基础速度的150%。
+     */
     private static final double SPEED_MULTIPLIER = 1.5;
 
-    // 反射获取 LivingEntity 的 jumping 字段，用于检测玩家是否按下跳跃键
+    /**
+     * LivingEntity类中"jumping"字段的反射引用。
+     * 用于检测玩家是否正在按下跳跃键（空格）。
+     */
     private static Field jumpingField;
 
+    /**
+     * 静态初始化块。
+     * 使用反射获取LivingEntity的jumping字段，用于检测跳跃输入。
+     */
     static {
         try {
             jumpingField = LivingEntity.class.getDeclaredField("jumping");
@@ -56,122 +72,123 @@ public class SheepPowerMagic extends MobEffect {
         }
     }
 
+    /**
+     * 构造方法。
+     *
+     * 创建有益效果，颜色为淡蓝色（0xA8D8FF）。
+     */
     public SheepPowerMagic() {
-        // 有益效果，颜色为灵魂蓝
         super(MobEffectCategory.BENEFICIAL, 0xA8D8FF);
     }
 
     /**
-     * 赋予实体灵魂状态效果。
+     * 给予实体羊的力量效果。
      *
-     * @param entity   目标实体
-     * @param duration 持续时间（ticks，20 ticks = 1 秒）
+     * 静态工具方法，用于方便地给予玩家羊的力量效果。
+     * 效果参数：无环境效果、无粒子效果、显示图标。
+     *
+     * @param entity 目标实体
+     * @param duration 效果持续时间（tick）
      */
     public static void grantSheepPower(LivingEntity entity, int duration) {
         if (entity == null) return;
-
         entity.addEffect(new MobEffectInstance(
-            ChenMod.SHEEP_POWER,
-            duration,
-            0,
-            false,
-            false,
-            true
-        ));
+                ChenMod.SHEEP_POWER, duration, 0, false, false, true));
     }
 
+    /**
+     * 判断是否应该在此tick应用效果。
+     *
+     * @param duration 剩余持续时间
+     * @param amplifier 效果等级
+     * @return 始终返回true，每tick都执行
+     */
     @Override
     public boolean shouldApplyEffectTickThisTick(int duration, int amplifier) {
         return true;
     }
 
     /**
-     * 每 tick 施加灵魂状态：
-     *   1. 禁用碰撞（穿墙）
-     *   2. 清除自身所有其他效果
-     *   3. 屏蔽窒息伤害（穿墙时与方块重叠不掉血）
-     *   4. 无敌状态（屏蔽所有伤害）
-     *   5. 使用 CREATIVE_FLIGHT 属性赋予飞行能力
-     *   6. 增加水平移动速度
-     *   7. 单键起飞（按下空格直接飞行）
-     *   8. 悬浮：未飞行时抵消重力；按住 Shift 则下降
-     *   9. 完全隐身（隐藏玩家模型）
+     * 每tick应用效果逻辑。
+     *
+     * 实现羊的力量的核心功能：
+     * 1. 穿墙（禁用物理碰撞）
+     * 2. 清除其他所有效果
+     * 3. 屏蔽窒息伤害
+     * 4. 无敌状态
+     * 5. 飞行能力
+     * 6. 移动速度加成
+     * 7. 单键起飞（空格直接飞行）
+     * 8. 悬浮/重力控制（按Shift下降，否则悬浮）
+     *
+     * @param entity 效果作用的实体
+     * @param amplifier 效果等级
+     * @return 始终返回true
      */
     @Override
     public boolean applyEffectTick(LivingEntity entity, int amplifier) {
         if (!(entity instanceof Player player)) return true;
 
-        // 1. 穿墙：禁用物理碰撞箱
+        // 1. 穿墙 - 禁用物理碰撞，允许穿过方块
         player.noPhysics = true;
 
-        // 2. 清除自身所有其他效果（保留羊符咒本身）
+        // 2. 清除其他效果 - 保持只有羊的力量效果
         removeAllOtherEffects(player);
 
-        // 3. 屏蔽窒息伤害：每 tick 刷新无敌帧
-        // Minecraft 窒息伤害在无敌帧 > 0 时会被完全屏蔽
-        // 设为 20（1 秒）确保每 tick 都覆盖，不影响其他有意义的伤害（如玩家攻击）
+        // 3. 屏蔽窒息伤害 - 设置无敌时间防止窒息伤害
         if (player.invulnerableTime < 20) {
             player.invulnerableTime = 20;
         }
 
-        // 4. 无敌状态：设置玩家为无敌模式，屏蔽所有伤害
+        // 4. 无敌 - 设置创造模式的无敌能力
         if (!player.getAbilities().invulnerable) {
             player.getAbilities().invulnerable = true;
             player.onUpdateAbilities();
         }
 
-        // 5. 使用 CREATIVE_FLIGHT 属性赋予飞行能力
+        // 5. 飞行 - 添加创造模式飞行属性修饰符
         var flightAttribute = player.getAttribute(NeoForgeMod.CREATIVE_FLIGHT);
         if (flightAttribute != null && !flightAttribute.hasModifier(SHEEP_FLIGHT_ID)) {
             flightAttribute.addTransientModifier(
-                new AttributeModifier(SHEEP_FLIGHT_ID, 1.0, AttributeModifier.Operation.ADD_VALUE)
-            );
+                    new AttributeModifier(SHEEP_FLIGHT_ID, 1.0, AttributeModifier.Operation.ADD_VALUE));
         }
 
-        // 6. 增加水平移动速度（MULTIPLY_TOTAL 模式：在所有加法修饰后再乘以倍率）
+        // 6. 速度 - 添加移动速度属性修饰符
         var speedAttribute = player.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speedAttribute != null && !speedAttribute.hasModifier(SHEEP_SPEED_ID)) {
             speedAttribute.addTransientModifier(
-                new AttributeModifier(SHEEP_SPEED_ID, SPEED_MULTIPLIER, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL)
-            );
+                    new AttributeModifier(SHEEP_SPEED_ID, SPEED_MULTIPLIER,
+                            AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         }
 
-        // 7. 单键起飞：按下空格直接进入飞行状态
-        // （noPhysics=true 时玩家无法正常跳跃，因此直接拦截跳跃键激活飞行）
+        // 7. 单键起飞 - 按下空格键直接开始飞行
         if (isJumping(player) && !player.getAbilities().flying) {
             player.getAbilities().flying = true;
             player.onUpdateAbilities();
         }
 
-        // 8. 悬浮 / 重力控制（仅在未激活创造飞行时生效）
+        // 8. 悬浮/重力控制
+        // 如果没有在飞行状态，则控制垂直移动
         if (!player.getAbilities().flying) {
             if (player.isShiftKeyDown()) {
-                // 按住 Shift：下降速度与创造飞行空格上升速度一致（固定 -0.6）
-                player.setDeltaMovement(
-                    player.getDeltaMovement().x,
-                    -0.6,
-                    player.getDeltaMovement().z
-                );
+                // 按Shift下降
+                player.setDeltaMovement(player.getDeltaMovement().x, -0.6, player.getDeltaMovement().z);
             } else {
-                // 默认悬浮：清除 Y 轴速度，完全抵消重力
-                player.setDeltaMovement(
-                    player.getDeltaMovement().x,
-                    0.0,
-                    player.getDeltaMovement().z
-                );
+                // 否则悬浮（抵消重力）
+                player.setDeltaMovement(player.getDeltaMovement().x, 0.0, player.getDeltaMovement().z);
             }
         }
 
         return true;
     }
 
-
-
     /**
-     * 检测玩家是否正在按下跳跃键（空格）
+     * 检查实体是否正在跳跃。
      *
-     * @param entity 实体
-     * @return 如果正在跳跃返回 true
+     * 使用反射访问LivingEntity的jumping字段。
+     *
+     * @param entity 要检查的实体
+     * @return 如果正在跳跃返回true，否则返回false
      */
     private boolean isJumping(LivingEntity entity) {
         if (jumpingField == null) return false;
@@ -183,56 +200,55 @@ public class SheepPowerMagic extends MobEffect {
     }
 
     /**
-     * 清除玩家身上所有其他效果，仅保留羊符咒本身。
-     * 这样可以确保灵魂状态不受其他药水效果干扰。
+     * 移除玩家身上除羊的力量外的所有效果。
      *
-     * @param player 玩家实体
+     * 遍历玩家所有活跃效果，移除非羊的力量效果。
+     *
+     * @param player 目标玩家
      */
     private void removeAllOtherEffects(Player player) {
-        // 获取玩家当前所有效果的副本列表，避免遍历时修改集合
         List<MobEffectInstance> activeEffects = new ArrayList<>(player.getActiveEffects());
-
         for (MobEffectInstance effectInstance : activeEffects) {
-            // 跳过羊符咒本身，保留灵魂状态
-            if (effectInstance.is(ChenMod.SHEEP_POWER)) {
-                continue;
-            }
-
-            // 移除其他所有效果
+            if (effectInstance.is(ChenMod.SHEEP_POWER)) continue;
             Holder<MobEffect> effectHolder = effectInstance.getEffect();
             player.removeEffect(effectHolder);
         }
     }
 
     /**
-     * 效果结束时恢复玩家正常物理与飞行状态。
-     * 创造 / 旁观模式不受影响。
+     * 恢复玩家到正常状态。
+     *
+     * 当羊的力量效果结束时调用，恢复玩家的所有属性：
+     * - 恢复物理碰撞
+     * - 移除无敌时间
+     * - 移除飞行和速度属性修饰符
+     * - 恢复飞行能力（如果不是创造模式或观察者模式）
+     *
+     * @param player 目标玩家
      */
     public static void restorePlayer(Player player) {
         if (player == null) return;
 
-        // 恢复碰撞
+        // 恢复物理碰撞
         player.noPhysics = false;
-
-        // 恢复无敌帧（清零，让正常伤害逻辑重新生效）
+        // 移除无敌时间
         player.invulnerableTime = 0;
 
+        // 恢复无敌状态（创造模式本来就是无敌的，这里确保非创造模式恢复正常）
         if (!player.isCreative() && !player.isSpectator()) {
-            // 撤销无敌状态
             player.getAbilities().invulnerable = false;
+        }
 
-            // 撤销飞行能力
-            var flightAttribute = player.getAttribute(NeoForgeMod.CREATIVE_FLIGHT);
-            if (flightAttribute != null) {
-                flightAttribute.removeModifier(SHEEP_FLIGHT_ID);
-            }
+        // 移除飞行属性修饰符（所有模式都需要移除）
+        var flightAttribute = player.getAttribute(NeoForgeMod.CREATIVE_FLIGHT);
+        if (flightAttribute != null) flightAttribute.removeModifier(SHEEP_FLIGHT_ID);
 
-            // 撤销速度加成
-            var speedAttribute = player.getAttribute(Attributes.MOVEMENT_SPEED);
-            if (speedAttribute != null) {
-                speedAttribute.removeModifier(SHEEP_SPEED_ID);
-            }
+        // 移除速度属性修饰符（所有模式都需要移除）
+        var speedAttribute = player.getAttribute(Attributes.MOVEMENT_SPEED);
+        if (speedAttribute != null) speedAttribute.removeModifier(SHEEP_SPEED_ID);
 
+        // 如果不是创造模式或观察者模式，停止飞行
+        if (!player.isCreative() && !player.isSpectator()) {
             player.getAbilities().flying = false;
             player.onUpdateAbilities();
         }
