@@ -9,8 +9,13 @@ import com.example.examplemod.talisman.RoosterTalismanItem;
 import com.example.examplemod.talisman.MonkeyTalismanItem;
 import com.example.examplemod.talisman.TigerTalismanItem;
 import com.example.examplemod.talisman.DragonTalismanItem;
+import com.example.examplemod.talisman.MouseTalismanItem;
+import com.example.examplemod.talisman.PigTalismanItem;
 import com.example.examplemod.talisman.SheepTalismanItem;
 import com.example.examplemod.entity.DragonFireballEntity;
+import com.example.examplemod.entity.LivingBlockEntity;
+import com.example.examplemod.entity.MouseBeamEntity;
+import com.example.examplemod.entity.PigLaserEntity;
 import com.example.examplemod.entity.SheepBodyEntity;
 import org.slf4j.Logger;
 
@@ -79,6 +84,9 @@ public class ChenMod {
     public static final DeferredItem<TigerTalismanItem> TIGER_TALISMAN = ITEMS.register("tiger_talisman", TigerTalismanItem::new);
     // 注册龙符咒物品
     public static final DeferredItem<DragonTalismanItem> DRAGON_TALISMAN = ITEMS.register("dragon_talisman", DragonTalismanItem::new);
+    // 注册鼠符咒物品
+    public static final DeferredItem<MouseTalismanItem> MOUSE_TALISMAN = ITEMS.register("mouse_talisman", MouseTalismanItem::new);
+    public static final DeferredItem<PigTalismanItem> PIG_TALISMAN = ITEMS.register("pig_talisman", PigTalismanItem::new);
     // 注册羊符咒物品
     public static final DeferredItem<SheepTalismanItem> SHEEP_TALISMAN = ITEMS.register("sheep_talisman", SheepTalismanItem::new);
 
@@ -125,6 +133,26 @@ public class ChenMod {
                     .clientTrackingRange(4)
                     .updateInterval(10)
                     .build("dragon_fireball"));
+
+    public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<MouseBeamEntity>> MOUSE_BEAM = ENTITIES.register("mouse_beam", () ->
+            EntityType.Builder.<MouseBeamEntity>of(MouseBeamEntity::new, MobCategory.MISC)
+                    .sized(0.1F, 0.1F)
+                    .clientTrackingRange(32)
+                    .updateInterval(1)
+                    .build("mouse_beam"));
+
+    public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<LivingBlockEntity>> LIVING_BLOCK = ENTITIES.register("living_block", () ->
+            EntityType.Builder.<LivingBlockEntity>of(LivingBlockEntity::new, MobCategory.CREATURE)
+                    .sized(0.9F, 1.0F)
+                    .clientTrackingRange(10)
+                    .build("living_block"));
+
+    public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<PigLaserEntity>> PIG_LASER = ENTITIES.register("pig_laser", () ->
+            EntityType.Builder.<PigLaserEntity>of(PigLaserEntity::new, MobCategory.MISC)
+                    .sized(0.1F, 0.1F)
+                    .clientTrackingRange(32)
+                    .updateInterval(1)
+                    .build("pig_laser"));
 
 
 
@@ -197,6 +225,7 @@ public class ChenMod {
     private void addEntityAttributes(net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent event) {
         event.put(TIGER_CLONE.get(), TigerCloneEntity.createAttributes().build());
         event.put(SHEEP_BODY.get(), SheepBodyEntity.createAttributes().build());
+        event.put(LIVING_BLOCK.get(), LivingBlockEntity.createAttributes().build());
     }
 
     // 将物品添加到创造模式标签页
@@ -211,6 +240,8 @@ public class ChenMod {
             event.accept(MONKEY_TALISMAN);
             event.accept(TIGER_TALISMAN);
             event.accept(DRAGON_TALISMAN);
+            event.accept(MOUSE_TALISMAN);
+            event.accept(PIG_TALISMAN);
             event.accept(SHEEP_TALISMAN);
         }
     }

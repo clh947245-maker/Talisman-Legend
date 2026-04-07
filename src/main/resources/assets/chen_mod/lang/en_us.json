@@ -53,6 +53,10 @@
   "effect.chen_mod.tiger_power": "Tiger Power",
   "item.chen_mod.dragon_talisman": "Dragon Talisman",
   "item.chen_mod.dragon_talisman.desc": "Dragon Blast! Shoots a fire pillar forward, explodes on impact.",
+  "item.chen_mod.mouse_talisman": "Mouse Talisman",
+  "item.chen_mod.mouse_talisman.desc": "Fires a small beam that stops when it hits a block or entity.",
+  "item.chen_mod.pig_talisman": "Pig Talisman",
+  "item.chen_mod.pig_talisman.desc": "Fires two yellow eye lasers that damage creatures in their path without breaking blocks.",
   "item.chen_mod.sheep_talisman": "Sheep Talisman",
   "item.chen_mod.sheep_talisman.desc": "Astral Projection, separate your soul from your body to explore freely",
   "message.chen_mod.sheep_return_prompt": "Press %s to return to your body",
@@ -74,5 +78,7 @@
   "direction.chen_mod.west": "West",
   "direction.chen_mod.north_west": "North-West",
   "effect.chen_mod.sheep_power": "Sheep's Power",
-  "entity.chen_mod.dragon_fireball": "Dragon Blast"
+  "entity.chen_mod.dragon_fireball": "Dragon Blast",
+  "entity.chen_mod.mouse_beam": "Mouse Beam",
+  "entity.chen_mod.living_block": "Living Block"
 }
