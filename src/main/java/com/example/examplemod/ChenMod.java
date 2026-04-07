@@ -11,6 +11,7 @@ import com.example.examplemod.talisman.TigerTalismanItem;
 import com.example.examplemod.talisman.DragonTalismanItem;
 import com.example.examplemod.talisman.SheepTalismanItem;
 import com.example.examplemod.entity.DragonFireballEntity;
+import com.example.examplemod.entity.SheepBodyEntity;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -41,6 +42,10 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import com.example.examplemod.network.ServerPayloadHandler;
+import com.example.examplemod.network.packet.SheepBodyTrackerPayload;
+import com.example.examplemod.network.packet.SheepDisguisePayload;
+import com.example.examplemod.network.packet.SheepReturnPayload;
+import com.example.examplemod.network.packet.SheepSuicidePayload;
 import com.example.examplemod.network.packet.TransformationSelectionPayload;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -108,6 +113,12 @@ public class ChenMod {
                     .sized(0.6F, 1.95F)
                     .build("tiger_clone"));
 
+    public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<SheepBodyEntity>> SHEEP_BODY = ENTITIES.register("sheep_body", () ->
+            EntityType.Builder.<SheepBodyEntity>of(SheepBodyEntity::new, MobCategory.MISC)
+                    .sized(0.6F, 1.95F)
+                    .clientTrackingRange(8)
+                    .build("sheep_body"));
+
     public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<DragonFireballEntity>> DRAGON_FIREBALL = ENTITIES.register("dragon_fireball", () ->
             EntityType.Builder.<DragonFireballEntity>of(DragonFireballEntity::new, MobCategory.MISC)
                     .sized(1.0F, 1.0F)
@@ -146,7 +157,31 @@ public class ChenMod {
             TransformationSelectionPayload.STREAM_CODEC,
             ServerPayloadHandler::handleTransformationSelection
         );
+
+        registrar.playToServer(
+            SheepReturnPayload.TYPE,
+            SheepReturnPayload.STREAM_CODEC,
+            ServerPayloadHandler::handleSheepReturn
+        );
+
+        registrar.playToServer(
+            SheepSuicidePayload.TYPE,
+            SheepSuicidePayload.STREAM_CODEC,
+            ServerPayloadHandler::handleSheepSuicide
+        );
         
+        registrar.playToClient(
+            SheepBodyTrackerPayload.TYPE,
+            SheepBodyTrackerPayload.STREAM_CODEC,
+            com.example.examplemod.network.ClientPayloadHandler::handleSheepBodyTracker
+        );
+
+        registrar.playToClient(
+            SheepDisguisePayload.TYPE,
+            SheepDisguisePayload.STREAM_CODEC,
+            com.example.examplemod.network.ClientPayloadHandler::handleSheepDisguise
+        );
+
         registrar.playToClient(
             com.example.examplemod.network.packet.TransformationRestorePayload.TYPE,
             com.example.examplemod.network.packet.TransformationRestorePayload.STREAM_CODEC,
@@ -161,6 +196,7 @@ public class ChenMod {
 
     private void addEntityAttributes(net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent event) {
         event.put(TIGER_CLONE.get(), TigerCloneEntity.createAttributes().build());
+        event.put(SHEEP_BODY.get(), SheepBodyEntity.createAttributes().build());
     }
 
     // 将物品添加到创造模式标签页

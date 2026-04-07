@@ -1,6 +1,7 @@
 package com.example.examplemod.mixin;
 
 import com.example.examplemod.ChenMod;
+import com.example.examplemod.entity.SheepBodyEntity;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -34,6 +35,10 @@ public class EntityRendererMixin {
     private void onGetShadowRadius(Entity entity, CallbackInfoReturnable<Float> cir) {
         // 检查实体是否为生物（LivingEntity），因为只有生物才能拥有药水效果
         // 并且检查该生物是否拥有蛇符咒的魔法效果 (SNACK_POWER)
+        if (entity instanceof SheepBodyEntity bodyEntity && bodyEntity.isSnackInvisible()) {
+            cir.setReturnValue(0.0f);
+            return;
+        }
         if (entity instanceof LivingEntity living && living.hasEffect(ChenMod.SNACK_POWER)) {
             // 如果满足条件，将返回值设为 0.0f（无阴影）
             // 设置返回值会自动取消原方法的后续执行

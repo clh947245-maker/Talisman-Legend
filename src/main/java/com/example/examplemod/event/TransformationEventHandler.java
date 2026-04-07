@@ -1,6 +1,7 @@
 package com.example.examplemod.event;
 
 import com.example.examplemod.ChenMod;
+import com.example.examplemod.entity.SheepBodyEntity;
 import com.example.examplemod.magic.transformation.ITransformation;
 import com.example.examplemod.magic.transformation.TransformationManager;
 import com.example.examplemod.network.packet.TransformationRestorePayload;
@@ -32,11 +33,21 @@ public class TransformationEventHandler {
     @SubscribeEvent
     public static void onEntitySize(EntityEvent.Size event) {
         try {
-            if (event.getEntity() instanceof Player player) {
+            if (event.getEntity() instanceof LivingEntity entity) {
+                if (entity instanceof SheepBodyEntity bodyEntity) {
+                    int transformationId = bodyEntity.getMonkeyTransformationId();
+                    ITransformation transformation = TransformationManager.getTransformation(transformationId);
+                    if (transformation != null) {
+                        EntityDimensions newDims = transformation.getDimensions(event.getPose(), event.getOldSize());
+                        float newEyeHeight = transformation.getEyeHeight(event.getPose(), newDims);
+                        event.setNewSize(newDims.withEyeHeight(newEyeHeight));
+                    }
+                    return;
+                }
                 // 确保效果已注册
                 if (ChenMod.MONKEY_POWER == null || !ChenMod.MONKEY_POWER.isBound()) return;
 
-                MobEffectInstance effect = player.getEffect(ChenMod.MONKEY_POWER);
+                MobEffectInstance effect = entity.getEffect(ChenMod.MONKEY_POWER);
                 if (effect != null) {
                     // 获取当前变身 ID
                     int transformationId = effect.getAmplifier();

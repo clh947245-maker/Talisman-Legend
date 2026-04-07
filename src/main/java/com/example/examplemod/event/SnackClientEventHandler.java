@@ -1,6 +1,7 @@
 package com.example.examplemod.event;
 
 import com.example.examplemod.ChenMod;
+import com.example.examplemod.entity.SheepBodyEntity;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -18,7 +19,8 @@ public class SnackClientEventHandler {
      */
     @SubscribeEvent
     public static void onRenderLivingPre(RenderLivingEvent.Pre<?, ?> event) {
-        if (event.getEntity().hasEffect(ChenMod.SNACK_POWER)) {
+        if (event.getEntity().hasEffect(ChenMod.SNACK_POWER)
+                || event.getEntity() instanceof SheepBodyEntity bodyEntity && bodyEntity.isSnackInvisible()) {
             // 取消渲染，实体将不可见
             event.setCanceled(true);
         }

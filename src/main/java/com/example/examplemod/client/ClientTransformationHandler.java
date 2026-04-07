@@ -3,7 +3,9 @@ package com.example.examplemod.client;
 import com.example.examplemod.ChenMod;
 import com.example.examplemod.magic.transformation.ITransformation;
 import com.example.examplemod.magic.transformation.TransformationManager;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
@@ -92,19 +94,27 @@ public class ClientTransformationHandler {
                 event.setCanceled(true);
 
                 // 渲染替代模型
-                renderTransformedEntity(player, transformationId, event);
+                renderTransformedEntity(
+                        player,
+                        transformationId,
+                        event.getPartialTick(),
+                        event.getPoseStack(),
+                        event.getMultiBufferSource(),
+                        event.getPackedLight()
+                );
             }
         }
     }
 
-    private static void renderTransformedEntity(Player player, int transformationId, RenderPlayerEvent.Pre event) {
+    public static boolean renderTransformedEntity(LivingEntity sourceEntity, int transformationId, float partialTick, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         // 获取或创建虚拟实体
-        LivingEntity dummy = getDummyEntity(player, transformationId);
-        if (dummy == null)
-            return;
+        LivingEntity dummy = getDummyEntity(sourceEntity, transformationId);
+        if (dummy == null) {
+            return false;
+        }
 
         // 同步玩家的数据到虚拟实体
-        syncEntityData(player, dummy, transformationId);
+        syncEntityData(sourceEntity, dummy, transformationId);
 
         // 渲染虚拟实体
         EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
@@ -113,7 +123,7 @@ public class ClientTransformationHandler {
         // 我们直接使用 event.getPoseStack() 中的变换，它已经包含了相对于相机的位移
 
         // 保存当前的 PoseStack 状态
-        event.getPoseStack().pushPose();
+        poseStack.pushPose();
 
         // 处理渲染
         // 注意：RenderPlayerEvent 中 PoseStack 已经定位到了玩家的位置
@@ -130,27 +140,28 @@ public class ClientTransformationHandler {
                     dummy,
                     0, 0, 0, // x, y, z (因为 PoseStack 已经变换过了，这里相对坐标为 0)
                     0.0f, // entityYaw (dummy 已经同步了)
-                    event.getPartialTick(),
-                    event.getPoseStack(),
-                    event.getMultiBufferSource(),
-                    event.getPackedLight());
+                    partialTick,
+                    poseStack,
+                    buffer,
+                    packedLight);
         } catch (Exception e) {
             // 防止渲染崩溃导致游戏退出
             ChenMod.LOGGER.error("Error rendering transformed entity", e);
         }
 
-        event.getPoseStack().popPose();
+        poseStack.popPose();
+        return true;
     }
 
-    private static LivingEntity getDummyEntity(Player player, int transformationId) {
-        UUID uuid = player.getUUID();
+    private static LivingEntity getDummyEntity(LivingEntity sourceEntity, int transformationId) {
+        UUID uuid = sourceEntity.getUUID();
 
         // 检查缓存是否有效
         if (DUMMY_ENTITIES.containsKey(uuid)) {
             LivingEntity existing = DUMMY_ENTITIES.get(uuid);
             // 检查变身ID是否改变，或者世界是否改变（防止跨世界引用）
             if (LAST_TRANSFORMATION_ID.getOrDefault(uuid, -1) != transformationId
-                    || existing.level() != player.level()) {
+                    || existing.level() != sourceEntity.level()) {
                 DUMMY_ENTITIES.remove(uuid);
             } else {
                 return existing;
@@ -165,7 +176,7 @@ public class ClientTransformationHandler {
         if (transformation != null) {
             EntityType<? extends LivingEntity> type = transformation.getEntityType();
             if (type != null && type != EntityType.PLAYER) {
-                entity = type.create(player.level());
+                entity = type.create(sourceEntity.level());
             }
         }
 
@@ -177,60 +188,60 @@ public class ClientTransformationHandler {
         return entity;
     }
 
-    private static void syncEntityData(Player player, LivingEntity dummy, int transformationId) {
+    private static void syncEntityData(LivingEntity sourceEntity, LivingEntity dummy, int transformationId) {
         // 记录是否是新的 tick (用于控制动画更新频率)
-        boolean isNewTick = dummy.tickCount != player.tickCount;
-        dummy.tickCount = player.tickCount;
+        boolean isNewTick = dummy.tickCount != sourceEntity.tickCount;
+        dummy.tickCount = sourceEntity.tickCount;
 
         // 同步位置和旋转
-        dummy.setPos(player.getX(), player.getY(), player.getZ());
-        dummy.xo = player.xo;
-        dummy.yo = player.yo;
-        dummy.zo = player.zo;
+        dummy.setPos(sourceEntity.getX(), sourceEntity.getY(), sourceEntity.getZ());
+        dummy.xo = sourceEntity.xo;
+        dummy.yo = sourceEntity.yo;
+        dummy.zo = sourceEntity.zo;
 
-        dummy.setYRot(player.getYRot());
-        dummy.yRotO = player.yRotO;
-        dummy.setXRot(player.getXRot());
-        dummy.xRotO = player.xRotO;
+        dummy.setYRot(sourceEntity.getYRot());
+        dummy.yRotO = sourceEntity.yRotO;
+        dummy.setXRot(sourceEntity.getXRot());
+        dummy.xRotO = sourceEntity.xRotO;
 
-        dummy.yBodyRot = player.yBodyRot;
-        dummy.yBodyRotO = player.yBodyRotO;
-        dummy.yHeadRot = player.yHeadRot;
-        dummy.yHeadRotO = player.yHeadRotO;
+        dummy.yBodyRot = sourceEntity.yBodyRot;
+        dummy.yBodyRotO = sourceEntity.yBodyRotO;
+        dummy.yHeadRot = sourceEntity.yHeadRot;
+        dummy.yHeadRotO = sourceEntity.yHeadRotO;
 
         // 同步状态
-        dummy.swinging = player.swinging;
-        dummy.swingTime = player.swingTime;
-        dummy.hurtTime = player.hurtTime;
-        dummy.deathTime = player.deathTime;
-        dummy.walkAnimation.setSpeed(player.walkAnimation.speed());
+        dummy.swinging = sourceEntity.swinging;
+        dummy.swingTime = sourceEntity.swingTime;
+        dummy.hurtTime = sourceEntity.hurtTime;
+        dummy.deathTime = sourceEntity.deathTime;
+        dummy.walkAnimation.setSpeed(sourceEntity.walkAnimation.speed());
 
-        dummy.setSwimming(player.isSwimming());
-        dummy.setSprinting(player.isSprinting());
-        dummy.setDeltaMovement(player.getDeltaMovement());
+        dummy.setSwimming(sourceEntity.isSwimming());
+        dummy.setSprinting(sourceEntity.isSprinting());
+        dummy.setDeltaMovement(sourceEntity.getDeltaMovement());
 
         // 关键修复1：同步 speedOld 以防止腿部动画震颤
         // 关键修复2：同步 position 以防止腿部动画卡住
         try {
             if (walkAnimSpeedOldField != null) {
-                float playerSpeedOld = walkAnimSpeedOldField.getFloat(player.walkAnimation);
-                walkAnimSpeedOldField.setFloat(dummy.walkAnimation, playerSpeedOld);
+                float sourceSpeedOld = walkAnimSpeedOldField.getFloat(sourceEntity.walkAnimation);
+                walkAnimSpeedOldField.setFloat(dummy.walkAnimation, sourceSpeedOld);
             }
             if (walkAnimPositionField != null) {
-                float playerPosition = walkAnimPositionField.getFloat(player.walkAnimation);
-                walkAnimPositionField.setFloat(dummy.walkAnimation, playerPosition);
+                float sourcePosition = walkAnimPositionField.getFloat(sourceEntity.walkAnimation);
+                walkAnimPositionField.setFloat(dummy.walkAnimation, sourcePosition);
             }
         } catch (IllegalAccessException e) {
             // 忽略
         }
 
         // 潜行状态
-        dummy.setPose(player.getPose());
-        dummy.setShiftKeyDown(player.isShiftKeyDown());
+        dummy.setPose(sourceEntity.getPose());
+        dummy.setShiftKeyDown(sourceEntity.isShiftKeyDown());
 
         // 调用 Transformation 类中的动画同步逻辑
         ITransformation transformation = TransformationManager.getTransformation(transformationId);
-        if (transformation != null) {
+        if (transformation != null && sourceEntity instanceof Player player) {
             transformation.syncAnimation(player, dummy, isNewTick);
         }
     }
