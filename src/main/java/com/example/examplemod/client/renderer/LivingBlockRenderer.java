@@ -11,8 +11,10 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.client.model.data.ModelData;
 
 public class LivingBlockRenderer extends EntityRenderer<LivingBlockEntity> {
 
@@ -93,12 +95,12 @@ public class LivingBlockRenderer extends EntityRenderer<LivingBlockEntity> {
         poseStack.pushPose();
         poseStack.translate(-scaleX * 0.5F, -scaleY * 0.5F, -scaleZ * 0.5F);
         poseStack.scale(scaleX, scaleY, scaleZ);
-        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(state, poseStack, buffer, packedLight, OverlayTexture.NO_OVERLAY);
+        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(state, poseStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, null);
         poseStack.popPose();
     }
 
     @Override
     public ResourceLocation getTextureLocation(LivingBlockEntity entity) {
-        return net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS;
+        return InventoryMenu.BLOCK_ATLAS;
     }
 }

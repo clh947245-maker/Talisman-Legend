@@ -8,7 +8,9 @@ import com.example.examplemod.network.SheepBodyTrackerState;
 import com.example.examplemod.network.packet.SheepReturnPayload;
 import com.example.examplemod.network.packet.SheepSuicidePayload;
 import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -23,6 +25,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RenderArmEvent;
 import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
 import net.neoforged.neoforge.client.event.RenderHandEvent;
@@ -67,6 +70,43 @@ public class SheepClientEventHandler {
 
     private static boolean isSoulState(Player player) {
         return player != null && player.hasEffect(ChenMod.SHEEP_POWER);
+    }
+
+    private static boolean isAllowedSoulKey(KeyMapping keyMapping, Minecraft minecraft) {
+        return keyMapping == minecraft.options.keyUp
+                || keyMapping == minecraft.options.keyDown
+                || keyMapping == minecraft.options.keyLeft
+                || keyMapping == minecraft.options.keyRight
+                || keyMapping == minecraft.options.keyJump
+                || keyMapping == minecraft.options.keyShift
+                || keyMapping == minecraft.options.keySprint;
+    }
+
+    private static void suppressSoulShortcuts(Minecraft minecraft) {
+        for (KeyMapping keyMapping : minecraft.options.keyMappings) {
+            if (isAllowedSoulKey(keyMapping, minecraft)) {
+                continue;
+            }
+
+            keyMapping.setDown(false);
+            while (keyMapping.consumeClick()) {
+                // Drain queued shortcut presses so held hotkeys do not leak through on later ticks.
+            }
+        }
+    }
+
+    private static boolean matchesBlockedSoulShortcut(InputEvent.Key event, Minecraft minecraft) {
+        for (KeyMapping keyMapping : minecraft.options.keyMappings) {
+            if (isAllowedSoulKey(keyMapping, minecraft)) {
+                continue;
+            }
+
+            if (keyMapping.matches(event.getKey(), event.getScanCode())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public static void initDisguiseRenderers(EntityRendererProvider.Context context) {
@@ -280,7 +320,26 @@ public class SheepClientEventHandler {
         if (!isSoulState(player)) {
             return;
         }
-        if (event.getNewScreen() instanceof AbstractContainerScreen<?>) {
+        if (event.getNewScreen() != null && !(event.getNewScreen() instanceof PauseScreen)) {
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onKeyInput(InputEvent.Key event) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (!isSoulState(minecraft.player) || minecraft.screen != null) {
+            return;
+        }
+
+        if (matchesBlockedSoulShortcut(event, minecraft)) {
+            suppressSoulShortcuts(minecraft);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onMouseScroll(InputEvent.MouseScrollingEvent event) {
+        if (isSoulState(Minecraft.getInstance().player)) {
             event.setCanceled(true);
         }
     }
@@ -310,10 +369,14 @@ public class SheepClientEventHandler {
             SheepBodyTrackerState.clear();
         }
 
-        if (minecraft.screen instanceof AbstractContainerScreen<?>) {
-            player.closeContainer();
+        if (minecraft.screen != null && !(minecraft.screen instanceof PauseScreen)) {
+            if (minecraft.screen instanceof AbstractContainerScreen<?>) {
+                player.closeContainer();
+            }
             minecraft.setScreen(null);
         }
+
+        suppressSoulShortcuts(minecraft);
 
         if (minecraft.screen == null && SheepPowerMagic.isNearReturnableBody(player) && jumpKeyDown && !wasJumpKeyDown) {
             PacketDistributor.sendToServer(new SheepReturnPayload());

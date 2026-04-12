@@ -12,19 +12,36 @@ import com.example.examplemod.talisman.DragonTalismanItem;
 import com.example.examplemod.talisman.MouseTalismanItem;
 import com.example.examplemod.talisman.PigTalismanItem;
 import com.example.examplemod.talisman.SheepTalismanItem;
+import com.example.examplemod.item.OniMaskItem;
 import com.example.examplemod.entity.DragonFireballEntity;
 import com.example.examplemod.entity.LivingBlockEntity;
 import com.example.examplemod.entity.MouseBeamEntity;
 import com.example.examplemod.entity.PigLaserEntity;
 import com.example.examplemod.entity.SheepBodyEntity;
+import com.example.examplemod.entity.ShengZhuEntity;
+import com.example.examplemod.entity.ShadowNinjaEntity;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
 
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import com.example.examplemod.magic.MaskReleaseEffect;
 import com.example.examplemod.magic.RabbitPowerMagic;
 import com.example.examplemod.magic.HorsePowerMagic;
 import com.example.examplemod.magic.OxPowerMagic;
@@ -34,6 +51,7 @@ import com.example.examplemod.magic.RoosterPowerMagic;
 import com.example.examplemod.magic.MonkeyPowerMagic;
 import com.example.examplemod.magic.TigerPowerMagic;
 import com.example.examplemod.magic.SheepPowerMagic;
+import com.example.examplemod.magic.ShadowGeneralBlessingEffect;
 import com.example.examplemod.entity.TigerCloneEntity;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -42,12 +60,16 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.common.DeferredSpawnEggItem;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import com.example.examplemod.network.ServerPayloadHandler;
 import com.example.examplemod.network.packet.SheepBodyTrackerPayload;
+import com.example.examplemod.network.packet.ShadowNinjaCommandPayload;
 import com.example.examplemod.network.packet.SheepDisguisePayload;
 import com.example.examplemod.network.packet.SheepReturnPayload;
 import com.example.examplemod.network.packet.SheepSuicidePayload;
@@ -55,78 +77,288 @@ import com.example.examplemod.network.packet.TransformationSelectionPayload;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-// 此处的值应与 META-INF/neoforge.mods.toml 文件中的条目匹配
+import java.util.EnumMap;
+import java.util.List;
+
+/**
+ * ChenMod 主类
+ *
+ * 这是模组的主入口类，负责注册所有游戏内容（物品、效果、实体等）
+ * 并处理模组生命周期事件。类路径和 MODID 必须与 META-INF/neoforge.mods.toml 中的配置匹配。
+ */
 @Mod(ChenMod.MODID)
 public class ChenMod {
-    // 在公共位置定义 Mod ID，供所有引用使用
+
+    /**
+     * 模组唯一标识符
+     *
+     * 用于资源路径、注册表名称等，必须与 neoforge.mods.toml 中的 modId 一致
+     */
     public static final String MODID = "chen_mod";
-    // 直接引用 slf4j 日志记录器
+
+    /**
+     * 日志记录器
+     *
+     * 使用 slf4j 框架记录模组运行日志
+     */
     public static final Logger LOGGER = LogUtils.getLogger();
-    
-    // 创建一个 Deferred Register 来保存 Item（物品），所有物品都将在 "chen_mod" 命名空间下注册
+
+    /**
+     * 物品注册器
+     *
+     * 使用 Deferred Register 模式延迟注册所有模组物品
+     */
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MODID);
 
-    // 注册马符咒物品
+    /**
+     * 盔甲材料注册器
+     *
+     * 用于注册自定义盔甲材料（如鬼影面具）
+     */
+    public static final DeferredRegister<ArmorMaterial> ARMOR_MATERIALS = DeferredRegister.create(Registries.ARMOR_MATERIAL, MODID);
+
+    /**
+     * 魔法绑定附魔的资源键
+     *
+     * 用于标识和引用魔法绑定附魔
+     */
+    public static final ResourceKey<Enchantment> MAGIC_BINDING_ENCHANTMENT =
+            ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.fromNamespaceAndPath(MODID, "magic_binding"));
+
+    // ==================== 符咒物品注册 ====================
+
+    /**
+     * 马符咒
+     *
+     * 赋予玩家治疗能力，右键使用触发效果
+     */
     public static final DeferredItem<HorseTalismanItem> HORSE_TALISMAN = ITEMS.register("horse_talisman", HorseTalismanItem::new);
-    // 注册牛符咒物品
+
+    /**
+     * 牛符咒
+     *
+     * 赋予玩家力量增强，右键使用触发效果
+     */
     public static final DeferredItem<OxTalismanItem> OX_TALISMAN = ITEMS.register("ox_talisman", OxTalismanItem::new);
-    // 注册兔符咒物品
+
+    /**
+     * 兔符咒
+     *
+     * 赋予玩家速度提升，右键使用触发效果
+     */
     public static final DeferredItem<RabbitTalismanItem> RABBIT_TALISMAN = ITEMS.register("rabbit_talisman", RabbitTalismanItem::new);
-    // 注册蛇符咒物品
+
+    /**
+     * 蛇符咒
+     *
+     * 赋予玩家隐身能力，右键使用触发效果
+     */
     public static final DeferredItem<SnackTalismanItem> SNACK_TALISMAN = ITEMS.register("snack_talisman", SnackTalismanItem::new);
-    // 注册狗符咒物品
+
+    /**
+     * 狗符咒
+     *
+     * 赋予玩家不死能力，右键使用触发效果
+     */
     public static final DeferredItem<DogTalismanItem> DOG_TALISMAN = ITEMS.register("dog_talisman", DogTalismanItem::new);
-    // 注册鸡符咒物品
+
+    /**
+     * 鸡符咒
+     *
+     * 赋予玩家漂浮能力，右键使用触发效果
+     */
     public static final DeferredItem<RoosterTalismanItem> ROOSTER_TALISMAN = ITEMS.register("rooster_talisman", RoosterTalismanItem::new);
-    // 注册猴符咒物品
+
+    /**
+     * 猴符咒
+     *
+     * 赋予玩家变形能力，右键使用触发效果
+     */
     public static final DeferredItem<MonkeyTalismanItem> MONKEY_TALISMAN = ITEMS.register("monkey_talisman", MonkeyTalismanItem::new);
-    // 注册虎符咒物品
+
+    /**
+     * 虎符咒
+     *
+     * 赋予玩家分身能力，右键使用触发效果
+     */
     public static final DeferredItem<TigerTalismanItem> TIGER_TALISMAN = ITEMS.register("tiger_talisman", TigerTalismanItem::new);
-    // 注册龙符咒物品
+
+    /**
+     * 龙符咒
+     *
+     * 赋予玩家火焰爆破能力，右键使用触发效果
+     */
     public static final DeferredItem<DragonTalismanItem> DRAGON_TALISMAN = ITEMS.register("dragon_talisman", DragonTalismanItem::new);
-    // 注册鼠符咒物品
+
+    /**
+     * 鼠符咒
+     *
+     * 赋予玩家化静为动能力，右键使用触发效果
+     */
     public static final DeferredItem<MouseTalismanItem> MOUSE_TALISMAN = ITEMS.register("mouse_talisman", MouseTalismanItem::new);
+
+    /**
+     * 猪符咒
+     *
+     * 赋予玩家激光眼能力，右键使用触发效果
+     */
     public static final DeferredItem<PigTalismanItem> PIG_TALISMAN = ITEMS.register("pig_talisman", PigTalismanItem::new);
-    // 注册羊符咒物品
+
+    /**
+     * 羊符咒
+     *
+     * 赋予玩家灵魂出窍能力，右键使用触发效果
+     */
     public static final DeferredItem<SheepTalismanItem> SHEEP_TALISMAN = ITEMS.register("sheep_talisman", SheepTalismanItem::new);
 
-    /*
-        注册魔法效果
-    */
-    // 兔子的魔法效果
-    public static final DeferredRegister<MobEffect> MOB_EFFECTS = DeferredRegister.create(net.minecraft.core.registries.Registries.MOB_EFFECT, MODID);
-    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, RabbitPowerMagic> RABBIT_POWER = MOB_EFFECTS.register("rabbit_power", RabbitPowerMagic::new);
-    // 牛的魔法效果
-    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, OxPowerMagic> OX_POWER = MOB_EFFECTS.register("ox_power", OxPowerMagic::new);
-    // 马的魔法效果
-    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, HorsePowerMagic> HORSE_POWER = MOB_EFFECTS.register("horse_power", HorsePowerMagic::new);
-    // 蛇的魔法效果
-    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, SnackPowerMagic> SNACK_POWER = MOB_EFFECTS.register("snack_power", SnackPowerMagic::new);
-    // 狗的魔法效果
-    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, DogPowerMagic> DOG_POWER = MOB_EFFECTS.register("dog_power", DogPowerMagic::new);
-    // 鸡的魔法效果
-    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, RoosterPowerMagic> ROOSTER_POWER = MOB_EFFECTS.register("rooster_power", RoosterPowerMagic::new);
-    // 猴的魔法效果
-    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, MonkeyPowerMagic> MONKEY_POWER = MOB_EFFECTS.register("monkey_power", MonkeyPowerMagic::new);
-    // 虎的魔法效果
-    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, TigerPowerMagic> TIGER_POWER = MOB_EFFECTS.register("tiger_power", TigerPowerMagic::new);
-    // 羊的魔法效果
-    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, SheepPowerMagic> SHEEP_POWER = MOB_EFFECTS.register("sheep_power", SheepPowerMagic::new);
+    /**
+     * 鬼影面具盔甲材料
+     *
+     * 用于创建鬼影面具装备，提供基础防御属性
+     */
+    public static final DeferredHolder<ArmorMaterial, ArmorMaterial> ONI_MASK_MATERIAL = ARMOR_MATERIALS.register("oni_mask", () -> {
+        EnumMap<ArmorItem.Type, Integer> defense = new EnumMap<>(ArmorItem.Type.class);
+        for (ArmorItem.Type type : ArmorItem.Type.values()) {
+            defense.put(type, 0);
+        }
 
-    // 实体注册
+        return new ArmorMaterial(
+                defense,
+                0,
+                SoundEvents.ARMOR_EQUIP_LEATHER,
+                () -> Ingredient.EMPTY,
+                List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(MODID, "oni_mask"))),
+                0.0F,
+                0.0F
+        );
+    });
+
+    /**
+     * 鬼影面具物品
+     *
+     * 特殊装备，佩戴后可召唤黑影兵团
+     */
+    public static final DeferredItem<OniMaskItem> ONI_MASK = ITEMS.register("oni_mask", () -> new OniMaskItem(ONI_MASK_MATERIAL));
+
+    // ==================== 魔法效果注册 ====================
+
+    /**
+     * 魔法效果注册器
+     *
+     * 用于注册所有符咒对应的 MobEffect 效果
+     */
+    public static final DeferredRegister<MobEffect> MOB_EFFECTS = DeferredRegister.create(net.minecraft.core.registries.Registries.MOB_EFFECT, MODID);
+    public static final DeferredRegister<Potion> POTIONS = DeferredRegister.create(Registries.POTION, MODID);
+
+    /**
+     * 兔符咒魔法效果
+     *
+     * 提供速度加成
+     */
+    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, RabbitPowerMagic> RABBIT_POWER = MOB_EFFECTS.register("rabbit_power", RabbitPowerMagic::new);
+
+    /**
+     * 牛符咒魔法效果
+     *
+     * 提供力量加成
+     */
+    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, OxPowerMagic> OX_POWER = MOB_EFFECTS.register("ox_power", OxPowerMagic::new);
+
+    /**
+     * 马符咒魔法效果
+     *
+     * 提供治疗效果
+     */
+    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, HorsePowerMagic> HORSE_POWER = MOB_EFFECTS.register("horse_power", HorsePowerMagic::new);
+
+    /**
+     * 蛇符咒魔法效果
+     *
+     * 提供隐身效果
+     */
+    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, SnackPowerMagic> SNACK_POWER = MOB_EFFECTS.register("snack_power", SnackPowerMagic::new);
+
+    /**
+     * 狗符咒魔法效果
+     *
+     * 提供不死效果
+     */
+    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, DogPowerMagic> DOG_POWER = MOB_EFFECTS.register("dog_power", DogPowerMagic::new);
+
+    /**
+     * 鸡符咒魔法效果
+     *
+     * 提供漂浮效果
+     */
+    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, RoosterPowerMagic> ROOSTER_POWER = MOB_EFFECTS.register("rooster_power", RoosterPowerMagic::new);
+
+    /**
+     * 猴符咒魔法效果
+     *
+     * 提供变形能力
+     */
+    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, MonkeyPowerMagic> MONKEY_POWER = MOB_EFFECTS.register("monkey_power", MonkeyPowerMagic::new);
+
+    /**
+     * 虎符咒魔法效果
+     *
+     * 提供分身能力
+     */
+    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, TigerPowerMagic> TIGER_POWER = MOB_EFFECTS.register("tiger_power", TigerPowerMagic::new);
+
+    /**
+     * 羊符咒魔法效果
+     *
+     * 提供灵魂出窍能力
+     */
+    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, SheepPowerMagic> SHEEP_POWER = MOB_EFFECTS.register("sheep_power", SheepPowerMagic::new);
+    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, MaskReleaseEffect> MASK_RELEASE =
+            MOB_EFFECTS.register("mask_release", MaskReleaseEffect::new);
+
+    /**
+     * 鬼影将军祝福效果
+     * 召唤黑影兵团的增益效果
+     */
+    public static final net.neoforged.neoforge.registries.DeferredHolder<MobEffect, ShadowGeneralBlessingEffect> SHADOW_GENERAL_BLESSING =
+            MOB_EFFECTS.register("shadow_general_blessing", ShadowGeneralBlessingEffect::new);
+    public static final DeferredHolder<Potion, Potion> MASK_RELEASE_POTION = POTIONS.register(
+            "mask_release",
+            () -> new Potion("mask_release", new MobEffectInstance(MASK_RELEASE, 3600))
+    );
+
+    // ==================== 实体注册 ====================
+
+    /**
+     * 实体类型注册器
+     * 用于注册所有模组自定义实体
+     */
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(net.minecraft.core.registries.Registries.ENTITY_TYPE, MODID);
 
+    /**
+     * 虎分身实体
+     * 由虎符咒召唤的分身实体
+     */
     public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<TigerCloneEntity>> TIGER_CLONE = ENTITIES.register("tiger_clone", () ->
             EntityType.Builder.of(TigerCloneEntity::new, MobCategory.MONSTER)
                     .sized(0.6F, 1.95F)
                     .build("tiger_clone"));
 
+    /**
+     * 羊符咒躯体实体
+     *
+     * 灵魂出窍时留下的玩家躯体
+     */
     public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<SheepBodyEntity>> SHEEP_BODY = ENTITIES.register("sheep_body", () ->
             EntityType.Builder.<SheepBodyEntity>of(SheepBodyEntity::new, MobCategory.MISC)
                     .sized(0.6F, 1.95F)
                     .clientTrackingRange(8)
                     .build("sheep_body"));
 
+    /**
+     * 龙火球实体
+     *
+     * 龙符咒发射的火焰弹
+     */
     public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<DragonFireballEntity>> DRAGON_FIREBALL = ENTITIES.register("dragon_fireball", () ->
             EntityType.Builder.<DragonFireballEntity>of(DragonFireballEntity::new, MobCategory.MISC)
                     .sized(1.0F, 1.0F)
@@ -134,6 +366,11 @@ public class ChenMod {
                     .updateInterval(10)
                     .build("dragon_fireball"));
 
+    /**
+     * 鼠光束实体
+     *
+     * 鼠符咒发射的活化光束
+     */
     public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<MouseBeamEntity>> MOUSE_BEAM = ENTITIES.register("mouse_beam", () ->
             EntityType.Builder.<MouseBeamEntity>of(MouseBeamEntity::new, MobCategory.MISC)
                     .sized(0.1F, 0.1F)
@@ -141,12 +378,22 @@ public class ChenMod {
                     .updateInterval(1)
                     .build("mouse_beam"));
 
+    /**
+     * 活化方块实体
+     *
+     * 被鼠符咒活化的方块实体
+     */
     public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<LivingBlockEntity>> LIVING_BLOCK = ENTITIES.register("living_block", () ->
             EntityType.Builder.<LivingBlockEntity>of(LivingBlockEntity::new, MobCategory.CREATURE)
                     .sized(0.9F, 1.0F)
                     .clientTrackingRange(10)
                     .build("living_block"));
 
+    /**
+     * 猪激光实体
+     *
+     * 猪符咒发射的激光
+     */
     public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<PigLaserEntity>> PIG_LASER = ENTITIES.register("pig_laser", () ->
             EntityType.Builder.<PigLaserEntity>of(PigLaserEntity::new, MobCategory.MISC)
                     .sized(0.1F, 0.1F)
@@ -154,62 +401,136 @@ public class ChenMod {
                     .updateInterval(1)
                     .build("pig_laser"));
 
+    /**
+     * 黑影忍者实体
+     *
+     * 鬼影面具召唤的黑影兵团单位
+     */
+    public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<ShadowNinjaEntity>> SHADOW_NINJA = ENTITIES.register("shadow_ninja", () ->
+            EntityType.Builder.<ShadowNinjaEntity>of(ShadowNinjaEntity::new, MobCategory.MONSTER)
+                    .sized(0.9F, 2.0F)
+                    .clientTrackingRange(10)
+                    .build("shadow_ninja"));
 
+    /**
+     * 黑影忍者刷怪蛋
+     *
+     * 用于召唤黑影忍者实体的刷怪蛋
+     */
+    public static final DeferredItem<DeferredSpawnEggItem> SHADOW_NINJA_SPAWN_EGG = ITEMS.register(
+            "shadow_ninja_spawn_egg",
+            () -> new DeferredSpawnEggItem(SHADOW_NINJA, 0x14161F, 0xC9D7DE, new Item.Properties())
+    );
 
-    // Mod 类的构造函数是 Mod 加载时运行的第一段代码。
+    /**
+     * 圣主实体
+     *
+     * 使用 dragon_brutel 模型的敌对大型生物。
+     */
+    public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<ShengZhuEntity>> SHENG_ZHU = ENTITIES.register("sheng_zhu", () ->
+            EntityType.Builder.<ShengZhuEntity>of(ShengZhuEntity::new, MobCategory.MONSTER)
+                    .fireImmune()
+                    .sized(1.9F, 5.0F)
+                    .clientTrackingRange(12)
+                    .build("sheng_zhu"));
+
+    /**
+     * 圣主刷怪蛋
+     *
+     * 用于生成圣主实体。
+     */
+    public static final DeferredItem<DeferredSpawnEggItem> SHENG_ZHU_SPAWN_EGG = ITEMS.register(
+            "sheng_zhu_spawn_egg",
+            () -> new DeferredSpawnEggItem(SHENG_ZHU, 0x6A2417, 0xD9AF58, new Item.Properties())
+    );
+
+    // ==================== 构造函数 ====================
+
+    /**
+     * 模组主构造函数
+     *
+     * 由 NeoForge 在模组加载时调用，负责初始化所有模组内容
+     *
+     * @param modEventBus 模组事件总线，用于注册事件监听器
+     * @param modContainer 模组容器，提供模组元数据
+     */
     public ChenMod(IEventBus modEventBus, ModContainer modContainer) {
 
-        // 注册 commonSetup 方法以进行 Mod 加载
+        // 注册通用设置事件监听器
         modEventBus.addListener(this::commonSetup);
+        // 注册实体属性创建事件监听器
         modEventBus.addListener(this::addEntityAttributes);
 
-        // 将 Deferred Register 注册到 Mod 事件总线，以便注册物品
+        // 将所有 Deferred Register 注册到模组事件总线
         ITEMS.register(modEventBus);
+        ARMOR_MATERIALS.register(modEventBus);
         MOB_EFFECTS.register(modEventBus);
+        POTIONS.register(modEventBus);
         ENTITIES.register(modEventBus);
 
-        // 注册我们自己以关注服务器和其他感兴趣的游戏事件。
+        // 将当前类注册到 NeoForge 全局事件总线，用于接收游戏内事件
         NeoForge.EVENT_BUS.register(this);
 
-        // 将物品注册到创造模式标签页
+        // 注册创造模式物品栏填充事件监听器
         modEventBus.addListener(this::addCreative);
-        
-        // 注册网络包
+
+        // 注册网络数据包处理器
         modEventBus.addListener(this::registerPayloads);
     }
 
+    /**
+     * 注册网络数据包
+     *
+     * 配置模组使用的所有网络通信数据包，包括服务器到客户端和客户端到服务器的通信
+     *
+     * @param event 数据包注册事件
+     */
     private void registerPayloads(final RegisterPayloadHandlersEvent event) {
         final PayloadRegistrar registrar = event.registrar("1");
+
+        // 注册变形选择数据包（客户端到服务器）
         registrar.playToServer(
             TransformationSelectionPayload.TYPE,
             TransformationSelectionPayload.STREAM_CODEC,
             ServerPayloadHandler::handleTransformationSelection
         );
 
+        // 注册羊符咒返回数据包（客户端到服务器）
         registrar.playToServer(
             SheepReturnPayload.TYPE,
             SheepReturnPayload.STREAM_CODEC,
             ServerPayloadHandler::handleSheepReturn
         );
 
+        // 注册羊符咒自杀数据包（客户端到服务器）
         registrar.playToServer(
             SheepSuicidePayload.TYPE,
             SheepSuicidePayload.STREAM_CODEC,
             ServerPayloadHandler::handleSheepSuicide
         );
-        
+
+        // 注册黑影忍者命令数据包（客户端到服务器）
+        registrar.playToServer(
+            ShadowNinjaCommandPayload.TYPE,
+            ShadowNinjaCommandPayload.STREAM_CODEC,
+            ServerPayloadHandler::handleShadowNinjaCommand
+        );
+
+        // 注册羊躯体追踪数据包（服务器到客户端）
         registrar.playToClient(
             SheepBodyTrackerPayload.TYPE,
             SheepBodyTrackerPayload.STREAM_CODEC,
             com.example.examplemod.network.ClientPayloadHandler::handleSheepBodyTracker
         );
 
+        // 注册羊伪装数据包（服务器到客户端）
         registrar.playToClient(
             SheepDisguisePayload.TYPE,
             SheepDisguisePayload.STREAM_CODEC,
             com.example.examplemod.network.ClientPayloadHandler::handleSheepDisguise
         );
 
+        // 注册变形恢复数据包（服务器到客户端）
         registrar.playToClient(
             com.example.examplemod.network.packet.TransformationRestorePayload.TYPE,
             com.example.examplemod.network.packet.TransformationRestorePayload.STREAM_CODEC,
@@ -217,19 +538,46 @@ public class ChenMod {
         );
     }
 
+    /**
+     * 通用设置
+     *
+     * 在模组加载时执行一次性初始化操作
+     *
+     * @param event 通用设置事件
+     */
     private void commonSetup(FMLCommonSetupEvent event) {
-        // 一些通用的设置代码
         LOGGER.info("ChenMod common setup complete.");
     }
 
+    @SubscribeEvent
+    public void registerBrewingRecipes(RegisterBrewingRecipesEvent event) {
+        event.getBuilder().addMix(Potions.AWKWARD, Items.SALMON, MASK_RELEASE_POTION);
+    }
+
+    /**
+     * 添加实体属性
+     *
+     * 为模组自定义实体注册属性（如生命值、攻击力等）
+     *
+     * @param event 实体属性创建事件
+     */
     private void addEntityAttributes(net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent event) {
         event.put(TIGER_CLONE.get(), TigerCloneEntity.createAttributes().build());
         event.put(SHEEP_BODY.get(), SheepBodyEntity.createAttributes().build());
         event.put(LIVING_BLOCK.get(), LivingBlockEntity.createAttributes().build());
+        event.put(SHADOW_NINJA.get(), ShadowNinjaEntity.createAttributes().build());
+        event.put(SHENG_ZHU.get(), ShengZhuEntity.createAttributes().build());
     }
 
-    // 将物品添加到创造模式标签页
+    /**
+     * 添加创造模式物品栏内容
+     *
+     * 将模组物品添加到指定的创造模式物品栏中
+     *
+     * @param event 创造模式物品栏构建事件
+     */
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
+        // 将所有符咒和鬼影面具添加到战斗物品栏
         if (event.getTabKey() == CreativeModeTabs.COMBAT) {
             event.accept(HORSE_TALISMAN);
             event.accept(OX_TALISMAN);
@@ -243,13 +591,25 @@ public class ChenMod {
             event.accept(MOUSE_TALISMAN);
             event.accept(PIG_TALISMAN);
             event.accept(SHEEP_TALISMAN);
+            event.accept(ONI_MASK);
+        }
+
+        // 将黑影忍者刷怪蛋添加到刷怪蛋物品栏
+        if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
+            event.accept(SHADOW_NINJA_SPAWN_EGG);
+            event.accept(SHENG_ZHU_SPAWN_EGG);
         }
     }
 
-    // 您可以使用 SubscribeEvent 让事件总线发现要调用的方法
+    /**
+     * 服务器启动事件处理
+     *
+     * 当服务器开始启动时触发，可用于执行服务器级别的初始化
+     *
+     * @param event 服务器启动事件
+     */
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
-        // 在服务器启动时执行某些操作
-        LOGGER.info("Server starting with ChenMod loaded");
+        LOGGER.info("ChenMod server starting...");
     }
 }

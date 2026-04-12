@@ -1,0 +1,39 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.chen_mod.shadow_ninja_right_shoulder",
+        "texture_width": 128,
+        "texture_height": 128
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [0, 0, 0]
+        },
+        {
+          "name": "right_shoulder",
+          "parent": "root",
+          "pivot": [-5, 22, 0],
+          "cubes": [
+            {
+              "origin": [-9.2, 21.0, -2.5],
+              "size": [5, 3, 5],
+              "pivot": [-5, 22, 0],
+              "rotation": [0, 0, 10],
+              "uv": [64, 8]
+            },
+            {
+              "origin": [-10.0, 19.5, -2.0],
+              "size": [3, 2, 4],
+              "pivot": [-7.0, 20.5, 0],
+              "rotation": [0, 0, 22],
+              "uv": [84, 8]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

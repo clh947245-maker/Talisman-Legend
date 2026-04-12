@@ -1,5 +1,9 @@
 package com.example.examplemod.network;
 
+/**
+ * 客户端保存的“灵魂出窍后原身体”快照。
+ * 供界面或客户端逻辑查询身体是否存在、是否存活以及所在位置。
+ */
 public final class SheepBodyTrackerState {
     private static boolean hasBody;
     private static boolean alive;
@@ -12,6 +16,7 @@ public final class SheepBodyTrackerState {
     }
 
     public static void update(boolean hasBodySnapshot, boolean bodyAlive, double bodyX, double bodyY, double bodyZ, String bodyDimension) {
+        // 每次收到服务端同步包时都整体覆盖，保证字段来自同一帧状态。
         hasBody = hasBodySnapshot;
         alive = bodyAlive;
         x = bodyX;
@@ -21,6 +26,7 @@ public final class SheepBodyTrackerState {
     }
 
     public static void clear() {
+        // 退出场景或状态失效时恢复为默认值，避免读取到过期身体坐标。
         hasBody = false;
         alive = false;
         x = 0.0D;

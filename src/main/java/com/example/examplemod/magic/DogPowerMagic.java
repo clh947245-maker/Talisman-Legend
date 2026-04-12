@@ -5,51 +5,49 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
-import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 
 /**
- * 魔法效果："狗的力量"
- * <p>
- * 赋予持有者不死之身。
- * 具体逻辑在 DogImmortalityHandler 中调用此类方法。
- * </p>
+ * 狗的能力魔法实现。
  */
 public class DogPowerMagic extends MobEffect {
+    private static final float MIN_HEALTH = 1.0F;
+
+    public DogPowerMagic() {
+        super(MobEffectCategory.BENEFICIAL, 0xC6A300);
+    }
 
     /**
-     * 处理死亡事件逻辑
+     * Caps post-mitigation damage so the holder never drops below half a heart.
      */
-    public static void onDeath(LivingDeathEvent event) {
+    public static void clampDamageToHalfHeart(LivingDamageEvent.Pre event) {
         LivingEntity entity = event.getEntity();
-        
-        // 检查是否拥有狗符咒效果
-        if (entity.hasEffect(ChenMod.DOG_POWER)) {
-            // 狗符咒防止死亡
-            event.setCanceled(true);
-            
-            // 将生命值设置为 1.0 (半颗心)
-            entity.setHealth(1.0f);
+        if (!entity.hasEffect(ChenMod.DOG_POWER)) {
+            return;
+        }
+
+        float currentHealth = entity.getHealth();
+        float maxDamage = Math.max(currentHealth - MIN_HEALTH, 0.0F);
+        if (event.getNewDamage() > maxDamage) {
+            event.setNewDamage(maxDamage);
         }
     }
 
     /**
-     * API: 赋予实体狗力量效果 (指定持续时间)
+     * API: grants the dog power effect for the given duration.
      */
     public static void grantDogPower(LivingEntity entity, int duration) {
-        if (entity == null) return;
-        
-        entity.addEffect(new MobEffectInstance(
-            ChenMod.DOG_POWER, 
-            duration, 
-            0, 
-            false, 
-            false, 
-            false
-        ));
-    }
+        if (entity == null) {
+            return;
+        }
 
-    public DogPowerMagic() {
-        // BENEFICIAL (有益), 颜色 (金黄色)
-        super(MobEffectCategory.BENEFICIAL, 0xC6A300);
+        entity.addEffect(new MobEffectInstance(
+                ChenMod.DOG_POWER,
+                duration,
+                0,
+                false,
+                false,
+                false
+        ));
     }
 }

@@ -1,0 +1,14 @@
+{
+  "sources": [
+    {
+      "type": "directory",
+      "source": "mob_effect/talisman",
+      "prefix": ""
+    },
+    {
+      "type": "directory",
+      "source": "mob_effect/blessing",
+      "prefix": ""
+    }
+  ]
+}

@@ -6,14 +6,21 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 客户端绵羊伪装状态缓存。
+ * 用于记录某个玩家当前伪装时展示的皮肤来源和显示名称。
+ */
 public final class SheepDisguiseState {
+    // 伪装玩家 UUID -> 皮肤来源玩家 UUID
     private static final Map<UUID, UUID> SKIN_SOURCES = new ConcurrentHashMap<>();
+    // 伪装玩家 UUID -> 客户端展示名称
     private static final Map<UUID, Component> DISPLAY_NAMES = new ConcurrentHashMap<>();
 
     private SheepDisguiseState() {
     }
 
     public static void update(UUID playerUUID, boolean active, UUID skinSourceUUID, Component displayName) {
+        // 伪装关闭时直接清理缓存，避免客户端继续显示旧数据。
         if (!active) {
             clear(playerUUID);
             return;

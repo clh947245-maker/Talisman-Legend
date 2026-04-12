@@ -1,0 +1,35 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.chen_mod.shadow_ninja_right_arm",
+        "texture_width": 128,
+        "texture_height": 128
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [0, 0, 0]
+        },
+        {
+          "name": "right_arm",
+          "parent": "root",
+          "pivot": [-5, 22, 0],
+          "cubes": [
+            {
+              "origin": [-8, 15, -2],
+              "size": [4, 7, 4],
+              "uv": [0, 86]
+            },
+            {
+              "origin": [-8.5, 15, -2.5],
+              "size": [5, 7, 5],
+              "uv": [16, 86]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

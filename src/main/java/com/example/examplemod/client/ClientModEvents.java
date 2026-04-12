@@ -6,17 +6,17 @@ import com.example.examplemod.client.renderer.LivingBlockRenderer;
 import com.example.examplemod.client.renderer.MouseBeamRenderer;
 import com.example.examplemod.client.renderer.PigLaserRenderer;
 import com.example.examplemod.client.renderer.SheepBodyRenderer;
+import com.example.examplemod.client.renderer.ShengZhuRenderer;
+import com.example.examplemod.client.renderer.ShadowNinjaRenderer;
 import com.example.examplemod.client.renderer.TigerCloneRenderer;
+import com.example.examplemod.client.renderer.layer.OniMaskFaceLayer;
 import com.example.examplemod.event.SheepClientEventHandler;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.resources.PlayerSkin;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 
-@EventBusSubscriber(modid = ChenMod.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class ClientModEvents {
-
-    @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ChenMod.TIGER_CLONE.get(), TigerCloneRenderer::new);
         event.registerEntityRenderer(ChenMod.SHEEP_BODY.get(), SheepBodyRenderer::new);
@@ -24,10 +24,22 @@ public class ClientModEvents {
         event.registerEntityRenderer(ChenMod.MOUSE_BEAM.get(), MouseBeamRenderer::new);
         event.registerEntityRenderer(ChenMod.LIVING_BLOCK.get(), LivingBlockRenderer::new);
         event.registerEntityRenderer(ChenMod.PIG_LASER.get(), PigLaserRenderer::new);
+        event.registerEntityRenderer(ChenMod.SHADOW_NINJA.get(), ShadowNinjaRenderer::new);
+        event.registerEntityRenderer(ChenMod.SHENG_ZHU.get(), ShengZhuRenderer::new);
     }
 
-    @SubscribeEvent
+    public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
+        ShadowNinjaKeyMappings.register(event);
+    }
+
     public static void onAddLayers(EntityRenderersEvent.AddLayers event) {
         SheepClientEventHandler.initDisguiseRenderers(event.getContext());
+
+        for (PlayerSkin.Model skin : event.getSkins()) {
+            PlayerRenderer renderer = event.getSkin(skin);
+            if (renderer != null) {
+                renderer.addLayer(new OniMaskFaceLayer(renderer));
+            }
+        }
     }
 }

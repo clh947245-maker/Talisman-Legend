@@ -1,6 +1,7 @@
 package com.example.examplemod.client.renderer;
 
 import com.example.examplemod.client.ClientTransformationHandler;
+import com.example.examplemod.client.renderer.layer.SheepBodyOniMaskFaceLayer;
 import com.example.examplemod.entity.SheepBodyEntity;
 import com.example.examplemod.magic.transformation.TransformationManager;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -65,6 +66,7 @@ public class SheepBodyRenderer extends LivingEntityRenderer<SheepBodyEntity, Pla
                 new HumanoidModel<>(context.bakeLayer(ModelLayers.PLAYER_OUTER_ARMOR)),
                 context.getModelManager()
         ));
+        this.addLayer(new SheepBodyOniMaskFaceLayer(this));
     }
 
     /**

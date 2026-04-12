@@ -1,0 +1,35 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.chen_mod.shadow_ninja_right_leg",
+        "texture_width": 128,
+        "texture_height": 128
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [0, 0, 0]
+        },
+        {
+          "name": "right_leg",
+          "parent": "root",
+          "pivot": [-2, 12, 0],
+          "cubes": [
+            {
+              "origin": [-4, 6, -2],
+              "size": [4, 6, 4],
+              "uv": [68, 86]
+            },
+            {
+              "origin": [-4.5, 6, -2.5],
+              "size": [5, 6, 5],
+              "uv": [86, 86]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

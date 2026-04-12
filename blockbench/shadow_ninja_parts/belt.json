@@ -1,0 +1,35 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.chen_mod.shadow_ninja_belt",
+        "texture_width": 128,
+        "texture_height": 128
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [0, 0, 0]
+        },
+        {
+          "name": "belt",
+          "parent": "root",
+          "pivot": [0, 12, 0],
+          "cubes": [
+            {
+              "origin": [-4.5, 11, -2.5],
+              "size": [9, 2, 5],
+              "uv": [52, 40]
+            },
+            {
+              "origin": [-0.5, 6, -3.0],
+              "size": [1, 5, 1],
+              "uv": [28, 58]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

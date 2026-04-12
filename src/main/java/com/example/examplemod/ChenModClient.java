@@ -1,7 +1,9 @@
 package com.example.examplemod;
 
+import com.example.examplemod.client.ClientModEvents;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -29,11 +31,14 @@ public class ChenModClient {
      *
      * @param container 模组容器实例  ..
      */
-    public ChenModClient(ModContainer container) {
+    public ChenModClient(IEventBus modEventBus, ModContainer container) {
         // 允许 NeoForge 为此模组创建配置屏幕。
         // 玩家可以通过 "模组" 菜单 -> 选择本模组 -> 点击 "配置" 来访问。
         // 注意：需要确保 en_us.json 文件中有对应的翻译键。
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
+        modEventBus.addListener(ClientModEvents::registerRenderers);
+        modEventBus.addListener(ClientModEvents::registerKeyMappings);
+        modEventBus.addListener(ClientModEvents::onAddLayers);
     }
 
     /**

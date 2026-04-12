@@ -1,6 +1,3 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "chen_mod:item/pig_talisman"
-  }
+  "parent": "chen_mod:item/talisman/pig_talisman"
 }

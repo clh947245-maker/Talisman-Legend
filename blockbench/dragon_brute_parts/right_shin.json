@@ -1,0 +1,26 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.chen_mod.dragon_brute_right_shin",
+        "texture_width": 128,
+        "texture_height": 128
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [0, 0, 0]
+        },
+        {
+          "name": "right_shin",
+          "parent": "root",
+          "pivot": [-4, 18, 1],
+          "cubes": [
+            { "origin": [-6, 6, -1.5], "size": [4, 14, 4], "uv": [56, 96] }
+          ]
+        }
+      ]
+    }
+  ]
+}

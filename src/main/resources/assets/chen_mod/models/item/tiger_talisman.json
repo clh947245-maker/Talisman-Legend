@@ -1,6 +1,3 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "chen_mod:item/tiger_talisman"
-  }
+  "parent": "chen_mod:item/talisman/tiger_talisman"
 }

@@ -1,9 +1,11 @@
 package com.example.examplemod.event;
 
 import com.example.examplemod.ChenMod;
+import com.example.examplemod.item.OniMaskItem;
 import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -19,6 +21,9 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
  */
 @EventBusSubscriber(modid = ChenMod.MODID)
 public class TalismanInventoryHandler {
+    private static final int ONI_MASK_BLESSING_DECAY_DURATION = 20 * 7;
+    private static final int ONI_MASK_BLESSING_WORN_DURATION = 20 * 30;
+    private static final int ONI_MASK_REFRESH_THRESHOLD = 20 * 20;
 
     /**
      * 玩家每 tick 更新时触发
@@ -27,6 +32,7 @@ public class TalismanInventoryHandler {
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         Player player = event.getEntity();
         if (player.level().isClientSide) return;
+        maintainOniMaskBlessing(player);
 
         // 检测马符咒
         if (player.hasEffect(ChenMod.HORSE_POWER)) {
@@ -66,6 +72,36 @@ public class TalismanInventoryHandler {
         // 检测虎符咒
         if (ChenMod.TIGER_POWER.isBound() && player.hasEffect(ChenMod.TIGER_POWER)) {
             checkTalismanInInventory(player, ChenMod.TIGER_POWER, ChenMod.TIGER_TALISMAN.get());
+        }
+    }
+
+    private static void maintainOniMaskBlessing(Player player) {
+        ItemStack helmet = player.getItemBySlot(EquipmentSlot.HEAD);
+        MobEffectInstance blessing = player.getEffect(ChenMod.SHADOW_GENERAL_BLESSING);
+
+        if (!OniMaskItem.isOniMask(helmet)) {
+            if (blessing != null && blessing.getDuration() > ONI_MASK_BLESSING_DECAY_DURATION) {
+                player.addEffect(new MobEffectInstance(
+                        ChenMod.SHADOW_GENERAL_BLESSING,
+                        ONI_MASK_BLESSING_DECAY_DURATION,
+                        blessing.getAmplifier(),
+                        blessing.isAmbient(),
+                        blessing.isVisible(),
+                        blessing.showIcon()
+                ));
+            }
+            return;
+        }
+
+        if (blessing == null || blessing.getDuration() <= ONI_MASK_REFRESH_THRESHOLD) {
+            player.addEffect(new MobEffectInstance(
+                    ChenMod.SHADOW_GENERAL_BLESSING,
+                    ONI_MASK_BLESSING_WORN_DURATION,
+                    0,
+                    false,
+                    false,
+                    true
+            ));
         }
     }
 

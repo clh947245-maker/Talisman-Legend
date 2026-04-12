@@ -1,0 +1,21 @@
+{
+  "description": {
+    "translate": "enchantment.chen_mod.magic_binding"
+  },
+  "supported_items": "#chen_mod:enchantable/magic_binding",
+  "primary_items": "#chen_mod:enchantable/magic_binding",
+  "weight": 1,
+  "max_level": 1,
+  "min_cost": {
+    "base": 1,
+    "per_level_above_first": 0
+  },
+  "max_cost": {
+    "base": 1,
+    "per_level_above_first": 0
+  },
+  "anvil_cost": 0,
+  "slots": [
+    "head"
+  ]
+}

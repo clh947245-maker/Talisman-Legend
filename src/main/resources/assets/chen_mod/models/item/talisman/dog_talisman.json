@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "chen_mod:item/talisman/dog_talisman"
+  }
+}

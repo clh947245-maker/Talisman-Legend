@@ -1,0 +1,30 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.chen_mod.shadow_ninja_left_forearm",
+        "texture_width": 128,
+        "texture_height": 128
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [0, 0, 0]
+        },
+        {
+          "name": "left_forearm",
+          "parent": "root",
+          "pivot": [6, 15, 0],
+          "cubes": [
+            {
+              "origin": [4, 9, -2],
+              "size": [4, 6, 4],
+              "uv": [36, 74]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

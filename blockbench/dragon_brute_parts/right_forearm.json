@@ -1,0 +1,27 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.chen_mod.dragon_brute_right_forearm",
+        "texture_width": 128,
+        "texture_height": 128
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [0, 0, 0]
+        },
+        {
+          "name": "right_forearm",
+          "parent": "root",
+          "pivot": [-11, 40, 0],
+          "cubes": [
+            { "origin": [-13.5, 28, -2.5], "size": [5, 14, 5], "uv": [72, 108] },
+            { "origin": [-14, 31, -3], "size": [6, 8, 6], "uv": [92, 108] }
+          ]
+        }
+      ]
+    }
+  ]
+}

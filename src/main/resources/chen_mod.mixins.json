@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_21",
   "refmap": "chen_mod.refmap.json",
   "mixins": [
+    "ArmorSlotMixin",
     "EntityRendererMixin"
   ],
   "injectors": {
