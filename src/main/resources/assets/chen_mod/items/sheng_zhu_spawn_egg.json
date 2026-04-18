@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "chen_mod:item/spawn_egg/sheng_zhu_spawn_egg"
+    "model": "chen_mod:item/sheng_zhu_spawn_egg"
   }
 }

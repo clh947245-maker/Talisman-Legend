@@ -111,6 +111,9 @@ public class SheepPowerMagic extends MobEffect {
             player.invulnerableTime = 20;
         }
 
+        // 灵魂状态下接触火焰或岩浆时不应进入燃烧状态。
+        player.clearFire();
+
         if (!player.getAbilities().invulnerable) {
             player.getAbilities().invulnerable = true;
             player.onUpdateAbilities();
@@ -183,6 +186,7 @@ public class SheepPowerMagic extends MobEffect {
 
         player.noPhysics = false;
         player.invulnerableTime = 0;
+        player.clearFire();
 
         if (!player.isCreative() && !player.isSpectator()) {
             player.getAbilities().invulnerable = false;

@@ -1,0 +1,129 @@
+{
+    "format_version":  "1.16.0",
+    "minecraft:geometry":  [
+                               {
+                                   "description":  {
+                                                       "identifier":  "geometry.chen_mod.shengzhu_palace.courtyard_floor",
+                                                       "texture_width":  2048,
+                                                       "texture_height":  4096
+                                                   },
+                                   "bones":  [
+                                                 {
+                                                     "name":  "root",
+                                                     "pivot":  [
+                                                                   0,
+                                                                   0,
+                                                                   0
+                                                               ]
+                                                 },
+                                                 {
+                                                     "name":  "courtyard_floor",
+                                                     "pivot":  [
+                                                                   0,
+                                                                   15,
+                                                                   0
+                                                               ],
+                                                     "parent":  "root",
+                                                     "cubes":  [
+                                                                   {
+                                                                       "origin":  [
+                                                                                      -92,
+                                                                                      15,
+                                                                                      -112
+                                                                                  ],
+                                                                       "size":  [
+                                                                                    184,
+                                                                                    5,
+                                                                                    190
+                                                                                ],
+                                                                       "uv":  [
+                                                                                  512,
+                                                                                  0
+                                                                              ]
+                                                                   },
+                                                                   {
+                                                                       "origin":  [
+                                                                                      -26,
+                                                                                      15,
+                                                                                      -144
+                                                                                  ],
+                                                                       "size":  [
+                                                                                    52,
+                                                                                    5,
+                                                                                    32
+                                                                                ],
+                                                                       "uv":  [
+                                                                                  700,
+                                                                                  0
+                                                                              ]
+                                                                   },
+                                                                   {
+                                                                       "origin":  [
+                                                                                      -108,
+                                                                                      15,
+                                                                                      -84
+                                                                                  ],
+                                                                       "size":  [
+                                                                                    16,
+                                                                                    5,
+                                                                                    132
+                                                                                ],
+                                                                       "uv":  [
+                                                                                  758,
+                                                                                  0
+                                                                              ]
+                                                                   },
+                                                                   {
+                                                                       "origin":  [
+                                                                                      92,
+                                                                                      15,
+                                                                                      -84
+                                                                                  ],
+                                                                       "size":  [
+                                                                                    16,
+                                                                                    5,
+                                                                                    132
+                                                                                ],
+                                                                       "uv":  [
+                                                                                  780,
+                                                                                  0
+                                                                              ]
+                                                                   },
+                                                                   {
+                                                                       "origin":  [
+                                                                                      -76,
+                                                                                      15,
+                                                                                      78
+                                                                                  ],
+                                                                       "size":  [
+                                                                                    152,
+                                                                                    5,
+                                                                                    18
+                                                                                ],
+                                                                       "uv":  [
+                                                                                  802,
+                                                                                  0
+                                                                              ]
+                                                                   },
+                                                                   {
+                                                                       "origin":  [
+                                                                                      -40,
+                                                                                      20,
+                                                                                      -32
+                                                                                  ],
+                                                                       "size":  [
+                                                                                    80,
+                                                                                    6,
+                                                                                    46
+                                                                                ],
+                                                                       "uv":  [
+                                                                                  512,
+                                                                                  202
+                                                                              ]
+                                                                   }
+                                                               ]
+                                                 }
+                                             ]
+                               }
+                           ]
+}

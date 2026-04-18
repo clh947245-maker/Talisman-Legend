@@ -369,6 +369,9 @@ public class SheepClientEventHandler {
             SheepBodyTrackerState.clear();
         }
 
+        // 客户端也持续清掉燃烧状态，避免岩浆/火焰接触导致本地仍显示着火特效。
+        player.clearFire();
+
         if (minecraft.screen != null && !(minecraft.screen instanceof PauseScreen)) {
             if (minecraft.screen instanceof AbstractContainerScreen<?>) {
                 player.closeContainer();

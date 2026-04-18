@@ -1,0 +1,12 @@
+{
+  "type": "chen_mod:mouse_dungeon_loot",
+  "conditions": [
+    {
+      "condition": "neoforge:loot_table_id",
+      "loot_table_id": "minecraft:chests/simple_dungeon"
+    }
+  ],
+  "chance": 0.05,
+  "horizontal_range": 8,
+  "vertical_range": 5
+}

@@ -1,3 +1,3 @@
 {
-  "parent": "chen_mod:item/spawn_egg/shadow_ninja_spawn_egg"
+  "parent": "minecraft:item/template_spawn_egg"
 }

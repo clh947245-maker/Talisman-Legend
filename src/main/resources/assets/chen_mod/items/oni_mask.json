@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "chen_mod:item/mask/oni_mask"
+    "model": "chen_mod:item/oni_mask"
   }
 }

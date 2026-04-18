@@ -13,6 +13,7 @@ import com.example.examplemod.talisman.MouseTalismanItem;
 import com.example.examplemod.talisman.PigTalismanItem;
 import com.example.examplemod.talisman.SheepTalismanItem;
 import com.example.examplemod.item.OniMaskItem;
+import com.example.examplemod.loot.MouseDungeonLootModifier;
 import com.example.examplemod.entity.DragonFireballEntity;
 import com.example.examplemod.entity.LivingBlockEntity;
 import com.example.examplemod.entity.MouseBeamEntity;
@@ -23,6 +24,7 @@ import com.example.examplemod.entity.ShadowNinjaEntity;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.MapCodec;
 
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
@@ -63,9 +65,11 @@ import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.common.DeferredSpawnEggItem;
+import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import com.example.examplemod.network.ServerPayloadHandler;
 import com.example.examplemod.network.packet.SheepBodyTrackerPayload;
@@ -109,6 +113,13 @@ public class ChenMod {
      * 使用 Deferred Register 模式延迟注册所有模组物品
      */
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MODID);
+    /**
+     * 全局战利品修饰器序列化器注册表
+     *
+     * 用于注册类似“地牢箱子额外注入鼠符咒”这类基于 LootContext 动态处理的掉落逻辑。
+     */
+    public static final DeferredRegister<MapCodec<? extends IGlobalLootModifier>> LOOT_MODIFIER_SERIALIZERS =
+            DeferredRegister.create(NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, MODID);
 
     /**
      * 盔甲材料注册器
@@ -444,6 +455,15 @@ public class ChenMod {
             () -> new DeferredSpawnEggItem(SHENG_ZHU, 0x6A2417, 0xD9AF58, new Item.Properties())
     );
 
+    /**
+     * 鼠符咒地牢掉落修饰器
+     *
+     * 负责在原版地牢箱子结算战利品时，以低概率向结果中注入鼠符咒，
+     * 并配合存档判重保证单个地牢最多出现一个。
+     */
+    public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<MouseDungeonLootModifier>> MOUSE_DUNGEON_LOOT_MODIFIER =
+            LOOT_MODIFIER_SERIALIZERS.register("mouse_dungeon_loot", () -> MouseDungeonLootModifier.CODEC);
+
     // ==================== 构造函数 ====================
 
     /**
@@ -463,6 +483,8 @@ public class ChenMod {
 
         // 将所有 Deferred Register 注册到模组事件总线
         ITEMS.register(modEventBus);
+        // 供 data/chen_mod/loot_modifiers/*.json 引用自定义全局战利品修饰器类型。
+        LOOT_MODIFIER_SERIALIZERS.register(modEventBus);
         ARMOR_MATERIALS.register(modEventBus);
         MOB_EFFECTS.register(modEventBus);
         POTIONS.register(modEventBus);

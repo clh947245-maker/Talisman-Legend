@@ -1,3 +1,6 @@
 {
-  "parent": "chen_mod:item/talisman/monkey_talisman"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "chen_mod:item/talisman/monkey_talisman"
+  }
 }

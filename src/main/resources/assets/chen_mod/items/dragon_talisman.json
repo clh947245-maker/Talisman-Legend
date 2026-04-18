@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "chen_mod:item/talisman/dragon_talisman"
+    "model": "chen_mod:item/dragon_talisman"
   }
 }
