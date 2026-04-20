@@ -13,6 +13,7 @@ import com.example.examplemod.talisman.MouseTalismanItem;
 import com.example.examplemod.talisman.PigTalismanItem;
 import com.example.examplemod.talisman.SheepTalismanItem;
 import com.example.examplemod.item.OniMaskItem;
+import com.example.examplemod.item.PalaceConstructorItem;
 import com.example.examplemod.loot.MouseDungeonLootModifier;
 import com.example.examplemod.entity.DragonFireballEntity;
 import com.example.examplemod.entity.LivingBlockEntity;
@@ -21,6 +22,7 @@ import com.example.examplemod.entity.PigLaserEntity;
 import com.example.examplemod.entity.SheepBodyEntity;
 import com.example.examplemod.entity.ShengZhuEntity;
 import com.example.examplemod.entity.ShadowNinjaEntity;
+import com.example.examplemod.structure.ModStructures;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -63,6 +65,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent;
+import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
@@ -70,6 +73,8 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import net.minecraft.world.entity.SpawnPlacementTypes;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 import com.example.examplemod.network.ServerPayloadHandler;
 import com.example.examplemod.network.packet.SheepBodyTrackerPayload;
@@ -455,6 +460,11 @@ public class ChenMod {
             () -> new DeferredSpawnEggItem(SHENG_ZHU, 0x6A2417, 0xD9AF58, new Item.Properties())
     );
 
+    public static final DeferredItem<PalaceConstructorItem> PALACE_CONSTRUCTOR = ITEMS.register(
+            "palace_constructor",
+            PalaceConstructorItem::new
+    );
+
     /**
      * 鼠符咒地牢掉落修饰器
      *
@@ -489,12 +499,14 @@ public class ChenMod {
         MOB_EFFECTS.register(modEventBus);
         POTIONS.register(modEventBus);
         ENTITIES.register(modEventBus);
+        ModStructures.register(modEventBus);
 
         // 将当前类注册到 NeoForge 全局事件总线，用于接收游戏内事件
         NeoForge.EVENT_BUS.register(this);
 
         // 注册创造模式物品栏填充事件监听器
         modEventBus.addListener(this::addCreative);
+        modEventBus.addListener(this::registerSpawnPlacements);
 
         // 注册网络数据包处理器
         modEventBus.addListener(this::registerPayloads);
@@ -571,6 +583,16 @@ public class ChenMod {
         LOGGER.info("ChenMod common setup complete.");
     }
 
+    private void registerSpawnPlacements(RegisterSpawnPlacementsEvent event) {
+        event.register(
+                SHADOW_NINJA.get(),
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                ShadowNinjaEntity::checkShadowNinjaSpawnRules,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
+    }
+
     @SubscribeEvent
     public void registerBrewingRecipes(RegisterBrewingRecipesEvent event) {
         event.getBuilder().addMix(Potions.AWKWARD, Items.SALMON, MASK_RELEASE_POTION);
@@ -617,6 +639,10 @@ public class ChenMod {
         }
 
         // 将黑影忍者刷怪蛋添加到刷怪蛋物品栏
+        if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
+            event.accept(PALACE_CONSTRUCTOR);
+        }
+
         if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
             event.accept(SHADOW_NINJA_SPAWN_EGG);
             event.accept(SHENG_ZHU_SPAWN_EGG);
@@ -634,4 +660,5 @@ public class ChenMod {
     public void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("ChenMod server starting...");
     }
+
 }

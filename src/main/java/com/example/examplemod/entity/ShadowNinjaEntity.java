@@ -1,6 +1,7 @@
 package com.example.examplemod.entity;
 
 import com.example.examplemod.item.OniMaskItem;
+import com.example.examplemod.structure.ShengZhuPalaceInhabitants;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.UUID;
@@ -10,10 +11,12 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -28,6 +31,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
@@ -59,14 +63,20 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
     private static final int DISMISS_ANIMATION_TICKS = 30;
     private static final int SHADOW_RUSH_SINK_TICKS = 10;
     private static final int SHADOW_RUSH_RISE_TICKS = 10;
+    private static final double BASE_MOVEMENT_SPEED = 0.35D;
+    private static final double ATTACK_MOVE_SPEED = 1.25D;
+    private static final double FOLLOW_MOVE_SPEED = 1.25D;
     private static final double SUMMON_BURIED_OFFSET = 2.8D;
     private static final double DISMISS_BURIED_OFFSET = 3.0D;
     private static final double SHADOW_RUSH_BURIED_OFFSET = 2.8D;
     private static final float SUMMON_RISE_START_PROGRESS = 0.22F;
     private static final float DISMISS_SINK_END_PROGRESS = 0.68F;
-    private static final double SHADOW_RUSH_TRIGGER_DISTANCE = 10.0D;
-    private static final double SHADOW_RUSH_TRIGGER_DISTANCE_SQR =
-            SHADOW_RUSH_TRIGGER_DISTANCE * SHADOW_RUSH_TRIGGER_DISTANCE;
+    private static final double SHADOW_RUSH_TARGET_TRIGGER_DISTANCE = 20.0D;
+    private static final double SHADOW_RUSH_TARGET_TRIGGER_DISTANCE_SQR =
+            SHADOW_RUSH_TARGET_TRIGGER_DISTANCE * SHADOW_RUSH_TARGET_TRIGGER_DISTANCE;
+    private static final double SHADOW_RUSH_COMMANDER_TRIGGER_DISTANCE = 10.0D;
+    private static final double SHADOW_RUSH_COMMANDER_TRIGGER_DISTANCE_SQR =
+            SHADOW_RUSH_COMMANDER_TRIGGER_DISTANCE * SHADOW_RUSH_COMMANDER_TRIGGER_DISTANCE;
     private static final double SHADOW_RUSH_OWNER_OFFSET = 2.5D;
     private static final double SHADOW_RUSH_TARGET_OFFSET = 1.85D;
     private static final int SHADOW_RUSH_COOLDOWN_TICKS = 40;
@@ -79,7 +89,8 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
     private static final double JUMP_KICK_VERTICAL_RANGE = 1.75D;
     private static final int JUMP_KICK_COOLDOWN_TICKS = 45;
     private static final int JUMP_KICK_ACTIVE_TICKS = 14;
-    private static final double JUMP_KICK_Y_MOTION = 0.42D;
+    private static final double NINJA_JUMP_Y_MOTION = 0.78D;
+    private static final double JUMP_KICK_Y_MOTION = NINJA_JUMP_Y_MOTION;
     private static final double COMMAND_ACQUIRE_RADIUS = 32.0D;
     private static final double COMMAND_ACQUIRE_RADIUS_SQR = COMMAND_ACQUIRE_RADIUS * COMMAND_ACQUIRE_RADIUS;
     private static final double COMMAND_RELEASE_RADIUS = 48.0D;
@@ -94,10 +105,13 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
     private static final int COMMANDER_IDLE_KNEEL_TICKS = 20 * 8;
     private static final int SELF_DEFENSE_MEMORY_TICKS = 120;
     private static final int COLLECTIVE_HATE_MEMORY_TICKS = 160;
+    private static final float SAFE_FALL_DISTANCE = 5.0F;
     private static final double COMMANDER_IDLE_MOVEMENT_EPSILON_SQR = 0.0009D;
     private static final float BASE_SHADOW_RADIUS = 0.5F;
     private static final float BASE_SHADOW_STRENGTH = 1.0F;
     private static final EntityDataAccessor<Optional<UUID>> DATA_COMMANDER_UUID =
+            SynchedEntityData.defineId(ShadowNinjaEntity.class, EntityDataSerializers.OPTIONAL_UUID);
+    private static final EntityDataAccessor<Optional<UUID>> DATA_LEGION_SUMMONER_UUID =
             SynchedEntityData.defineId(ShadowNinjaEntity.class, EntityDataSerializers.OPTIONAL_UUID);
     private static final EntityDataAccessor<Boolean> DATA_KNEELING =
             SynchedEntityData.defineId(ShadowNinjaEntity.class, EntityDataSerializers.BOOLEAN);
@@ -132,9 +146,13 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, 30.0D)
-                .add(Attributes.MOVEMENT_SPEED, 0.30D)
+                .add(Attributes.MOVEMENT_SPEED, BASE_MOVEMENT_SPEED)
                 .add(Attributes.ATTACK_DAMAGE, 5.0D)
                 .add(Attributes.FOLLOW_RANGE, 24.0D);
+    }
+
+    public static boolean checkShadowNinjaSpawnRules(EntityType<ShadowNinjaEntity> entityType, ServerLevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random) {
+        return ShengZhuPalaceInhabitants.canShadowNinjaSpawn(entityType, level, spawnType, pos, random);
     }
 
     public boolean isFriendlyToPlayers() {
@@ -182,6 +200,22 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
             this.faceCommander(commanderAnchor);
         }
         this.startSummonAnimation();
+    }
+
+    public void prepareAmbushAttack(LivingEntity target, double surfaceY) {
+        if (target != null && target.isAlive()) {
+            this.collectiveAggroTarget = target;
+            this.collectiveAggroTimestamp = this.tickCount;
+        }
+        this.prepareSummonFromBelow(surfaceY);
+    }
+
+    public void assignLegionSummoner(LivingEntity summoner) {
+        this.entityData.set(DATA_LEGION_SUMMONER_UUID, Optional.ofNullable(summoner == null ? null : summoner.getUUID()));
+    }
+
+    public boolean isSummonedByLegion(UUID summonerUuid) {
+        return summonerUuid != null && summonerUuid.equals(this.getLegionSummonerUUID().orElse(null));
     }
 
     public boolean isSummoning() {
@@ -234,6 +268,7 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(DATA_COMMANDER_UUID, Optional.empty());
+        builder.define(DATA_LEGION_SUMMONER_UUID, Optional.empty());
         builder.define(DATA_KNEELING, false);
         builder.define(DATA_MASK_SUMMONED, false);
         builder.define(DATA_COMMAND_STATE, COMMAND_STATE_NORMAL);
@@ -244,6 +279,7 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
     public void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
         this.getCommanderUUID().ifPresent(uuid -> compound.putUUID("CommanderUUID", uuid));
+        this.getLegionSummonerUUID().ifPresent(uuid -> compound.putUUID("LegionSummonerUUID", uuid));
         compound.putBoolean("Kneeling", this.isKneeling());
         compound.putBoolean("MaskSummoned", this.isMaskSummoned());
         compound.putByte("CommandState", this.entityData.get(DATA_COMMAND_STATE));
@@ -265,6 +301,11 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
         } else {
             this.entityData.set(DATA_COMMANDER_UUID, Optional.empty());
         }
+        if (compound.hasUUID("LegionSummonerUUID")) {
+            this.entityData.set(DATA_LEGION_SUMMONER_UUID, Optional.of(compound.getUUID("LegionSummonerUUID")));
+        } else {
+            this.entityData.set(DATA_LEGION_SUMMONER_UUID, Optional.empty());
+        }
         this.entityData.set(DATA_KNEELING, compound.getBoolean("Kneeling"));
         this.entityData.set(DATA_MASK_SUMMONED, compound.getBoolean("MaskSummoned"));
         this.entityData.set(DATA_COMMAND_STATE, compound.getByte("CommandState"));
@@ -282,6 +323,18 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
     public boolean isAlliedTo(Entity entity) {
         if (super.isAlliedTo(entity)) {
             return true;
+        }
+
+        UUID legionSummonerUuid = this.getLegionSummonerUUID().orElse(null);
+        if (legionSummonerUuid != null) {
+            if (entity != null && legionSummonerUuid.equals(entity.getUUID())) {
+                return true;
+            }
+
+            if (entity instanceof ShadowNinjaEntity other
+                    && legionSummonerUuid.equals(other.getLegionSummonerUUID().orElse(null))) {
+                return true;
+            }
         }
 
         if (!this.isFriendlyToPlayers()) {
@@ -308,7 +361,7 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.1D, false) {
+        this.goalSelector.addGoal(2, new MeleeAttackGoal(this, ATTACK_MOVE_SPEED, false) {
             @Override
             public boolean canUse() {
                 return !ShadowNinjaEntity.this.isPerformingJumpKick()
@@ -421,6 +474,13 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
             return;
         }
 
+        if (!this.level().isClientSide() && !this.isFriendlyToPlayers() && this.getTarget() == null) {
+            LivingEntity ambushTarget = this.getCollectiveAggroTarget();
+            if (this.isRecentCollectiveAggroTarget(ambushTarget)) {
+                this.setTarget(ambushTarget);
+            }
+        }
+
         if (this.jumpKickCooldownTicks > 0) {
             this.jumpKickCooldownTicks--;
         }
@@ -441,7 +501,7 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
     public boolean hurt(DamageSource source, float amount) {
         boolean didHurt = super.hurt(source, amount);
 
-        if (didHurt && !this.level().isClientSide()) {
+        if (didHurt && !this.level().isClientSide() && !this.isDeadOrDying()) {
             LivingEntity attacker = this.resolveAggressor(source);
             if (attacker != null && this.canAssistAgainst(attacker)) {
                 this.broadcastCollectiveHate(attacker);
@@ -460,6 +520,27 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
         }
 
         return didHurt;
+    }
+
+    @Override
+    public void setTarget(LivingEntity target) {
+        super.setTarget(this.canHoldGrudgeAgainst(target) ? target : null);
+    }
+
+    @Override
+    public void jumpFromGround() {
+        super.jumpFromGround();
+        Vec3 currentMotion = this.getDeltaMovement();
+        if (currentMotion.y < NINJA_JUMP_Y_MOTION) {
+            this.setDeltaMovement(currentMotion.x, NINJA_JUMP_Y_MOTION, currentMotion.z);
+            this.hasImpulse = true;
+        }
+    }
+
+    @Override
+    protected int calculateFallDamage(float fallDistance, float damageMultiplier) {
+        float adjustedFallDistance = Math.max(0.0F, fallDistance - (SAFE_FALL_DISTANCE - 3.0F));
+        return super.calculateFallDamage(adjustedFallDistance, damageMultiplier);
     }
 
     @Override
@@ -497,6 +578,10 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
 
     private Optional<UUID> getCommanderUUID() {
         return this.entityData.get(DATA_COMMANDER_UUID);
+    }
+
+    private Optional<UUID> getLegionSummonerUUID() {
+        return this.entityData.get(DATA_LEGION_SUMMONER_UUID);
     }
 
     private void setCommanderUUID(UUID commanderUuid) {
@@ -629,6 +714,11 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
         this.entityData.set(DATA_STATE_TICKS, 0);
         if (wasSummoning) {
             this.beginSummonCeremony();
+        }
+
+        LivingEntity collectiveTarget = this.getCollectiveAggroTarget();
+        if (this.isRecentCollectiveAggroTarget(collectiveTarget)) {
+            this.setTarget(collectiveTarget);
         }
     }
 
@@ -877,7 +967,16 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
         return target != null
                 && target.isAlive()
                 && target != this
+                && this.canHoldGrudgeAgainst(target)
                 && !this.isAlliedTo(target);
+    }
+
+    private boolean canHoldGrudgeAgainst(LivingEntity target) {
+        if (!(target instanceof Player player)) {
+            return target != null;
+        }
+
+        return !player.isCreative() && !player.isSpectator();
     }
 
     private LivingEntity resolveAggressor(DamageSource source) {
@@ -988,7 +1087,7 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
         LivingEntity target = this.getTarget();
         if (target != null
                 && target.isAlive()
-                && this.distanceToSqr(target) > SHADOW_RUSH_TRIGGER_DISTANCE_SQR) {
+                && this.distanceToSqr(target) > SHADOW_RUSH_TARGET_TRIGGER_DISTANCE_SQR) {
             Vec3 destination = this.findShadowRushPositionNearTarget(target);
             if (destination != null) {
                 this.startShadowRush(destination);
@@ -999,7 +1098,7 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
         LivingEntity commander = this.getCommanderAnchor();
         if (commander != null
                 && target == null
-                && this.distanceToSqr(commander) > SHADOW_RUSH_TRIGGER_DISTANCE_SQR) {
+                && this.distanceToSqr(commander) > SHADOW_RUSH_COMMANDER_TRIGGER_DISTANCE_SQR) {
             Vec3 destination = this.findShadowRushPositionNearCommander(commander);
             if (destination != null) {
                 this.startShadowRush(destination);
@@ -1168,8 +1267,6 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
     }
 
     private class FriendlyFollowCommanderGoal extends Goal {
-        private static final double FOLLOW_SPEED = 1.1D;
-
         private FriendlyFollowCommanderGoal() {
             this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
         }
@@ -1223,7 +1320,7 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
             ShadowNinjaEntity.this.getLookControl().setLookAt(commander, 20.0F, 20.0F);
             double distanceSqr = ShadowNinjaEntity.this.distanceToSqr(commander);
             if (distanceSqr > MUSTER_RADIUS_SQR) {
-                ShadowNinjaEntity.this.getNavigation().moveTo(commander, FOLLOW_SPEED);
+                ShadowNinjaEntity.this.getNavigation().moveTo(commander, FOLLOW_MOVE_SPEED);
             } else {
                 ShadowNinjaEntity.this.getNavigation().stop();
             }

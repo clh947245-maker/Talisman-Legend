@@ -100,5 +100,9 @@
   "entity.chen_mod.shadow_ninja": "暗影兵团忍者",
   "item.chen_mod.shadow_ninja_spawn_egg": "暗影兵团忍者刷怪蛋",
   "entity.chen_mod.sheng_zhu": "圣主",
-  "item.chen_mod.sheng_zhu_spawn_egg": "圣主刷怪蛋"
+  "item.chen_mod.sheng_zhu_spawn_egg": "圣主刷怪蛋",
+  "item.chen_mod.palace_constructor": "宫殿构造器",
+  "item.chen_mod.palace_constructor.desc": "用于保留宫殿设计入口，等待新的宫殿方案。",
+  "item.chen_mod.palace_constructor.desc_2": "当前不会生成宫殿，等你重新设计后再接入。",
+  "message.chen_mod.palace_constructor.pending": "宫殿构造器已保留，等待新的宫殿设计。"
 }
