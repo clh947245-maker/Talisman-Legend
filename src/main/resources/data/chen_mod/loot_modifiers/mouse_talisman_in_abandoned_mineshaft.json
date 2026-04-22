@@ -1,0 +1,11 @@
+{
+  "type": "chen_mod:mouse_dungeon_loot",
+  "conditions": [
+    {
+      "condition": "neoforge:loot_table_id",
+      "loot_table_id": "minecraft:chests/abandoned_mineshaft"
+    }
+  ],
+  "chance": 0.4,
+  "config_key": "mouse_abandoned_mineshaft"
+}

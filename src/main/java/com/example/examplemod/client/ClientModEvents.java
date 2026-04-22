@@ -11,6 +11,8 @@ import com.example.examplemod.client.renderer.ShadowNinjaRenderer;
 import com.example.examplemod.client.renderer.TigerCloneRenderer;
 import com.example.examplemod.client.renderer.layer.OniMaskFaceLayer;
 import com.example.examplemod.event.SheepClientEventHandler;
+import net.minecraft.client.renderer.entity.ChickenRenderer;
+import net.minecraft.client.renderer.entity.PigRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.PlayerSkin;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
@@ -26,6 +28,9 @@ public class ClientModEvents {
         event.registerEntityRenderer(ChenMod.PIG_LASER.get(), PigLaserRenderer::new);
         event.registerEntityRenderer(ChenMod.SHADOW_NINJA.get(), ShadowNinjaRenderer::new);
         event.registerEntityRenderer(ChenMod.SHENG_ZHU.get(), ShengZhuRenderer::new);
+        event.registerEntityRenderer(ChenMod.AIBO.get(), ChickenRenderer::new);
+        event.registerEntityRenderer(ChenMod.MO_DI_CAI.get(), PigRenderer::new);
+        event.registerEntityRenderer(ChenMod.AIBO_MO_DI_CAI_FUSION.get(), PigRenderer::new);
     }
 
     public static void registerKeyMappings(RegisterKeyMappingsEvent event) {

@@ -22,6 +22,43 @@ TAG_LONG_ARRAY = 12
 
 DATA_VERSION_1_21_1 = 3955
 
+NON_SOLID_BLOCKS = {
+    "minecraft:lantern",
+    "minecraft:wall_torch",
+}
+
+DIRECTION_VECTORS = {
+    "north": (0, -1),
+    "south": (0, 1),
+    "west": (-1, 0),
+    "east": (1, 0),
+}
+
+OPPOSITE_DIRECTIONS = {
+    "north": "south",
+    "south": "north",
+    "west": "east",
+    "east": "west",
+}
+
+LIGHTING_ANCHORS = (
+    {"floor": (33, 5, 21), "torch_dirs": ("north", "south")},
+    {"floor": (40, 5, 25), "torch_dirs": ("west", "east")},
+    {"floor": (50, 5, 25), "torch_dirs": ("north", "south")},
+    {"floor": (33, 5, 43), "torch_dirs": ("west", "north")},
+    {"floor": (41, 5, 43), "torch_dirs": ("east", "west")},
+    {"floor": (35, 5, 80), "torch_dirs": ("west", "south")},
+    {"floor": (40, 5, 84), "torch_dirs": ("west", "east", "north")},
+    {"floor": (47, 5, 84), "torch_dirs": ("east", "south")},
+    {"floor": (36, 11, 100), "torch_dirs": ("west", "south")},
+    {"floor": (40, 11, 100), "torch_dirs": ("west", "east")},
+    {"floor": (44, 11, 100), "torch_dirs": ("east", "south")},
+    {"floor": (34, 16, 60), "torch_dirs": ("west", "north")},
+    {"floor": (48, 16, 60), "torch_dirs": ("east", "north")},
+    {"floor": (34, 16, 76), "torch_dirs": ("west", "south")},
+    {"floor": (48, 16, 76), "torch_dirs": ("east", "south")},
+)
+
 
 @dataclass(frozen=True)
 class NbtList:
@@ -175,6 +212,157 @@ def verify_structure_nbt(path: str):
         raise ValueError("NBT parser did not consume the entire file.")
 
 
+def palette_entry_key(entry: dict):
+    properties = entry.get("Properties", {})
+    return (
+        entry["Name"],
+        tuple(sorted((str(key), str(value)) for key, value in properties.items())),
+    )
+
+
+def ensure_palette_entry(palette: list, state_lookup: dict, entry: dict) -> int:
+    normalized = OrderedDict([("Name", entry["Name"])])
+    if entry.get("Properties"):
+        normalized["Properties"] = OrderedDict(
+            (str(key), str(value)) for key, value in sorted(entry["Properties"].items())
+        )
+
+    key = palette_entry_key(normalized)
+    if key in state_lookup:
+        return state_lookup[key]
+
+    palette.append(normalized)
+    state_lookup[key] = len(palette) - 1
+    return state_lookup[key]
+
+
+def add_palace_lighting(template: dict):
+    palette = template["palette"]
+    state_lookup = {
+        palette_entry_key(entry): index
+        for index, entry in enumerate(palette)
+    }
+    blocks_by_pos = {
+        tuple(block["pos"]): int(block["state"])
+        for block in template["blocks"]
+    }
+    size_x, size_y, size_z = template["size"]
+
+    glowstone_state = ensure_palette_entry(
+        palette,
+        state_lookup,
+        {"Name": "minecraft:glowstone"},
+    )
+    lantern_state = ensure_palette_entry(
+        palette,
+        state_lookup,
+        {
+            "Name": "minecraft:lantern",
+            "Properties": {"hanging": "true"},
+        },
+    )
+    wall_torch_states = {
+        facing: ensure_palette_entry(
+            palette,
+            state_lookup,
+            {
+                "Name": "minecraft:wall_torch",
+                "Properties": {"facing": facing},
+            },
+        )
+        for facing in OPPOSITE_DIRECTIONS.values()
+    }
+
+    def in_bounds(pos) -> bool:
+        x, y, z = pos
+        return 0 <= x < size_x and 0 <= y < size_y and 0 <= z < size_z
+
+    def get_state(pos):
+        return blocks_by_pos.get(tuple(pos))
+
+    def is_air(pos) -> bool:
+        return get_state(pos) is None
+
+    def is_solid(pos) -> bool:
+        state = get_state(pos)
+        if state is None:
+            return False
+        return palette[state]["Name"] not in NON_SOLID_BLOCKS
+
+    def set_block(pos, state: int):
+        if not in_bounds(pos):
+            return False
+        blocks_by_pos[tuple(pos)] = state
+        return True
+
+    def find_hanging_lantern_positions(floor_pos):
+        x, floor_y, z = floor_pos
+        for support_y in range(floor_y + 2, size_y):
+            support_pos = (x, support_y, z)
+            lantern_pos = (x, support_y - 1, z)
+            if is_solid(support_pos) and is_air(lantern_pos):
+                return support_pos, lantern_pos
+        return None, None
+
+    def find_wall_torch_position(center_pos, search_direction: str):
+        x, floor_y, z = center_pos
+        dx, dz = DIRECTION_VECTORS[search_direction]
+        for torch_y in (floor_y + 2, floor_y + 3):
+            for step in range(1, 13):
+                torch_pos = (x + dx * step, torch_y, z + dz * step)
+                support_pos = (torch_pos[0] + dx, torch_y, torch_pos[2] + dz)
+                front_pos = (torch_pos[0] - dx, torch_y, torch_pos[2] - dz)
+                if not in_bounds(torch_pos) or not in_bounds(support_pos):
+                    break
+                if (
+                    is_air(torch_pos)
+                    and is_solid(support_pos)
+                    and (not in_bounds(front_pos) or is_air(front_pos))
+                ):
+                    return torch_pos
+        return None
+
+    added_glowstone = 0
+    added_lanterns = 0
+    added_wall_torches = 0
+
+    for anchor in LIGHTING_ANCHORS:
+        floor_pos = anchor["floor"]
+        support_pos, lantern_pos = find_hanging_lantern_positions(floor_pos)
+        if support_pos is not None and lantern_pos is not None:
+            previous_support_state = get_state(support_pos)
+            previous_lantern_state = get_state(lantern_pos)
+            if set_block(support_pos, glowstone_state) and previous_support_state != glowstone_state:
+                added_glowstone += 1
+            if previous_lantern_state is None and set_block(lantern_pos, lantern_state):
+                added_lanterns += 1
+
+        for search_direction in anchor["torch_dirs"]:
+            torch_pos = find_wall_torch_position(floor_pos, search_direction)
+            if torch_pos is None:
+                continue
+            torch_state = wall_torch_states[OPPOSITE_DIRECTIONS[search_direction]]
+            previous_torch_state = get_state(torch_pos)
+            if previous_torch_state is None and set_block(torch_pos, torch_state):
+                added_wall_torches += 1
+
+    template["blocks"] = [
+        OrderedDict(
+            [
+                ("state", state),
+                ("pos", [x, y, z]),
+            ]
+        )
+        for (x, y, z), state in sorted(blocks_by_pos.items(), key=lambda item: (item[0][1], item[0][2], item[0][0]))
+    ]
+
+    return {
+        "glowstone": added_glowstone,
+        "lanterns": added_lanterns,
+        "wall_torches": added_wall_torches,
+    }
+
+
 def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(os.path.dirname(script_dir))
@@ -264,6 +452,8 @@ def main():
     with open(json_path, "r", encoding="utf-8") as handle:
         template = json.load(handle)
 
+    lighting_counts = add_palace_lighting(template)
+
     root = OrderedDict()
     root["DataVersion"] = nbt_int(DATA_VERSION_1_21_1)
     root["size"] = nbt_int_list(template["size"])
@@ -325,6 +515,12 @@ def main():
     print(f"DataVersion: {DATA_VERSION_1_21_1}")
     print(f"Size: {template['size'][0]} x {template['size'][1]} x {template['size'][2]}")
     print(f"Blocks: {len(template['blocks'])}")
+    print(
+        "Lighting: "
+        f"{lighting_counts['glowstone']} glowstone, "
+        f"{lighting_counts['lanterns']} lanterns, "
+        f"{lighting_counts['wall_torches']} wall torches"
+    )
 
 
 if __name__ == "__main__":

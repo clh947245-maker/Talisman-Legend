@@ -1,0 +1,11 @@
+{
+  "type": "chen_mod:rabbit_turtle_loot",
+  "conditions": [
+    {
+      "condition": "neoforge:loot_table_id",
+      "loot_table_id": "minecraft:entities/turtle"
+    }
+  ],
+  "chance": 0.1,
+  "config_key": "rabbit_turtle"
+}

@@ -1,6 +1,20 @@
 {
   "replace": false,
   "entries": [
-    "chen_mod:mouse_talisman_in_simple_dungeon"
+    "chen_mod:mouse_talisman_in_simple_dungeon",
+    "chen_mod:mouse_talisman_in_abandoned_mineshaft",
+    "chen_mod:mouse_talisman_in_stronghold_corridor",
+    "chen_mod:mouse_talisman_in_stronghold_crossing",
+    "chen_mod:mouse_talisman_in_stronghold_library",
+    "chen_mod:monkey_talisman_in_ocean_ruin_warm_archaeology",
+    "chen_mod:monkey_talisman_in_ocean_ruin_cold_archaeology",
+    "chen_mod:ox_talisman_in_bastion_bridge",
+    "chen_mod:ox_talisman_in_bastion_hoglin_stable",
+    "chen_mod:ox_talisman_in_bastion_other",
+    "chen_mod:ox_talisman_in_bastion_treasure",
+    "chen_mod:rabbit_talisman_from_turtle",
+    "chen_mod:sheep_talisman_in_end_city_treasure",
+    "chen_mod:snake_talisman_in_ancient_city",
+    "chen_mod:tiger_talisman_in_nether_bridge"
   ]
 }

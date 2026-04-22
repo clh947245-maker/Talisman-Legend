@@ -1,0 +1,11 @@
+{
+  "type": "chen_mod:snake_ancient_city_loot",
+  "conditions": [
+    {
+      "condition": "neoforge:loot_table_id",
+      "loot_table_id": "minecraft:chests/ancient_city"
+    }
+  ],
+  "chance": 0.2,
+  "config_key": "snake_ancient_city"
+}

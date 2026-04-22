@@ -29,52 +29,66 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 public final class ShengZhuPalaceRewards {
-    private static final BlockPos[] FIRST_FLOOR_CHEST_CANDIDATES = new BlockPos[] {
-            new BlockPos(32, 5, 21),
-            new BlockPos(38, 5, 21),
-            new BlockPos(44, 5, 21),
-            new BlockPos(42, 5, 21),
-            new BlockPos(50, 5, 21),
-            new BlockPos(30, 5, 25),
+    private static final BlockPos[] FIRST_FLOOR_PRIMARY_CHEST_CANDIDATES = new BlockPos[] {
             new BlockPos(40, 5, 25),
-            new BlockPos(50, 5, 25),
-            new BlockPos(29, 5, 29),
-            new BlockPos(53, 5, 29),
-            new BlockPos(29, 5, 37),
-            new BlockPos(53, 5, 37),
+            new BlockPos(36, 5, 25),
+            new BlockPos(44, 5, 25),
             new BlockPos(33, 5, 43),
             new BlockPos(41, 5, 43),
+            new BlockPos(37, 5, 49),
+            new BlockPos(45, 5, 49),
             new BlockPos(33, 5, 55),
             new BlockPos(41, 5, 55),
+            new BlockPos(37, 5, 55),
+            new BlockPos(45, 5, 55),
             new BlockPos(35, 5, 80),
             new BlockPos(41, 5, 80),
             new BlockPos(35, 5, 84),
-            new BlockPos(41, 5, 84),
+            new BlockPos(41, 5, 84)
+    };
+    private static final BlockPos[] FIRST_FLOOR_SECONDARY_CHEST_CANDIDATES = new BlockPos[] {
+            new BlockPos(32, 5, 21),
+            new BlockPos(38, 5, 21),
+            new BlockPos(44, 5, 21),
+            new BlockPos(48, 5, 21),
+            new BlockPos(30, 5, 25),
+            new BlockPos(50, 5, 25),
+            new BlockPos(31, 5, 31),
+            new BlockPos(49, 5, 31),
             new BlockPos(47, 5, 84)
     };
-    private static final BlockPos[] SECOND_FLOOR_CHEST_CANDIDATES = new BlockPos[] {
+    private static final BlockPos[] SECOND_FLOOR_PRIMARY_CHEST_CANDIDATES = new BlockPos[] {
             new BlockPos(36, 11, 100),
             new BlockPos(40, 11, 100),
             new BlockPos(44, 11, 100),
-            new BlockPos(36, 11, 102),
             new BlockPos(40, 11, 102),
+            new BlockPos(34, 16, 60),
+            new BlockPos(38, 16, 60),
+            new BlockPos(44, 16, 60),
+            new BlockPos(48, 16, 60),
+            new BlockPos(34, 16, 68),
+            new BlockPos(38, 16, 68),
+            new BlockPos(44, 16, 68),
+            new BlockPos(48, 16, 68),
+            new BlockPos(34, 16, 76),
+            new BlockPos(38, 16, 76),
+            new BlockPos(44, 16, 76),
+            new BlockPos(48, 16, 76)
+    };
+    private static final BlockPos[] SECOND_FLOOR_SECONDARY_CHEST_CANDIDATES = new BlockPos[] {
+            new BlockPos(36, 11, 102),
             new BlockPos(44, 11, 102),
             new BlockPos(30, 16, 60),
-            new BlockPos(34, 16, 60),
-            new BlockPos(48, 16, 60),
             new BlockPos(52, 16, 60),
             new BlockPos(30, 16, 68),
-            new BlockPos(34, 16, 68),
-            new BlockPos(48, 16, 68),
             new BlockPos(52, 16, 68),
             new BlockPos(30, 16, 76),
-            new BlockPos(34, 16, 76),
-            new BlockPos(48, 16, 76),
             new BlockPos(52, 16, 76)
     };
-    private static final int MIN_TOTAL_CHESTS = 10;
-    private static final int MAX_TOTAL_CHESTS = 20;
-    private static final int MIN_SECOND_FLOOR_CHESTS = 4;
+    private static final int MIN_TOTAL_CHESTS = 20;
+    private static final int MAX_TOTAL_CHESTS = 40;
+    private static final int MIN_FIRST_FLOOR_CHESTS = 10;
+    private static final int MIN_SECOND_FLOOR_CHESTS = 8;
     private static final int MIN_LOCAL_DISTANCE = 5;
     private static final int MAX_CEILING_DISTANCE = 24;
     private static final Item[] DIAMOND_WEAPONS = new Item[] {
@@ -94,9 +108,13 @@ public final class ShengZhuPalaceRewards {
             new EnchantedBookSpec(Enchantments.LOOTING, 3),
             new EnchantedBookSpec(Enchantments.EFFICIENCY, 5),
             new EnchantedBookSpec(Enchantments.FORTUNE, 3),
+            new EnchantedBookSpec(Enchantments.SILK_TOUCH, 1),
             new EnchantedBookSpec(Enchantments.POWER, 5),
             new EnchantedBookSpec(Enchantments.FIRE_ASPECT, 2),
-            new EnchantedBookSpec(Enchantments.MENDING, 1)
+            new EnchantedBookSpec(Enchantments.MENDING, 1),
+            new EnchantedBookSpec(Enchantments.FEATHER_FALLING, 4),
+            new EnchantedBookSpec(Enchantments.RESPIRATION, 3),
+            new EnchantedBookSpec(Enchantments.THORNS, 3)
     };
 
     private ShengZhuPalaceRewards() {
@@ -106,13 +124,26 @@ public final class ShengZhuPalaceRewards {
         long palaceSeed = computePalaceSeed(level, origin, rotation);
         RandomSource palaceRandom = RandomSource.create(palaceSeed);
         int totalChestCount = MIN_TOTAL_CHESTS + palaceRandom.nextInt(MAX_TOTAL_CHESTS - MIN_TOTAL_CHESTS + 1);
-        int maxSecondFloorChests = Math.min(8, totalChestCount - 5);
+        int maxSecondFloorChests = Math.min(
+                SECOND_FLOOR_PRIMARY_CHEST_CANDIDATES.length + SECOND_FLOOR_SECONDARY_CHEST_CANDIDATES.length,
+                totalChestCount - MIN_FIRST_FLOOR_CHESTS
+        );
         int secondFloorChestCount = MIN_SECOND_FLOOR_CHESTS + palaceRandom.nextInt(maxSecondFloorChests - MIN_SECOND_FLOOR_CHESTS + 1);
         int firstFloorChestCount = totalChestCount - secondFloorChestCount;
 
         List<BlockPos> selectedLocalPositions = new ArrayList<>(totalChestCount);
-        addSelectedCandidates(selectedLocalPositions, FIRST_FLOOR_CHEST_CANDIDATES, firstFloorChestCount, palaceRandom);
-        addSelectedCandidates(selectedLocalPositions, SECOND_FLOOR_CHEST_CANDIDATES, secondFloorChestCount, palaceRandom);
+        selectedLocalPositions.addAll(selectCandidatesForFloor(
+                firstFloorChestCount,
+                palaceRandom,
+                FIRST_FLOOR_PRIMARY_CHEST_CANDIDATES,
+                FIRST_FLOOR_SECONDARY_CHEST_CANDIDATES
+        ));
+        selectedLocalPositions.addAll(selectCandidatesForFloor(
+                secondFloorChestCount,
+                palaceRandom,
+                SECOND_FLOOR_PRIMARY_CHEST_CANDIDATES,
+                SECOND_FLOOR_SECONDARY_CHEST_CANDIDATES
+        ));
 
         for (BlockPos localPos : selectedLocalPositions) {
             BlockPos worldPos = transformToWorld(origin, localPos, rotation);
@@ -226,6 +257,18 @@ public final class ShengZhuPalaceRewards {
                 selectedForFloor++;
             }
         }
+    }
+
+    @SafeVarargs
+    private static List<BlockPos> selectCandidatesForFloor(int targetCount, RandomSource random, BlockPos[]... candidateGroups) {
+        List<BlockPos> selected = new ArrayList<>(targetCount);
+        for (BlockPos[] candidateGroup : candidateGroups) {
+            if (selected.size() >= targetCount) {
+                break;
+            }
+            addSelectedCandidates(selected, candidateGroup, targetCount - selected.size(), random);
+        }
+        return selected;
     }
 
     private static boolean isFarEnough(List<BlockPos> selectedLocalPositions, BlockPos candidate) {

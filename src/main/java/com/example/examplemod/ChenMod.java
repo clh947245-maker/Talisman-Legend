@@ -14,7 +14,14 @@ import com.example.examplemod.talisman.PigTalismanItem;
 import com.example.examplemod.talisman.SheepTalismanItem;
 import com.example.examplemod.item.OniMaskItem;
 import com.example.examplemod.item.PalaceConstructorItem;
+import com.example.examplemod.config.ChenModLootConfig;
+import com.example.examplemod.loot.MonkeyOceanRuinLootModifier;
 import com.example.examplemod.loot.MouseDungeonLootModifier;
+import com.example.examplemod.loot.OxBastionLootModifier;
+import com.example.examplemod.loot.RabbitTurtleLootModifier;
+import com.example.examplemod.loot.SheepEndCityLootModifier;
+import com.example.examplemod.loot.SnakeAncientCityLootModifier;
+import com.example.examplemod.loot.TigerNetherFortressLootModifier;
 import com.example.examplemod.entity.DragonFireballEntity;
 import com.example.examplemod.entity.LivingBlockEntity;
 import com.example.examplemod.entity.MouseBeamEntity;
@@ -22,19 +29,26 @@ import com.example.examplemod.entity.PigLaserEntity;
 import com.example.examplemod.entity.SheepBodyEntity;
 import com.example.examplemod.entity.ShengZhuEntity;
 import com.example.examplemod.entity.ShadowNinjaEntity;
+import com.example.examplemod.entity.AiboEntity;
+import com.example.examplemod.entity.MoDiCaiEntity;
+import com.example.examplemod.entity.AiboMoDiCaiFusionEntity;
 import com.example.examplemod.structure.ModStructures;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.MapCodec;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.effect.MobEffect;
@@ -61,6 +75,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
@@ -118,6 +133,15 @@ public class ChenMod {
      * 使用 Deferred Register 模式延迟注册所有模组物品
      */
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MODID);
+    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS =
+            DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> CHEN_MOD_TAB = CREATIVE_MODE_TABS.register("chen_mod", () ->
+            CreativeModeTab.builder()
+                    .title(Component.translatable("itemGroup." + MODID))
+                    .icon(ChenMod::createCreativeTabIcon)
+                    .displayItems((parameters, output) -> addModCreativeTabContents(output))
+                    .build()
+    );
     /**
      * 全局战利品修饰器序列化器注册表
      *
@@ -460,6 +484,39 @@ public class ChenMod {
             () -> new DeferredSpawnEggItem(SHENG_ZHU, 0x6A2417, 0xD9AF58, new Item.Properties())
     );
 
+    public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<AiboEntity>> AIBO = ENTITIES.register("aibo", () ->
+            EntityType.Builder.<AiboEntity>of(AiboEntity::new, MobCategory.CREATURE)
+                    .sized(0.4F, 0.7F)
+                    .clientTrackingRange(10)
+                    .build("aibo"));
+
+    public static final DeferredItem<DeferredSpawnEggItem> AIBO_SPAWN_EGG = ITEMS.register(
+            "aibo_spawn_egg",
+            () -> new DeferredSpawnEggItem(AIBO, 0xF3D28C, 0x75B3E5, new Item.Properties())
+    );
+
+    public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<MoDiCaiEntity>> MO_DI_CAI = ENTITIES.register("mo_di_cai", () ->
+            EntityType.Builder.<MoDiCaiEntity>of(MoDiCaiEntity::new, MobCategory.CREATURE)
+                    .sized(0.9F, 0.9F)
+                    .clientTrackingRange(10)
+                    .build("mo_di_cai"));
+
+    public static final DeferredItem<DeferredSpawnEggItem> MO_DI_CAI_SPAWN_EGG = ITEMS.register(
+            "mo_di_cai_spawn_egg",
+            () -> new DeferredSpawnEggItem(MO_DI_CAI, 0xE9A8A2, 0x8C4B3F, new Item.Properties())
+    );
+
+    public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<AiboMoDiCaiFusionEntity>> AIBO_MO_DI_CAI_FUSION = ENTITIES.register("aibo_mo_di_cai_fusion", () ->
+            EntityType.Builder.<AiboMoDiCaiFusionEntity>of(AiboMoDiCaiFusionEntity::new, MobCategory.MONSTER)
+                    .sized(0.9F, 1.0F)
+                    .clientTrackingRange(10)
+                    .build("aibo_mo_di_cai_fusion"));
+
+    public static final DeferredItem<DeferredSpawnEggItem> AIBO_MO_DI_CAI_FUSION_SPAWN_EGG = ITEMS.register(
+            "aibo_mo_di_cai_fusion_spawn_egg",
+            () -> new DeferredSpawnEggItem(AIBO_MO_DI_CAI_FUSION, 0xE7B18B, 0x5F466E, new Item.Properties())
+    );
+
     public static final DeferredItem<PalaceConstructorItem> PALACE_CONSTRUCTOR = ITEMS.register(
             "palace_constructor",
             PalaceConstructorItem::new
@@ -473,6 +530,18 @@ public class ChenMod {
      */
     public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<MouseDungeonLootModifier>> MOUSE_DUNGEON_LOOT_MODIFIER =
             LOOT_MODIFIER_SERIALIZERS.register("mouse_dungeon_loot", () -> MouseDungeonLootModifier.CODEC);
+    public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<MonkeyOceanRuinLootModifier>> MONKEY_OCEAN_RUIN_LOOT_MODIFIER =
+            LOOT_MODIFIER_SERIALIZERS.register("monkey_ocean_ruin_loot", () -> MonkeyOceanRuinLootModifier.CODEC);
+    public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<OxBastionLootModifier>> OX_BASTION_LOOT_MODIFIER =
+            LOOT_MODIFIER_SERIALIZERS.register("ox_bastion_loot", () -> OxBastionLootModifier.CODEC);
+    public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<RabbitTurtleLootModifier>> RABBIT_TURTLE_LOOT_MODIFIER =
+            LOOT_MODIFIER_SERIALIZERS.register("rabbit_turtle_loot", () -> RabbitTurtleLootModifier.CODEC);
+    public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<SheepEndCityLootModifier>> SHEEP_END_CITY_LOOT_MODIFIER =
+            LOOT_MODIFIER_SERIALIZERS.register("sheep_end_city_loot", () -> SheepEndCityLootModifier.CODEC);
+    public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<SnakeAncientCityLootModifier>> SNAKE_ANCIENT_CITY_LOOT_MODIFIER =
+            LOOT_MODIFIER_SERIALIZERS.register("snake_ancient_city_loot", () -> SnakeAncientCityLootModifier.CODEC);
+    public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<TigerNetherFortressLootModifier>> TIGER_NETHER_FORTRESS_LOOT_MODIFIER =
+            LOOT_MODIFIER_SERIALIZERS.register("tiger_nether_fortress_loot", () -> TigerNetherFortressLootModifier.CODEC);
 
     // ==================== 构造函数 ====================
 
@@ -493,6 +562,7 @@ public class ChenMod {
 
         // 将所有 Deferred Register 注册到模组事件总线
         ITEMS.register(modEventBus);
+        CREATIVE_MODE_TABS.register(modEventBus);
         // 供 data/chen_mod/loot_modifiers/*.json 引用自定义全局战利品修饰器类型。
         LOOT_MODIFIER_SERIALIZERS.register(modEventBus);
         ARMOR_MATERIALS.register(modEventBus);
@@ -510,6 +580,7 @@ public class ChenMod {
 
         // 注册网络数据包处理器
         modEventBus.addListener(this::registerPayloads);
+        modContainer.registerConfig(ModConfig.Type.COMMON, ChenModLootConfig.SPEC);
     }
 
     /**
@@ -591,6 +662,13 @@ public class ChenMod {
                 ShadowNinjaEntity::checkShadowNinjaSpawnRules,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE
         );
+        event.register(
+                AIBO_MO_DI_CAI_FUSION.get(),
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                AiboMoDiCaiFusionEntity::checkSpawnRules,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
     }
 
     @SubscribeEvent
@@ -611,6 +689,9 @@ public class ChenMod {
         event.put(LIVING_BLOCK.get(), LivingBlockEntity.createAttributes().build());
         event.put(SHADOW_NINJA.get(), ShadowNinjaEntity.createAttributes().build());
         event.put(SHENG_ZHU.get(), ShengZhuEntity.createAttributes().build());
+        event.put(AIBO.get(), AiboEntity.createAttributes().build());
+        event.put(MO_DI_CAI.get(), MoDiCaiEntity.createAttributes().build());
+        event.put(AIBO_MO_DI_CAI_FUSION.get(), AiboMoDiCaiFusionEntity.createAttributes().build());
     }
 
     /**
@@ -620,6 +701,37 @@ public class ChenMod {
      *
      * @param event 创造模式物品栏构建事件
      */
+    private static void addModCreativeTabContents(CreativeModeTab.Output output) {
+        output.accept(HORSE_TALISMAN);
+        output.accept(OX_TALISMAN);
+        output.accept(RABBIT_TALISMAN);
+        output.accept(SNACK_TALISMAN);
+        output.accept(DOG_TALISMAN);
+        output.accept(ROOSTER_TALISMAN);
+        output.accept(MONKEY_TALISMAN);
+        output.accept(TIGER_TALISMAN);
+        output.accept(DRAGON_TALISMAN);
+        output.accept(MOUSE_TALISMAN);
+        output.accept(PIG_TALISMAN);
+        output.accept(SHEEP_TALISMAN);
+        output.accept(ONI_MASK);
+        output.accept(PALACE_CONSTRUCTOR);
+        output.accept(createMaskReleasePotionStack());
+        output.accept(SHADOW_NINJA_SPAWN_EGG);
+        output.accept(SHENG_ZHU_SPAWN_EGG);
+        output.accept(AIBO_SPAWN_EGG);
+        output.accept(MO_DI_CAI_SPAWN_EGG);
+        output.accept(AIBO_MO_DI_CAI_FUSION_SPAWN_EGG);
+    }
+
+    private static ItemStack createMaskReleasePotionStack() {
+        return PotionContents.createItemStack(Items.POTION, MASK_RELEASE_POTION);
+    }
+
+    private static ItemStack createCreativeTabIcon() {
+        return new ItemStack(DRAGON_TALISMAN.get());
+    }
+
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
         // 将所有符咒和鬼影面具添加到战斗物品栏
         if (event.getTabKey() == CreativeModeTabs.COMBAT) {
@@ -646,6 +758,9 @@ public class ChenMod {
         if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
             event.accept(SHADOW_NINJA_SPAWN_EGG);
             event.accept(SHENG_ZHU_SPAWN_EGG);
+            event.accept(AIBO_SPAWN_EGG);
+            event.accept(MO_DI_CAI_SPAWN_EGG);
+            event.accept(AIBO_MO_DI_CAI_FUSION_SPAWN_EGG);
         }
     }
 

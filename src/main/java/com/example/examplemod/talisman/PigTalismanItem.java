@@ -1,21 +1,19 @@
 package com.example.examplemod.talisman;
 
 import com.example.examplemod.entity.PigLaserEntity;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.HashSet;
@@ -27,8 +25,7 @@ public class PigTalismanItem extends Item {
     private static final double LASER_RANGE = 32.0D;
     private static final float LASER_DAMAGE = 8.0F;
     private static final double LASER_KNOCKBACK = 0.35D;
-    private static final int HIT_STUN_TICKS = 8;
-    private static final int HIT_STUN_AMPLIFIER = 6;
+    private static final double BLOCK_BREAK_STEP = 0.30D;
     public static final int COOLDOWN_TICKS = 12;
 
     public PigTalismanItem() {
@@ -43,9 +40,12 @@ public class PigTalismanItem extends Item {
             Vec3 look = player.getLookAngle().normalize();
             Vec3 leftStart = computeEyeStart(player, look, -1.0D);
             Vec3 rightStart = computeEyeStart(player, look, 1.0D);
-            Vec3 leftEnd = resolveBeamEnd(level, player, leftStart, look);
-            Vec3 rightEnd = resolveBeamEnd(level, player, rightStart, look);
+            Vec3 leftEnd = resolveBeamEnd(leftStart, look);
+            Vec3 rightEnd = resolveBeamEnd(rightStart, look);
 
+            Set<BlockPos> brokenBlocks = new HashSet<>();
+            breakBlocksAlongBeam(level, player, leftStart, leftEnd, brokenBlocks);
+            breakBlocksAlongBeam(level, player, rightStart, rightEnd, brokenBlocks);
             Set<Integer> hitEntityIds = new HashSet<>();
             damageEntitiesAlongBeam(level, player, leftStart, leftEnd, hitEntityIds);
             damageEntitiesAlongBeam(level, player, rightStart, rightEnd, hitEntityIds);
@@ -72,10 +72,40 @@ public class PigTalismanItem extends Item {
         return eyeCenter.add(right.scale(0.18D * side));
     }
 
-    private static Vec3 resolveBeamEnd(Level level, Player player, Vec3 start, Vec3 direction) {
-        Vec3 target = start.add(direction.scale(LASER_RANGE));
-        BlockHitResult hitResult = level.clip(new ClipContext(start, target, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
-        return hitResult.getType() == HitResult.Type.BLOCK ? hitResult.getLocation() : target;
+    private static Vec3 resolveBeamEnd(Vec3 start, Vec3 direction) {
+        return start.add(direction.scale(LASER_RANGE));
+    }
+
+    private static void breakBlocksAlongBeam(Level level, Player player, Vec3 start, Vec3 end, Set<BlockPos> brokenBlocks) {
+        Vec3 delta = end.subtract(start);
+        double totalLength = delta.length();
+        if (totalLength < 1.0E-7D) {
+            return;
+        }
+
+        Vec3 direction = delta.scale(1.0D / totalLength);
+        int samples = Math.max(1, Mth.ceil(totalLength / BLOCK_BREAK_STEP));
+        for (int i = 0; i <= samples; i++) {
+            double traveled = Math.min(totalLength, i * BLOCK_BREAK_STEP);
+            BlockPos blockPos = BlockPos.containing(start.add(direction.scale(traveled))).immutable();
+            if (!brokenBlocks.add(blockPos)) {
+                continue;
+            }
+            if (canLaserBreakBlock(level, player, blockPos)) {
+                level.destroyBlock(blockPos, false, player);
+            }
+        }
+    }
+
+    private static boolean canLaserBreakBlock(Level level, Player player, BlockPos blockPos) {
+        BlockState state = level.getBlockState(blockPos);
+        return !state.isAir()
+                && state.getFluidState().isEmpty()
+                && !state.hasBlockEntity()
+                && !state.getCollisionShape(level, blockPos).isEmpty()
+                && state.getDestroySpeed(level, blockPos) >= 0.0F
+                && level.mayInteract(player, blockPos)
+                && state.canEntityDestroy(level, blockPos, player);
     }
 
     private static void damageEntitiesAlongBeam(Level level, Player player, Vec3 start, Vec3 end, Set<Integer> hitEntityIds) {
@@ -99,7 +129,6 @@ public class PigTalismanItem extends Item {
             target.hurt(player.damageSources().magic(), LASER_DAMAGE);
             target.setDeltaMovement(target.getDeltaMovement().scale(0.15D));
             target.push(knockbackDirection.x * LASER_KNOCKBACK, 0.03D, knockbackDirection.z * LASER_KNOCKBACK);
-            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, HIT_STUN_TICKS, HIT_STUN_AMPLIFIER, false, false, true));
             target.hurtMarked = true;
         }
     }

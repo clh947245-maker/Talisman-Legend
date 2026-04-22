@@ -6,7 +6,8 @@
       "loot_table_id": "minecraft:chests/simple_dungeon"
     }
   ],
-  "chance": 0.05,
+  "chance": 0.4,
+  "config_key": "mouse_simple_dungeon",
   "horizontal_range": 8,
   "vertical_range": 5
 }

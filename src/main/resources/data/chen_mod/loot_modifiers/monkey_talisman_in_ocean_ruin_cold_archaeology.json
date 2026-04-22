@@ -1,0 +1,11 @@
+{
+  "type": "chen_mod:monkey_ocean_ruin_loot",
+  "conditions": [
+    {
+      "condition": "neoforge:loot_table_id",
+      "loot_table_id": "minecraft:archaeology/ocean_ruin_cold"
+    }
+  ],
+  "chance": 0.2,
+  "config_key": "monkey_ocean_ruin_warm"
+}

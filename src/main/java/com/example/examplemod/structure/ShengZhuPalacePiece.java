@@ -71,5 +71,6 @@ public class ShengZhuPalacePiece extends TemplateStructurePiece {
     ) {
         box.encapsulate(this.template.getBoundingBox(this.placeSettings, this.templatePosition));
         super.postProcess(level, structureManager, chunkGenerator, random, box, chunkPos, pivot);
+        ShengZhuPalaceRewards.placeRewardChests(level, this.templatePosition, this.placeSettings.getRotation(), box);
     }
 }

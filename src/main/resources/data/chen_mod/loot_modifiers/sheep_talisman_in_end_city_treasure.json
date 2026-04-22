@@ -1,0 +1,11 @@
+{
+  "type": "chen_mod:sheep_end_city_loot",
+  "conditions": [
+    {
+      "condition": "neoforge:loot_table_id",
+      "loot_table_id": "minecraft:chests/end_city_treasure"
+    }
+  ],
+  "chance": 0.4,
+  "config_key": "sheep_end_city"
+}

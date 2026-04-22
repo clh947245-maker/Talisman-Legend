@@ -1,0 +1,11 @@
+{
+  "type": "chen_mod:tiger_nether_fortress_loot",
+  "conditions": [
+    {
+      "condition": "neoforge:loot_table_id",
+      "loot_table_id": "minecraft:chests/nether_bridge"
+    }
+  ],
+  "chance": 0.4,
+  "config_key": "tiger_nether_fortress"
+}

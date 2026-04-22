@@ -1,0 +1,11 @@
+{
+  "type": "chen_mod:ox_bastion_loot",
+  "conditions": [
+    {
+      "condition": "neoforge:loot_table_id",
+      "loot_table_id": "minecraft:chests/bastion_other"
+    }
+  ],
+  "chance": 0.4,
+  "config_key": "ox_bastion"
+}

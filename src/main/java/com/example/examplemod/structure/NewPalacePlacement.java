@@ -40,7 +40,11 @@ public final class NewPalacePlacement {
                 .setIgnoreEntities(false)
                 .setKnownShape(true);
 
-        return optionalTemplate.get().placeInWorld(level, origin, origin, settings, level.random, 2);
+        boolean placed = optionalTemplate.get().placeInWorld(level, origin, origin, settings, level.random, 2);
+        if (placed) {
+            ShengZhuPalaceRewards.placeRewardChests(level, origin, rotation, null);
+        }
+        return placed;
     }
 
     private static Rotation toRotation(Direction facing) {
