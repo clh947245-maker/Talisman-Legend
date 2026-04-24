@@ -8,13 +8,14 @@ import com.example.examplemod.talisman.DogTalismanItem;
 import com.example.examplemod.talisman.RoosterTalismanItem;
 import com.example.examplemod.talisman.MonkeyTalismanItem;
 import com.example.examplemod.talisman.TigerTalismanItem;
+import com.example.examplemod.talisman.TigerTalismanHalfItem;
 import com.example.examplemod.talisman.DragonTalismanItem;
 import com.example.examplemod.talisman.MouseTalismanItem;
 import com.example.examplemod.talisman.PigTalismanItem;
 import com.example.examplemod.talisman.SheepTalismanItem;
 import com.example.examplemod.item.OniMaskItem;
-import com.example.examplemod.item.PalaceConstructorItem;
 import com.example.examplemod.config.ChenModLootConfig;
+import com.example.examplemod.loot.HorseFishingLootModifier;
 import com.example.examplemod.loot.MonkeyOceanRuinLootModifier;
 import com.example.examplemod.loot.MouseDungeonLootModifier;
 import com.example.examplemod.loot.OxBastionLootModifier;
@@ -26,13 +27,14 @@ import com.example.examplemod.entity.DragonFireballEntity;
 import com.example.examplemod.entity.LivingBlockEntity;
 import com.example.examplemod.entity.MouseBeamEntity;
 import com.example.examplemod.entity.PigLaserEntity;
+import com.example.examplemod.entity.PufferfishLaserEntity;
 import com.example.examplemod.entity.SheepBodyEntity;
 import com.example.examplemod.entity.ShengZhuEntity;
 import com.example.examplemod.entity.ShadowNinjaEntity;
 import com.example.examplemod.entity.AiboEntity;
 import com.example.examplemod.entity.MoDiCaiEntity;
 import com.example.examplemod.entity.AiboMoDiCaiFusionEntity;
-import com.example.examplemod.structure.ModStructures;
+import com.example.examplemod.item.PufferfishWeaponItem;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -97,6 +99,7 @@ import com.example.examplemod.network.packet.ShadowNinjaCommandPayload;
 import com.example.examplemod.network.packet.SheepDisguisePayload;
 import com.example.examplemod.network.packet.SheepReturnPayload;
 import com.example.examplemod.network.packet.SheepSuicidePayload;
+import com.example.examplemod.network.packet.PufferfishWeaponAttackPayload;
 import com.example.examplemod.network.packet.TransformationSelectionPayload;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -222,6 +225,10 @@ public class ChenMod {
      * 赋予玩家分身能力，右键使用触发效果
      */
     public static final DeferredItem<TigerTalismanItem> TIGER_TALISMAN = ITEMS.register("tiger_talisman", TigerTalismanItem::new);
+    public static final DeferredItem<TigerTalismanHalfItem> TIGER_TALISMAN_LEFT_HALF =
+            ITEMS.register("tiger_talisman_left_half", TigerTalismanHalfItem::newLeftHalf);
+    public static final DeferredItem<TigerTalismanHalfItem> TIGER_TALISMAN_RIGHT_HALF =
+            ITEMS.register("tiger_talisman_right_half", TigerTalismanHalfItem::newRightHalf);
 
     /**
      * 龙符咒
@@ -441,6 +448,13 @@ public class ChenMod {
                     .updateInterval(1)
                     .build("pig_laser"));
 
+    public static final net.neoforged.neoforge.registries.DeferredHolder<EntityType<?>, EntityType<PufferfishLaserEntity>> PUFFERFISH_LASER = ENTITIES.register("pufferfish_laser", () ->
+            EntityType.Builder.<PufferfishLaserEntity>of(PufferfishLaserEntity::new, MobCategory.MISC)
+                    .sized(0.1F, 0.1F)
+                    .clientTrackingRange(32)
+                    .updateInterval(1)
+                    .build("pufferfish_laser"));
+
     /**
      * 黑影忍者实体
      *
@@ -517,9 +531,9 @@ public class ChenMod {
             () -> new DeferredSpawnEggItem(AIBO_MO_DI_CAI_FUSION, 0xE7B18B, 0x5F466E, new Item.Properties())
     );
 
-    public static final DeferredItem<PalaceConstructorItem> PALACE_CONSTRUCTOR = ITEMS.register(
-            "palace_constructor",
-            PalaceConstructorItem::new
+    public static final DeferredItem<PufferfishWeaponItem> PUFFERFISH_WEAPON = ITEMS.register(
+            "pufferfish_weapon",
+            PufferfishWeaponItem::new
     );
 
     /**
@@ -530,6 +544,8 @@ public class ChenMod {
      */
     public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<MouseDungeonLootModifier>> MOUSE_DUNGEON_LOOT_MODIFIER =
             LOOT_MODIFIER_SERIALIZERS.register("mouse_dungeon_loot", () -> MouseDungeonLootModifier.CODEC);
+    public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<HorseFishingLootModifier>> HORSE_FISHING_LOOT_MODIFIER =
+            LOOT_MODIFIER_SERIALIZERS.register("horse_fishing_loot", () -> HorseFishingLootModifier.CODEC);
     public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<MonkeyOceanRuinLootModifier>> MONKEY_OCEAN_RUIN_LOOT_MODIFIER =
             LOOT_MODIFIER_SERIALIZERS.register("monkey_ocean_ruin_loot", () -> MonkeyOceanRuinLootModifier.CODEC);
     public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<OxBastionLootModifier>> OX_BASTION_LOOT_MODIFIER =
@@ -569,8 +585,6 @@ public class ChenMod {
         MOB_EFFECTS.register(modEventBus);
         POTIONS.register(modEventBus);
         ENTITIES.register(modEventBus);
-        ModStructures.register(modEventBus);
-
         // 将当前类注册到 NeoForge 全局事件总线，用于接收游戏内事件
         NeoForge.EVENT_BUS.register(this);
 
@@ -619,6 +633,12 @@ public class ChenMod {
             ShadowNinjaCommandPayload.TYPE,
             ShadowNinjaCommandPayload.STREAM_CODEC,
             ServerPayloadHandler::handleShadowNinjaCommand
+        );
+
+        registrar.playToServer(
+            PufferfishWeaponAttackPayload.TYPE,
+            PufferfishWeaponAttackPayload.STREAM_CODEC,
+            ServerPayloadHandler::handlePufferfishWeaponAttack
         );
 
         // 注册羊躯体追踪数据包（服务器到客户端）
@@ -715,8 +735,10 @@ public class ChenMod {
         output.accept(PIG_TALISMAN);
         output.accept(SHEEP_TALISMAN);
         output.accept(ONI_MASK);
-        output.accept(PALACE_CONSTRUCTOR);
+        output.accept(PUFFERFISH_WEAPON);
         output.accept(createMaskReleasePotionStack());
+        output.accept(createSplashMaskReleasePotionStack());
+        output.accept(createLingeringMaskReleasePotionStack());
         output.accept(SHADOW_NINJA_SPAWN_EGG);
         output.accept(SHENG_ZHU_SPAWN_EGG);
         output.accept(AIBO_SPAWN_EGG);
@@ -726,6 +748,14 @@ public class ChenMod {
 
     private static ItemStack createMaskReleasePotionStack() {
         return PotionContents.createItemStack(Items.POTION, MASK_RELEASE_POTION);
+    }
+
+    private static ItemStack createSplashMaskReleasePotionStack() {
+        return PotionContents.createItemStack(Items.SPLASH_POTION, MASK_RELEASE_POTION);
+    }
+
+    private static ItemStack createLingeringMaskReleasePotionStack() {
+        return PotionContents.createItemStack(Items.LINGERING_POTION, MASK_RELEASE_POTION);
     }
 
     private static ItemStack createCreativeTabIcon() {
@@ -751,10 +781,6 @@ public class ChenMod {
         }
 
         // 将黑影忍者刷怪蛋添加到刷怪蛋物品栏
-        if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
-            event.accept(PALACE_CONSTRUCTOR);
-        }
-
         if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
             event.accept(SHADOW_NINJA_SPAWN_EGG);
             event.accept(SHENG_ZHU_SPAWN_EGG);

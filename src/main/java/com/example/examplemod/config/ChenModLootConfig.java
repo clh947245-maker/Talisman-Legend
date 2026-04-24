@@ -6,6 +6,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  * 统一管理符咒在建筑奖励箱、考古战利品和生物掉落中的概率配置。
  */
 public final class ChenModLootConfig {
+    public static final String HORSE_FISHING = "horse_fishing";
     public static final String MOUSE_SIMPLE_DUNGEON = "mouse_simple_dungeon";
     public static final String MOUSE_ABANDONED_MINESHAFT = "mouse_abandoned_mineshaft";
     public static final String MOUSE_STRONGHOLD_CORRIDOR = "mouse_stronghold_corridor";
@@ -20,6 +21,7 @@ public final class ChenModLootConfig {
 
     public static final ModConfigSpec SPEC;
 
+    private static final ModConfigSpec.DoubleValue horseFishingChance;
     private static final ModConfigSpec.DoubleValue mouseSimpleDungeonChance;
     private static final ModConfigSpec.DoubleValue mouseAbandonedMineshaftChance;
     private static final ModConfigSpec.DoubleValue mouseStrongholdCorridorChance;
@@ -40,6 +42,10 @@ public final class ChenModLootConfig {
                 "请使用 0.0 到 1.0 之间的数值。",
                 "例如：0.2 = 20%，0.4 = 40%，1.0 = 100%。"
         ).push("loot_chances");
+
+        builder.comment("Horse talisman chance to replace fishing loot.").push("horse_talisman");
+        horseFishingChance = builder.defineInRange("fishing", 0.1D, 0.0D, 1.0D);
+        builder.pop();
 
         builder.comment("鼠符咒在地牢、废弃矿井和末地要塞宝箱中的出现概率。").push("mouse_talisman");
         mouseSimpleDungeonChance = builder.defineInRange("simple_dungeon", 0.4D, 0.0D, 1.0D);
@@ -89,6 +95,7 @@ public final class ChenModLootConfig {
      */
     public static float getLootChance(String configKey, float fallbackChance) {
         return switch (configKey) {
+            case HORSE_FISHING -> horseFishingChance.get().floatValue();
             case MOUSE_SIMPLE_DUNGEON -> mouseSimpleDungeonChance.get().floatValue();
             case MOUSE_ABANDONED_MINESHAFT -> mouseAbandonedMineshaftChance.get().floatValue();
             case MOUSE_STRONGHOLD_CORRIDOR -> mouseStrongholdCorridorChance.get().floatValue();

@@ -4,6 +4,7 @@ import com.example.examplemod.ChenMod;
 import com.example.examplemod.magic.SheepPowerMagic;
 import com.example.examplemod.magic.ShadowNinjaSquadManager;
 import com.example.examplemod.magic.transformation.TransformationManager;
+import com.example.examplemod.item.PufferfishWeaponItem;
 import com.example.examplemod.network.packet.SheepReturnPayload;
 import com.example.examplemod.network.packet.SheepSuicidePayload;
 import com.example.examplemod.network.packet.ShadowNinjaCommandPayload;
@@ -88,5 +89,9 @@ public class ServerPayloadHandler {
                 ShadowNinjaSquadManager.dismissAll(player);
             }
         });
+    }
+
+    public static void handlePufferfishWeaponAttack(final com.example.examplemod.network.packet.PufferfishWeaponAttackPayload payload, final IPayloadContext context) {
+        context.enqueueWork(() -> PufferfishWeaponItem.fireFromMainHand(context.player()));
     }
 }

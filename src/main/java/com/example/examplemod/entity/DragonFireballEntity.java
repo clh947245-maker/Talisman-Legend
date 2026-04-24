@@ -5,14 +5,19 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
 import javax.annotation.Nullable;
@@ -109,16 +114,42 @@ public class DragonFireballEntity extends LargeFireball {
         // 但我们想要自定义爆炸和火柱，所以我们可以选择不调用 super 或者在 super 之后添加额外逻辑
         // LargeFireball.onHit 主要是调用 explode。
         
+        if (result instanceof EntityHitResult entityHitResult) {
+            this.onHitEntity(entityHitResult);
+        } else if (result instanceof BlockHitResult blockHitResult) {
+            this.onHitBlock(blockHitResult);
+        }
+
         if (!this.level().isClientSide) {
             // 自定义爆炸：造成伤害并破坏方块
             // 4.0F 是爆炸半径 (与TNT一致)，true 表示产生火焰
-            this.level().explode(this, this.getX(), this.getY(), this.getZ(), 4.0F, true, Level.ExplosionInteraction.MOB);
+            this.level().explode(
+                    this,
+                    this.damageSources().explosion(this, this.getOwner()),
+                    null,
+                    this.getX(),
+                    this.getY(),
+                    this.getZ(),
+                    4.0F,
+                    true,
+                    Level.ExplosionInteraction.MOB
+            );
 
             // 生成火柱
             createFirePillar(this.blockPosition());
             
             // 销毁实体
             this.discard();
+        }
+    }
+
+    @Override
+    protected void onHitEntity(EntityHitResult result) {
+        if (this.level() instanceof ServerLevel serverLevel) {
+            Entity target = result.getEntity();
+            DamageSource damageSource = this.damageSources().fireball(this, this.getOwner());
+            target.hurt(damageSource, 6.0F);
+            EnchantmentHelper.doPostAttackEffects(serverLevel, target, damageSource);
         }
     }
 

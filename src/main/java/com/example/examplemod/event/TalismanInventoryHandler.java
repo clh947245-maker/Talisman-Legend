@@ -2,6 +2,7 @@ package com.example.examplemod.event;
 
 import com.example.examplemod.ChenMod;
 import com.example.examplemod.item.OniMaskItem;
+import com.example.examplemod.talisman.TigerTalismanHalfItem;
 import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -71,7 +72,10 @@ public class TalismanInventoryHandler {
 
         // 检测虎符咒
         if (ChenMod.TIGER_POWER.isBound() && player.hasEffect(ChenMod.TIGER_POWER)) {
-            checkTalismanInInventory(player, ChenMod.TIGER_POWER, ChenMod.TIGER_TALISMAN.get());
+            checkTigerTalismanInInventory(player);
+            if (TigerTalismanHalfItem.getHeldTigerHalf(player) != null && player.tickCount % 20 == 0) {
+                TigerTalismanHalfItem.showTracker(player);
+            }
         }
     }
 
@@ -145,5 +149,36 @@ public class TalismanInventoryHandler {
                  player.addEffect(new MobEffectInstance(effect, 10, amplifier, ambient, visible, showIcon));
             }
         }
+    }
+
+    private static void checkTigerTalismanInInventory(Player player) {
+        boolean hasItem = false;
+
+        for (ItemStack stack : player.getInventory().items) {
+            if (isTigerCarrier(stack)) {
+                hasItem = true;
+                break;
+            }
+        }
+
+        if (!hasItem && isTigerCarrier(player.getOffhandItem())) {
+            hasItem = true;
+        }
+
+        if (!hasItem) {
+            MobEffectInstance instance = player.getEffect(ChenMod.TIGER_POWER);
+            if (instance != null && instance.getDuration() > 10) {
+                int amplifier = instance.getAmplifier();
+                boolean ambient = instance.isAmbient();
+                boolean visible = instance.isVisible();
+                boolean showIcon = instance.showIcon();
+                player.removeEffect(ChenMod.TIGER_POWER);
+                player.addEffect(new MobEffectInstance(ChenMod.TIGER_POWER, 10, amplifier, ambient, visible, showIcon));
+            }
+        }
+    }
+
+    private static boolean isTigerCarrier(ItemStack stack) {
+        return stack.getItem() == ChenMod.TIGER_TALISMAN.get() || TigerTalismanHalfItem.isTigerHalf(stack);
     }
 }

@@ -126,7 +126,7 @@ public class PigTalismanItem extends Item {
             if (!hitEntityIds.add(target.getId())) {
                 continue;
             }
-            target.hurt(player.damageSources().magic(), LASER_DAMAGE);
+            target.hurt(player.damageSources().indirectMagic(player, player), LASER_DAMAGE);
             target.setDeltaMovement(target.getDeltaMovement().scale(0.15D));
             target.push(knockbackDirection.x * LASER_KNOCKBACK, 0.03D, knockbackDirection.z * LASER_KNOCKBACK);
             target.hurtMarked = true;

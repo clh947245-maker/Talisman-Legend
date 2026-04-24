@@ -1,16 +1,23 @@
 package com.example.examplemod.event;
 
 import com.example.examplemod.ChenMod;
+import com.example.examplemod.magic.SnackPowerMagic;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent.LivingVisibilityEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 
 /**
  * 处理服务端事件，如生物仇恨和可见性逻辑
  */
 @EventBusSubscriber(modid = ChenMod.MODID)
 public class SnackEventHandler {
+
+    @SubscribeEvent
+    public static void onAttackEntity(AttackEntityEvent event) {
+        SnackPowerMagic.revealAfterAttack(event.getEntity());
+    }
 
     /**
      * 当生物尝试改变目标时触发
@@ -19,7 +26,7 @@ public class SnackEventHandler {
     @SubscribeEvent
     public static void onLivingChangeTarget(LivingChangeTargetEvent event) {
         // 调用 SnackPowerMagic 中的逻辑
-        com.example.examplemod.magic.SnackPowerMagic.onChangeTarget(event);
+        SnackPowerMagic.onChangeTarget(event);
     }
 
     /**
@@ -29,6 +36,6 @@ public class SnackEventHandler {
     @SubscribeEvent
     public static void onLivingVisibility(LivingVisibilityEvent event) {
         // 调用 SnackPowerMagic 中的逻辑
-        com.example.examplemod.magic.SnackPowerMagic.onVisibility(event);
+        SnackPowerMagic.onVisibility(event);
     }
 }

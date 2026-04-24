@@ -1,4 +1,4 @@
-{
+﻿{
   "item.chen_mod.horse_talisman": "马符咒",
   "item.chen_mod.horse_talisman.desc": "高贵的马儿可以驱除体内的一切外力",
   "item.chen_mod.ox_talisman": "牛符咒",
@@ -16,6 +16,10 @@
   "item.chen_mod.monkey_talisman.selected": "当前选择形态：%s",
   "item.chen_mod.tiger_talisman": "虎符咒",
   "item.chen_mod.tiger_talisman.desc": "平衡阴阳，分离善恶",
+  "item.chen_mod.tiger_talisman_left_half": "虎符咒左半",
+  "item.chen_mod.tiger_talisman_left_half.desc": "裂成左半的虎符咒，会与分身手中的另一半互相感应",
+  "item.chen_mod.tiger_talisman_right_half": "虎符咒右半",
+  "item.chen_mod.tiger_talisman_right_half.desc": "裂成右半的虎符咒，会与本体手中的另一半互相感应",
   "entity.chen_mod.tiger_clone": "%s 的阴暗面",
   "gui.chen_mod.select": "选择",
   "transformation.chen_mod.chicken": "鸡",
@@ -47,6 +51,13 @@
   "transformation.chen_mod.pufferfish": "河豚",
   "message.chen_mod.monkey_revert": "已恢复原形",
   "message.chen_mod.monkey_transform": "当前变身：%s",
+  "message.chen_mod.tiger_split": "虎符咒沿裂口一分为二，你与分身各持一半",
+  "message.chen_mod.tiger_merge": "已与分身融合，虎符咒恢复完整",
+  "message.chen_mod.tiger_clone_too_far": "分身太远，无法融合",
+  "message.chen_mod.tiger_clone_died": "你的分身死亡了，你受到了反噬伤害！",
+  "message.chen_mod.tiger_restored": "另一半失去感应，虎符咒恢复完整",
+  "message.chen_mod.tiger_tracker": "分身方向：%s | 距离：%s 格 | 坐标：(%s, %s, %s)",
+  "message.chen_mod.tiger_tracker_other_dimension": "分身位于其他维度 | 坐标：(%s, %s, %s)",
   "effect.chen_mod.rabbit_power": "兔之力",
   "effect.chen_mod.snack_power": "蛇之力",
   "effect.chen_mod.dog_power": "狗之力",
@@ -107,9 +118,9 @@
   "item.chen_mod.mo_di_cai_spawn_egg": "莫迪才刷怪蛋",
   "entity.chen_mod.aibo_mo_di_cai_fusion": "飞猪组合",
   "item.chen_mod.aibo_mo_di_cai_fusion_spawn_egg": "飞猪组合刷怪蛋",
-  "item.chen_mod.palace_constructor": "宫殿构造器",
-  "item.chen_mod.palace_constructor.desc": "用于保留宫殿设计入口，等待新的宫殿方案。",
-  "item.chen_mod.palace_constructor.desc_2": "当前不会生成宫殿，等你重新设计后再接入。",
-  "message.chen_mod.palace_constructor.pending": "宫殿构造器已保留，等待新的宫殿设计。",
+  "item.chen_mod.pufferfish_weapon": "老爹的河豚",
+  "item.chen_mod.pufferfish_weapon.desc": "要用魔法打败魔法",
+  "entity.chen_mod.pufferfish_laser": "\u6cb3\u8c5a\u6fc0\u5149",
   "itemGroup.chen_mod": "成龙历险记模组"
 }
+

@@ -1,7 +1,6 @@
 package com.example.examplemod.entity;
 
 import com.example.examplemod.item.OniMaskItem;
-import com.example.examplemod.structure.ShengZhuPalaceInhabitants;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.UUID;
@@ -12,11 +11,13 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -32,6 +33,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
@@ -152,7 +154,7 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
     }
 
     public static boolean checkShadowNinjaSpawnRules(EntityType<ShadowNinjaEntity> entityType, ServerLevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random) {
-        return ShengZhuPalaceInhabitants.canShadowNinjaSpawn(entityType, level, spawnType, pos, random);
+        return Monster.checkMonsterSpawnRules(entityType, level, spawnType, pos, random);
     }
 
     public boolean isFriendlyToPlayers() {
@@ -273,6 +275,15 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
         builder.define(DATA_MASK_SUMMONED, false);
         builder.define(DATA_COMMAND_STATE, COMMAND_STATE_NORMAL);
         builder.define(DATA_STATE_TICKS, 0);
+    }
+
+    @Override
+    public SpawnGroupData finalizeSpawn(
+            ServerLevelAccessor level,
+            DifficultyInstance difficulty,
+            MobSpawnType spawnType,
+            SpawnGroupData spawnGroupData) {
+        return super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
     }
 
     @Override
@@ -1002,6 +1013,12 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
             }
 
             if (ninja.isFriendlyToPlayers() != this.isFriendlyToPlayers()) {
+                continue;
+            }
+
+            UUID legionSummonerUuid = this.getLegionSummonerUUID().orElse(null);
+            if (legionSummonerUuid != null
+                    && !legionSummonerUuid.equals(ninja.getLegionSummonerUUID().orElse(null))) {
                 continue;
             }
 

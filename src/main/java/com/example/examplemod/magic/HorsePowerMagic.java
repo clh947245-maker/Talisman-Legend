@@ -16,6 +16,7 @@ import java.util.List;
  * </p>
  */
 public class HorsePowerMagic extends MobEffect {
+    private static final int HEAL_INTERVAL_TICKS = 20 * 3;
 
     /**
      * API: 赋予实体马力量效果 (指定持续时间)
@@ -45,8 +46,8 @@ public class HorsePowerMagic extends MobEffect {
 
     @Override
     public boolean shouldApplyEffectTickThisTick(int duration, int amplifier) {
-        // 每 tick 都执行，确保负面效果被立即清除
-        return true;
+        // 每 3 秒执行一次恢复和净化。
+        return duration % HEAL_INTERVAL_TICKS == 0;
     }
 
     @Override

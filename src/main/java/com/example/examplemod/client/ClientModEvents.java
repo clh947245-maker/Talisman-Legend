@@ -5,6 +5,7 @@ import com.example.examplemod.client.renderer.DragonFireballRenderer;
 import com.example.examplemod.client.renderer.LivingBlockRenderer;
 import com.example.examplemod.client.renderer.MouseBeamRenderer;
 import com.example.examplemod.client.renderer.PigLaserRenderer;
+import com.example.examplemod.client.renderer.PufferfishLaserRenderer;
 import com.example.examplemod.client.renderer.SheepBodyRenderer;
 import com.example.examplemod.client.renderer.ShengZhuRenderer;
 import com.example.examplemod.client.renderer.ShadowNinjaRenderer;
@@ -26,6 +27,7 @@ public class ClientModEvents {
         event.registerEntityRenderer(ChenMod.MOUSE_BEAM.get(), MouseBeamRenderer::new);
         event.registerEntityRenderer(ChenMod.LIVING_BLOCK.get(), LivingBlockRenderer::new);
         event.registerEntityRenderer(ChenMod.PIG_LASER.get(), PigLaserRenderer::new);
+        event.registerEntityRenderer(ChenMod.PUFFERFISH_LASER.get(), PufferfishLaserRenderer::new);
         event.registerEntityRenderer(ChenMod.SHADOW_NINJA.get(), ShadowNinjaRenderer::new);
         event.registerEntityRenderer(ChenMod.SHENG_ZHU.get(), ShengZhuRenderer::new);
         event.registerEntityRenderer(ChenMod.AIBO.get(), ChickenRenderer::new);
