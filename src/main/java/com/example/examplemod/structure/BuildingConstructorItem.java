@@ -134,7 +134,6 @@ public class BuildingConstructorItem extends Item {
         FENGMING_GATE_TOWER("fengming_gate_tower_constructor", "fengming_gate_tower"),
         CHONGHUA_GATE("chonghua_gate_constructor", "chonghua_gate"),
         HANXIANG_COURTYARD("hanxiang_courtyard_constructor", "hanxiang_courtyard"),
-        TINGZHU_STUDIO("tingzhu_studio_constructor", "tingzhu_studio"),
         MINGDE_HALL("mingde_hall_constructor", "mingde_hall");
 
         private final String itemId;

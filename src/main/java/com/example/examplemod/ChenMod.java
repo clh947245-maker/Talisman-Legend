@@ -16,6 +16,7 @@ import com.example.examplemod.talisman.SheepTalismanItem;
 import com.example.examplemod.item.OniMaskItem;
 import com.example.examplemod.config.ChenModLootConfig;
 import com.example.examplemod.structure.BuildingConstructorItem;
+import com.example.examplemod.structure.ShengZhuPalaceStructure;
 import com.example.examplemod.loot.HorseFishingLootModifier;
 import com.example.examplemod.loot.MonkeyOceanRuinLootModifier;
 import com.example.examplemod.loot.MouseDungeonLootModifier;
@@ -93,6 +94,8 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.structure.StructureType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 
 import com.example.examplemod.network.ServerPayloadHandler;
 import com.example.examplemod.network.packet.SheepBodyTrackerPayload;
@@ -153,6 +156,32 @@ public class ChenMod {
      */
     public static final DeferredRegister<MapCodec<? extends IGlobalLootModifier>> LOOT_MODIFIER_SERIALIZERS =
             DeferredRegister.create(NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, MODID);
+    public static final DeferredRegister<StructureType<?>> STRUCTURE_TYPES =
+            DeferredRegister.create(Registries.STRUCTURE_TYPE, MODID);
+    public static final DeferredRegister<StructurePieceType> STRUCTURE_PIECE_TYPES =
+            DeferredRegister.create(Registries.STRUCTURE_PIECE, MODID);
+    public static final DeferredHolder<StructureType<?>, StructureType<ShengZhuPalaceStructure>> SHENG_ZHU_PALACE_STRUCTURE_TYPE =
+            STRUCTURE_TYPES.register("sheng_zhu_palace", () -> () -> ShengZhuPalaceStructure.CODEC);
+    public static final DeferredHolder<StructurePieceType, StructurePieceType> SHENG_ZHU_PALACE_BUILDING_PIECE =
+            STRUCTURE_PIECE_TYPES.register(
+                    "sheng_zhu_palace_building",
+                    () -> (StructurePieceType.StructureTemplateType) ShengZhuPalaceStructure.BuildingPiece::new
+            );
+    public static final DeferredHolder<StructurePieceType, StructurePieceType> SHENG_ZHU_PALACE_SPAWN_PIECE =
+            STRUCTURE_PIECE_TYPES.register(
+                    "sheng_zhu_palace_spawn",
+                    () -> (StructurePieceType.ContextlessType) ShengZhuPalaceStructure.ShengZhuSpawnPiece::new
+            );
+    public static final DeferredHolder<StructurePieceType, StructurePieceType> SHENG_ZHU_PALACE_GROUNDS_PIECE =
+            STRUCTURE_PIECE_TYPES.register(
+                    "sheng_zhu_palace_grounds",
+                    () -> (StructurePieceType.ContextlessType) ShengZhuPalaceStructure.GroundsPiece::new
+            );
+    public static final DeferredHolder<StructurePieceType, StructurePieceType> SHENG_ZHU_PALACE_AUXILIARY_PIECE =
+            STRUCTURE_PIECE_TYPES.register(
+                    "sheng_zhu_palace_auxiliary",
+                    () -> (StructurePieceType.ContextlessType) ShengZhuPalaceStructure.AuxiliaryBuildingPiece::new
+            );
 
     /**
      * 盔甲材料注册器
@@ -300,7 +329,6 @@ public class ChenMod {
     public static final DeferredItem<BuildingConstructorItem> FENGMING_GATE_TOWER_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.FENGMING_GATE_TOWER);
     public static final DeferredItem<BuildingConstructorItem> CHONGHUA_GATE_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.CHONGHUA_GATE);
     public static final DeferredItem<BuildingConstructorItem> HANXIANG_COURTYARD_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.HANXIANG_COURTYARD);
-    public static final DeferredItem<BuildingConstructorItem> TINGZHU_STUDIO_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.TINGZHU_STUDIO);
     public static final DeferredItem<BuildingConstructorItem> MINGDE_HALL_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.MINGDE_HALL);
 
     // ==================== 魔法效果注册 ====================
@@ -601,6 +629,8 @@ public class ChenMod {
         CREATIVE_MODE_TABS.register(modEventBus);
         // 供 data/chen_mod/loot_modifiers/*.json 引用自定义全局战利品修饰器类型。
         LOOT_MODIFIER_SERIALIZERS.register(modEventBus);
+        STRUCTURE_TYPES.register(modEventBus);
+        STRUCTURE_PIECE_TYPES.register(modEventBus);
         ARMOR_MATERIALS.register(modEventBus);
         MOB_EFFECTS.register(modEventBus);
         POTIONS.register(modEventBus);
@@ -768,7 +798,6 @@ public class ChenMod {
         output.accept(FENGMING_GATE_TOWER_CONSTRUCTOR);
         output.accept(CHONGHUA_GATE_CONSTRUCTOR);
         output.accept(HANXIANG_COURTYARD_CONSTRUCTOR);
-        output.accept(TINGZHU_STUDIO_CONSTRUCTOR);
         output.accept(MINGDE_HALL_CONSTRUCTOR);
         output.accept(createMaskReleasePotionStack());
         output.accept(createSplashMaskReleasePotionStack());

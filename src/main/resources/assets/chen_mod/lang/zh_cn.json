@@ -132,7 +132,6 @@
   "item.chen_mod.fengming_gate_tower_constructor": "凤鸣阙构造器",
   "item.chen_mod.chonghua_gate_constructor": "重华门构造器",
   "item.chen_mod.hanxiang_courtyard_constructor": "含香庞构造器",
-  "item.chen_mod.tingzhu_studio_constructor": "听竹轩构造器",
   "item.chen_mod.mingde_hall_constructor": "明德堂构造器",
   "item.chen_mod.building_constructor.desc": "右键空气可隔空放置；右键方块可在点击位置生成。",
   "item.chen_mod.building_constructor.structure": "结构：%s",

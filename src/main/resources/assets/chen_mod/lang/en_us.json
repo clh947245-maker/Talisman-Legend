@@ -82,7 +82,6 @@
   "item.chen_mod.fengming_gate_tower_constructor": "Fengming Gate Tower Constructor",
   "item.chen_mod.chonghua_gate_constructor": "Chonghua Gate Constructor",
   "item.chen_mod.hanxiang_courtyard_constructor": "Hanxiang Courtyard Constructor",
-  "item.chen_mod.tingzhu_studio_constructor": "Tingzhu Studio Constructor",
   "item.chen_mod.mingde_hall_constructor": "Mingde Hall Constructor",
   "item.chen_mod.building_constructor.desc": "Right-click air to place remotely; right-click a block to place at the target.",
   "item.chen_mod.building_constructor.structure": "Structure: %s",
