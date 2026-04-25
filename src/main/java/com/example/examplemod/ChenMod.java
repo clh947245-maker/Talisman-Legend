@@ -15,6 +15,7 @@ import com.example.examplemod.talisman.PigTalismanItem;
 import com.example.examplemod.talisman.SheepTalismanItem;
 import com.example.examplemod.item.OniMaskItem;
 import com.example.examplemod.config.ChenModLootConfig;
+import com.example.examplemod.structure.BuildingConstructorItem;
 import com.example.examplemod.loot.HorseFishingLootModifier;
 import com.example.examplemod.loot.MonkeyOceanRuinLootModifier;
 import com.example.examplemod.loot.MouseDungeonLootModifier;
@@ -287,6 +288,21 @@ public class ChenMod {
      */
     public static final DeferredItem<OniMaskItem> ONI_MASK = ITEMS.register("oni_mask", () -> new OniMaskItem(ONI_MASK_MATERIAL));
 
+    public static final DeferredItem<BuildingConstructorItem> CHENGTIAN_HALL_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.CHENGTIAN_HALL);
+    public static final DeferredItem<BuildingConstructorItem> QIYUE_PALACE_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.QIYUE_PALACE);
+    public static final DeferredItem<BuildingConstructorItem> LINGXIAO_TOWER_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.LINGXIAO_TOWER);
+    public static final DeferredItem<BuildingConstructorItem> TINGFENG_PAVILION_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.TINGFENG_PAVILION);
+    public static final DeferredItem<BuildingConstructorItem> TINGYU_PAVILION_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.TINGYU_PAVILION);
+    public static final DeferredItem<BuildingConstructorItem> LINGYUN_TERRACE_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.LINGYUN_TERRACE);
+    public static final DeferredItem<BuildingConstructorItem> YINGXIA_WATERSIDE_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.YINGXIA_WATERSIDE);
+    public static final DeferredItem<BuildingConstructorItem> HUIFENG_CORRIDOR_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.HUIFENG_CORRIDOR);
+    public static final DeferredItem<BuildingConstructorItem> FUGUANG_BOAT_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.FUGUANG_BOAT);
+    public static final DeferredItem<BuildingConstructorItem> FENGMING_GATE_TOWER_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.FENGMING_GATE_TOWER);
+    public static final DeferredItem<BuildingConstructorItem> CHONGHUA_GATE_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.CHONGHUA_GATE);
+    public static final DeferredItem<BuildingConstructorItem> HANXIANG_COURTYARD_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.HANXIANG_COURTYARD);
+    public static final DeferredItem<BuildingConstructorItem> TINGZHU_STUDIO_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.TINGZHU_STUDIO);
+    public static final DeferredItem<BuildingConstructorItem> MINGDE_HALL_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.MINGDE_HALL);
+
     // ==================== 魔法效果注册 ====================
 
     /**
@@ -536,6 +552,10 @@ public class ChenMod {
             PufferfishWeaponItem::new
     );
 
+    private static DeferredItem<BuildingConstructorItem> registerBuildingConstructor(BuildingConstructorItem.BuildingVariant variant) {
+        return ITEMS.register(variant.itemId(), () -> new BuildingConstructorItem(variant));
+    }
+
     /**
      * 鼠符咒地牢掉落修饰器
      *
@@ -736,6 +756,20 @@ public class ChenMod {
         output.accept(SHEEP_TALISMAN);
         output.accept(ONI_MASK);
         output.accept(PUFFERFISH_WEAPON);
+        output.accept(CHENGTIAN_HALL_CONSTRUCTOR);
+        output.accept(QIYUE_PALACE_CONSTRUCTOR);
+        output.accept(LINGXIAO_TOWER_CONSTRUCTOR);
+        output.accept(TINGFENG_PAVILION_CONSTRUCTOR);
+        output.accept(TINGYU_PAVILION_CONSTRUCTOR);
+        output.accept(LINGYUN_TERRACE_CONSTRUCTOR);
+        output.accept(YINGXIA_WATERSIDE_CONSTRUCTOR);
+        output.accept(HUIFENG_CORRIDOR_CONSTRUCTOR);
+        output.accept(FUGUANG_BOAT_CONSTRUCTOR);
+        output.accept(FENGMING_GATE_TOWER_CONSTRUCTOR);
+        output.accept(CHONGHUA_GATE_CONSTRUCTOR);
+        output.accept(HANXIANG_COURTYARD_CONSTRUCTOR);
+        output.accept(TINGZHU_STUDIO_CONSTRUCTOR);
+        output.accept(MINGDE_HALL_CONSTRUCTOR);
         output.accept(createMaskReleasePotionStack());
         output.accept(createSplashMaskReleasePotionStack());
         output.accept(createLingeringMaskReleasePotionStack());
