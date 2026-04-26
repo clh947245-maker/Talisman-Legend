@@ -15,6 +15,7 @@ public record ShadowNinjaCommandPayload(int action) implements CustomPacketPaylo
     public static final int ACTION_SUMMON = 0;
     // 遣散当前玩家的所有影忍。
     public static final int ACTION_DISMISS = 1;
+    public static final int ACTION_KNEEL = 2;
     public static final Type<ShadowNinjaCommandPayload> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(ChenMod.MODID, "shadow_ninja_command"));
     // 该数据包只需要传递一个动作整型值。

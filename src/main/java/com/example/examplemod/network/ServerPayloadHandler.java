@@ -87,6 +87,8 @@ public class ServerPayloadHandler {
                 ShadowNinjaSquadManager.summonSquad(player);
             } else if (payload.action() == ShadowNinjaCommandPayload.ACTION_DISMISS) {
                 ShadowNinjaSquadManager.dismissAll(player);
+            } else if (payload.action() == ShadowNinjaCommandPayload.ACTION_KNEEL) {
+                ShadowNinjaSquadManager.kneelNearby(player);
             }
         });
     }

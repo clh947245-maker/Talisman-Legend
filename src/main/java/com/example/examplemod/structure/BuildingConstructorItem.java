@@ -93,6 +93,9 @@ public class BuildingConstructorItem extends Item {
                 .setKnownShape(true);
 
         boolean placed = structure.placeInWorld(serverLevel, origin, origin, settings, serverLevel.getRandom(), 2);
+        if (placed) {
+            PalaceRewardChestPlacer.placeTemplateRewardChests(serverLevel, structure, origin, variant, serverLevel.getRandom());
+        }
         if (player != null) {
             Component message = placed
                     ? Component.translatable("message.chen_mod.building_constructor.placed", Component.translatable(variant.translationKey()))
@@ -134,7 +137,8 @@ public class BuildingConstructorItem extends Item {
         FENGMING_GATE_TOWER("fengming_gate_tower_constructor", "fengming_gate_tower"),
         CHONGHUA_GATE("chonghua_gate_constructor", "chonghua_gate"),
         HANXIANG_COURTYARD("hanxiang_courtyard_constructor", "hanxiang_courtyard"),
-        MINGDE_HALL("mingde_hall_constructor", "mingde_hall");
+        MINGDE_HALL("mingde_hall_constructor", "mingde_hall"),
+        TINGZHU_STUDIO("tingzhu_studio_constructor", "tingzhu_studio");
 
         private final String itemId;
         private final String structureId;
@@ -150,6 +154,15 @@ public class BuildingConstructorItem extends Item {
 
         public ResourceLocation structureId() {
             return ResourceLocation.fromNamespaceAndPath(ChenMod.MODID, "debug_buildings/" + structureId);
+        }
+
+        public static Optional<BuildingVariant> fromStructureId(ResourceLocation structureId) {
+            for (BuildingVariant variant : values()) {
+                if (variant.structureId().equals(structureId)) {
+                    return Optional.of(variant);
+                }
+            }
+            return Optional.empty();
         }
 
         public String translationKey() {

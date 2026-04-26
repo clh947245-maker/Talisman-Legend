@@ -43,12 +43,13 @@ import java.util.UUID;
 
 @EventBusSubscriber(modid = ChenMod.MODID, value = Dist.CLIENT)
 public class SheepClientEventHandler {
+    private static final int RETURN_KEY = GLFW.GLFW_KEY_H;
     private static final int SUICIDE_KEY = GLFW.GLFW_KEY_K;
     private static final int SUICIDE_BOX_WIDTH = 82;
     private static final int SUICIDE_BOX_HEIGHT = 18;
     private static final int SUICIDE_BOX_MARGIN = 12;
 
-    private static boolean wasJumpKeyDown;
+    private static boolean wasReturnKeyDown;
     private static boolean wasSuicideKeyDown;
     private static boolean wasInSoulState;
     private static boolean renderingDisguisePlayer;
@@ -245,7 +246,7 @@ public class SheepClientEventHandler {
 
         Component prompt = Component.translatable(
                 "message.chen_mod.sheep_return_prompt",
-                minecraft.options.keyJump.getTranslatedKeyMessage()
+                Component.literal("H")
         );
         int x = (minecraft.getWindow().getGuiScaledWidth() - minecraft.font.width(prompt)) / 2;
         int y = minecraft.getWindow().getGuiScaledHeight() / 2 + 16;
@@ -332,7 +333,7 @@ public class SheepClientEventHandler {
             return;
         }
 
-        if (matchesBlockedSoulShortcut(event, minecraft)) {
+        if (event.getKey() != RETURN_KEY && matchesBlockedSoulShortcut(event, minecraft)) {
             suppressSoulShortcuts(minecraft);
         }
     }
@@ -352,14 +353,14 @@ public class SheepClientEventHandler {
             SheepDisguiseState.clearAll();
         }
         long window = minecraft.getWindow().getWindow();
-        boolean jumpKeyDown = minecraft.options.keyJump.isDown();
+        boolean returnKeyDown = InputConstants.isKeyDown(window, RETURN_KEY);
         boolean suicideKeyDown = InputConstants.isKeyDown(window, SUICIDE_KEY);
 
         if (!isSoulState(player)) {
             if (wasInSoulState) {
                 SheepBodyTrackerState.clear();
             }
-            wasJumpKeyDown = jumpKeyDown;
+            wasReturnKeyDown = returnKeyDown;
             wasSuicideKeyDown = suicideKeyDown;
             wasInSoulState = false;
             return;
@@ -381,7 +382,7 @@ public class SheepClientEventHandler {
 
         suppressSoulShortcuts(minecraft);
 
-        if (minecraft.screen == null && SheepPowerMagic.isNearReturnableBody(player) && jumpKeyDown && !wasJumpKeyDown) {
+        if (minecraft.screen == null && SheepPowerMagic.isNearReturnableBody(player) && returnKeyDown && !wasReturnKeyDown) {
             PacketDistributor.sendToServer(new SheepReturnPayload());
         }
 
@@ -389,7 +390,7 @@ public class SheepClientEventHandler {
             PacketDistributor.sendToServer(new SheepSuicidePayload());
         }
 
-        wasJumpKeyDown = jumpKeyDown;
+        wasReturnKeyDown = returnKeyDown;
         wasSuicideKeyDown = suicideKeyDown;
         wasInSoulState = true;
     }

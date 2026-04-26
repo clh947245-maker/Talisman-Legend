@@ -47,9 +47,10 @@ public class ShengZhuPalaceStructure extends Structure {
     private static final long LAYOUT_SEED_SALT = 0x71E8D15C0FFEE12L;
     private static final int BUILDING_MIN_RADIUS = 56;
     private static final int BUILDING_RADIUS_VARIANCE = 47;
-    private static final int MIN_AUXILIARY_BUILDINGS = 10;
-    private static final int AUXILIARY_BUILDING_VARIANCE = 5;
+    private static final int MIN_AUXILIARY_BUILDINGS = 24;
+    private static final int AUXILIARY_BUILDING_VARIANCE = 9;
     private static final int BUILDING_MIN_GAP = 10;
+    private static final int AUXILIARY_BUILDING_MIN_GAP = 6;
     private static final int MAIN_BUILDING_FOOTPRINT_PADDING = 4;
     private static final int MAIN_BUILDING_WALL_GAP = 15;
     private static final int CENTER_CLEAR_HALF_SIZE = 40;
@@ -319,7 +320,7 @@ public class ShengZhuPalaceStructure extends Structure {
         int targetCount = MIN_AUXILIARY_BUILDINGS + random.nextInt(AUXILIARY_BUILDING_VARIANCE);
         List<PalaceFootprint> footprints = new ArrayList<>();
         List<PalaceFootprint> occupied = new ArrayList<>(mainFootprints);
-        for (int attempt = 0; attempt < 180 && footprints.size() < targetCount; attempt++) {
+        for (int attempt = 0; attempt < 560 && footprints.size() < targetCount; attempt++) {
             int x = random.nextInt(WALL_HALF_SIZE * 2 - 44) - WALL_HALF_SIZE + 22;
             int z = random.nextInt(WALL_HALF_SIZE * 2 - 44) - WALL_HALF_SIZE + 22;
             if (Math.abs(x) < CENTER_CLEAR_HALF_SIZE && Math.abs(z) < CENTER_CLEAR_HALF_SIZE) {
@@ -333,7 +334,36 @@ public class ShengZhuPalaceStructure extends Structure {
                 occupied.add(footprint);
             }
         }
+        addSymmetricDecorativeFootprints(random, footprints, occupied, targetCount);
         return footprints;
+    }
+
+    private static void addSymmetricDecorativeFootprints(
+            RandomSource random,
+            List<PalaceFootprint> footprints,
+            List<PalaceFootprint> occupied,
+            int targetCount) {
+        int[][] anchors = {
+                {-108, -108}, {108, -108}, {-108, 108}, {108, 108},
+                {-88, -32}, {88, -32}, {-88, 32}, {88, 32},
+                {-32, -88}, {32, -88}, {-32, 88}, {32, 88},
+                {-112, 0}, {112, 0}, {0, -112}, {0, 112}
+        };
+        int offsetRange = 7;
+        for (int[] anchor : anchors) {
+            if (footprints.size() >= targetCount) {
+                return;
+            }
+
+            PalaceSlot slot = new PalaceSlot(
+                    anchor[0] + random.nextInt(offsetRange * 2 + 1) - offsetRange,
+                    anchor[1] + random.nextInt(offsetRange * 2 + 1) - offsetRange);
+            PalaceFootprint footprint = decorativeFootprint(slot);
+            if (canPlaceAuxiliaryBuilding(footprint, occupied)) {
+                footprints.add(footprint);
+                occupied.add(footprint);
+            }
+        }
     }
 
     private static boolean canPlaceAuxiliaryBuilding(PalaceFootprint candidate, List<PalaceFootprint> occupied) {
@@ -348,7 +378,7 @@ public class ShengZhuPalaceStructure extends Structure {
             return false;
         }
         for (PalaceFootprint other : occupied) {
-            if (rectDistance(candidate, other) < BUILDING_MIN_GAP) {
+            if (rectDistance(candidate, other) < AUXILIARY_BUILDING_MIN_GAP) {
                 return false;
             }
         }
@@ -357,13 +387,47 @@ public class ShengZhuPalaceStructure extends Structure {
 
     private static PalaceFootprint auxiliaryFootprint(PalaceSlot slot) {
         int style = auxiliaryStyle(slot);
-        int halfX = style == 1 ? 8 : 6;
-        int halfZ = style == 2 ? 8 : 6;
+        int halfX = auxiliaryHalfX(style);
+        int halfZ = auxiliaryHalfZ(style);
         return new PalaceFootprint(slot, halfX, halfZ);
     }
 
+    private static PalaceFootprint decorativeFootprint(PalaceSlot slot) {
+        int style = auxiliaryStyle(slot);
+        return new PalaceFootprint(slot, auxiliaryHalfX(style), auxiliaryHalfZ(style));
+    }
+
+    private static int auxiliaryHalfX(int style) {
+        return switch (style) {
+            case 1 -> 8;
+            case 3, 4, 5 -> 4;
+            default -> 6;
+        };
+    }
+
+    private static int auxiliaryHalfZ(int style) {
+        return switch (style) {
+            case 2 -> 8;
+            case 3, 4, 5 -> 4;
+            default -> 6;
+        };
+    }
+
+    private static int auxiliaryHeight(int style) {
+        return switch (style) {
+            case 3 -> 13;
+            case 4 -> 7;
+            case 5 -> 5;
+            default -> 9;
+        };
+    }
+
+    private static boolean isDecorativeAuxiliaryStyle(int style) {
+        return style >= 3;
+    }
+
     private static int auxiliaryStyle(PalaceSlot slot) {
-        return Math.floorMod(slot.xOffset() * 31 + slot.zOffset() * 17, 3);
+        return Math.floorMod(slot.xOffset() * 31 + slot.zOffset() * 17, 6);
     }
 
     private static long mixSeed(long levelSeed, int chunkX, int chunkZ, long salt) {
@@ -384,6 +448,8 @@ public class ShengZhuPalaceStructure extends Structure {
     }
 
     public static class BuildingPiece extends TemplateStructurePiece {
+        private final BuildingConstructorItem.BuildingVariant variant;
+
         public BuildingPiece(StructureTemplateManager templateManager, ResourceLocation templateId, BlockPos pos) {
             super(
                     ChenMod.SHENG_ZHU_PALACE_BUILDING_PIECE.get(),
@@ -394,10 +460,12 @@ public class ShengZhuPalaceStructure extends Structure {
                     makeSettings(),
                     pos
             );
+            this.variant = BuildingConstructorItem.BuildingVariant.fromStructureId(templateId).orElse(null);
         }
 
         public BuildingPiece(StructureTemplateManager templateManager, CompoundTag tag) {
             super(ChenMod.SHENG_ZHU_PALACE_BUILDING_PIECE.get(), tag, templateManager, ignored -> makeSettings());
+            this.variant = BuildingConstructorItem.BuildingVariant.fromStructureId(this.makeTemplateLocation()).orElse(null);
         }
 
         private static StructurePlaceSettings makeSettings() {
@@ -410,6 +478,19 @@ public class ShengZhuPalaceStructure extends Structure {
 
         @Override
         protected void handleDataMarker(String name, BlockPos pos, ServerLevelAccessor level, RandomSource random, BoundingBox box) {
+        }
+
+        @Override
+        public void postProcess(
+                WorldGenLevel level,
+                StructureManager structureManager,
+                ChunkGenerator chunkGenerator,
+                RandomSource random,
+                BoundingBox box,
+                ChunkPos chunkPos,
+            BlockPos pivot) {
+            super.postProcess(level, structureManager, chunkGenerator, random, box, chunkPos, pivot);
+            PalaceRewardChestPlacer.placeTemplateRewardChests(level, this.template(), this.templatePosition(), this.variant, random, box);
         }
     }
 
@@ -656,6 +737,9 @@ public class ShengZhuPalaceStructure extends Structure {
         private static final BlockState WALL = Blocks.DEEPSLATE_TILES.defaultBlockState();
         private static final BlockState PILLAR = Blocks.POLISHED_BASALT.defaultBlockState();
         private static final BlockState ROOF = Blocks.DARK_PRISMARINE.defaultBlockState();
+        private static final BlockState TRIM = Blocks.POLISHED_BLACKSTONE.defaultBlockState();
+        private static final BlockState ACCENT = Blocks.RED_NETHER_BRICKS.defaultBlockState();
+        private static final BlockState LAMP = Blocks.SEA_LANTERN.defaultBlockState();
         private static final BlockState AIR = Blocks.AIR.defaultBlockState();
         private final int style;
 
@@ -670,14 +754,15 @@ public class ShengZhuPalaceStructure extends Structure {
         }
 
         private static BoundingBox createBox(BlockPos center, int style) {
-            int halfX = style == 1 ? 8 : 6;
-            int halfZ = style == 2 ? 8 : 6;
+            int halfX = auxiliaryHalfX(style);
+            int halfZ = auxiliaryHalfZ(style);
+            int height = auxiliaryHeight(style);
             return new BoundingBox(
                     center.getX() - halfX,
                     center.getY(),
                     center.getZ() - halfZ,
                     center.getX() + halfX,
-                    center.getY() + 9,
+                    center.getY() + height,
                     center.getZ() + halfZ
             );
         }
@@ -709,7 +794,7 @@ public class ShengZhuPalaceStructure extends Structure {
                         if (y < box.minY() || y > box.maxY()) {
                             continue;
                         }
-                        BlockState state = stateFor(area, x, y, z);
+                        BlockState state = stateFor(area, this.style, x, y, z);
                         if (state != AIR) {
                             pos.set(x, y, z);
                             level.setBlock(pos, state, 2);
@@ -717,9 +802,17 @@ public class ShengZhuPalaceStructure extends Structure {
                     }
                 }
             }
+
+            if (box.isInside(area.getCenter())) {
+                PalaceRewardChestPlacer.placeAuxiliaryCommonChest(level, area, random);
+            }
         }
 
-        private static BlockState stateFor(BoundingBox area, int x, int y, int z) {
+        private static BlockState stateFor(BoundingBox area, int style, int x, int y, int z) {
+            if (isDecorativeAuxiliaryStyle(style)) {
+                return decorativeStateFor(area, style, x, y, z);
+            }
+
             boolean edgeX = x == area.minX() || x == area.maxX();
             boolean edgeZ = z == area.minZ() || z == area.maxZ();
             boolean corner = edgeX && edgeZ;
@@ -738,6 +831,62 @@ public class ShengZhuPalaceStructure extends Structure {
                 boolean doorway = (z == area.minZ() && Math.abs(x - centerX) <= 1)
                         || (x == area.minX() && Math.abs(z - centerZ) <= 1);
                 return doorway ? AIR : WALL;
+            }
+            return AIR;
+        }
+
+        private static BlockState decorativeStateFor(BoundingBox area, int style, int x, int y, int z) {
+            int centerX = (area.minX() + area.maxX()) / 2;
+            int centerZ = (area.minZ() + area.maxZ()) / 2;
+            int dx = Math.abs(x - centerX);
+            int dz = Math.abs(z - centerZ);
+            int localY = y - area.minY();
+            boolean centerLine = x == centerX || z == centerZ;
+            boolean corner = (x == area.minX() || x == area.maxX()) && (z == area.minZ() || z == area.maxZ());
+
+            if (style == 3) {
+                if (localY == 0) {
+                    return FOUNDATION;
+                }
+                if (corner && localY <= 10) {
+                    return PILLAR;
+                }
+                if (dx <= 1 && dz <= 1 && localY <= 12) {
+                    return localY == 12 ? LAMP : TRIM;
+                }
+                if (localY >= 10 && dx <= 4 && dz <= 4) {
+                    return localY == area.maxY() - area.minY() ? ROOF : ACCENT;
+                }
+                return AIR;
+            }
+
+            if (style == 4) {
+                if (localY == 0 || localY == 1 && (dx <= 3 || dz <= 3)) {
+                    return FOUNDATION;
+                }
+                if (corner && localY <= 5) {
+                    return PILLAR;
+                }
+                if (localY == 6 || localY == 7) {
+                    return dx <= 4 && dz <= 4 ? ROOF : AIR;
+                }
+                return centerLine && dx <= 4 && dz <= 4 ? TRIM : AIR;
+            }
+
+            if (localY == 0) {
+                return FOUNDATION;
+            }
+            if (localY == 1 && (dx == 4 || dz == 4 || dx <= 1 && dz <= 1)) {
+                return TRIM;
+            }
+            if (localY == 2 && dx <= 2 && dz <= 2) {
+                return ACCENT;
+            }
+            if (localY == 3 && dx <= 1 && dz <= 1) {
+                return LAMP;
+            }
+            if (localY >= 4) {
+                return dx <= 3 && dz <= 3 ? ROOF : AIR;
             }
             return AIR;
         }

@@ -28,6 +28,8 @@ public final class ShadowNinjaClientEventHandler {
             }
             while (ShadowNinjaKeyMappings.DISMISS.consumeClick()) {
             }
+            while (ShadowNinjaKeyMappings.KNEEL.consumeClick()) {
+            }
             return;
         }
 
@@ -37,6 +39,10 @@ public final class ShadowNinjaClientEventHandler {
 
         while (ShadowNinjaKeyMappings.DISMISS.consumeClick()) {
             PacketDistributor.sendToServer(new ShadowNinjaCommandPayload(ShadowNinjaCommandPayload.ACTION_DISMISS));
+        }
+
+        while (ShadowNinjaKeyMappings.KNEEL.consumeClick()) {
+            PacketDistributor.sendToServer(new ShadowNinjaCommandPayload(ShadowNinjaCommandPayload.ACTION_KNEEL));
         }
     }
 }

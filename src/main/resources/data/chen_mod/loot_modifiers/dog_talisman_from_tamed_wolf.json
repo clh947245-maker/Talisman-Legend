@@ -1,0 +1,12 @@
+{
+  "type": "chen_mod:dog_talisman_loot",
+  "conditions": [
+    {
+      "condition": "neoforge:loot_table_id",
+      "loot_table_id": "minecraft:entities/wolf"
+    }
+  ],
+  "chance": 0.05,
+  "config_key": "dog_tamed_wolf",
+  "require_tamed": true
+}

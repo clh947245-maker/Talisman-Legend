@@ -17,6 +17,7 @@ import com.example.examplemod.item.OniMaskItem;
 import com.example.examplemod.config.ChenModLootConfig;
 import com.example.examplemod.structure.BuildingConstructorItem;
 import com.example.examplemod.structure.ShengZhuPalaceStructure;
+import com.example.examplemod.loot.DogTalismanLootModifier;
 import com.example.examplemod.loot.HorseFishingLootModifier;
 import com.example.examplemod.loot.MonkeyOceanRuinLootModifier;
 import com.example.examplemod.loot.MouseDungeonLootModifier;
@@ -330,6 +331,7 @@ public class ChenMod {
     public static final DeferredItem<BuildingConstructorItem> CHONGHUA_GATE_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.CHONGHUA_GATE);
     public static final DeferredItem<BuildingConstructorItem> HANXIANG_COURTYARD_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.HANXIANG_COURTYARD);
     public static final DeferredItem<BuildingConstructorItem> MINGDE_HALL_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.MINGDE_HALL);
+    public static final DeferredItem<BuildingConstructorItem> TINGZHU_STUDIO_CONSTRUCTOR = registerBuildingConstructor(BuildingConstructorItem.BuildingVariant.TINGZHU_STUDIO);
 
     // ==================== 魔法效果注册 ====================
 
@@ -600,6 +602,8 @@ public class ChenMod {
             LOOT_MODIFIER_SERIALIZERS.register("ox_bastion_loot", () -> OxBastionLootModifier.CODEC);
     public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<RabbitTurtleLootModifier>> RABBIT_TURTLE_LOOT_MODIFIER =
             LOOT_MODIFIER_SERIALIZERS.register("rabbit_turtle_loot", () -> RabbitTurtleLootModifier.CODEC);
+    public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<DogTalismanLootModifier>> DOG_TALISMAN_LOOT_MODIFIER =
+            LOOT_MODIFIER_SERIALIZERS.register("dog_talisman_loot", () -> DogTalismanLootModifier.CODEC);
     public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<SheepEndCityLootModifier>> SHEEP_END_CITY_LOOT_MODIFIER =
             LOOT_MODIFIER_SERIALIZERS.register("sheep_end_city_loot", () -> SheepEndCityLootModifier.CODEC);
     public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<SnakeAncientCityLootModifier>> SNAKE_ANCIENT_CITY_LOOT_MODIFIER =
@@ -799,6 +803,7 @@ public class ChenMod {
         output.accept(CHONGHUA_GATE_CONSTRUCTOR);
         output.accept(HANXIANG_COURTYARD_CONSTRUCTOR);
         output.accept(MINGDE_HALL_CONSTRUCTOR);
+        output.accept(TINGZHU_STUDIO_CONSTRUCTOR);
         output.accept(createMaskReleasePotionStack());
         output.accept(createSplashMaskReleasePotionStack());
         output.accept(createLingeringMaskReleasePotionStack());

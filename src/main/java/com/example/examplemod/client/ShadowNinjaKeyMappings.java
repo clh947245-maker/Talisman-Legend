@@ -20,6 +20,12 @@ public final class ShadowNinjaKeyMappings {
             GLFW.GLFW_KEY_C,
             CATEGORY
     );
+    public static final KeyMapping KNEEL = new KeyMapping(
+            "key." + ChenMod.MODID + ".shadow_ninja_kneel",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_B,
+            CATEGORY
+    );
 
     private ShadowNinjaKeyMappings() {
     }
@@ -27,5 +33,6 @@ public final class ShadowNinjaKeyMappings {
     public static void register(RegisterKeyMappingsEvent event) {
         event.register(SUMMON);
         event.register(DISMISS);
+        event.register(KNEEL);
     }
 }

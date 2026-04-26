@@ -215,6 +215,19 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
         this.entityData.set(DATA_LEGION_SUMMONER_UUID, Optional.ofNullable(summoner == null ? null : summoner.getUUID()));
     }
 
+    public void kneelForCommander(LivingEntity commander) {
+        if (commander == null || this.isTransitioning() || this.isDismissing()) {
+            return;
+        }
+
+        this.setTarget(null);
+        this.summonPoseLocked = true;
+        this.setKneeling(true);
+        this.getNavigation().stop();
+        this.getLookControl().setLookAt(commander, 20.0F, 20.0F);
+        this.faceCommander(commander);
+    }
+
     public boolean isSummonedByLegion(UUID summonerUuid) {
         return summonerUuid != null && summonerUuid.equals(this.getLegionSummonerUUID().orElse(null));
     }
@@ -534,7 +547,7 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
 
     @Override
     public void setTarget(LivingEntity target) {
-        super.setTarget(this.canHoldGrudgeAgainst(target) ? target : null);
+        super.setTarget(target == null || this.canAssistAgainst(target) ? target : null);
     }
 
     @Override
@@ -1071,7 +1084,9 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
             return false;
         }
 
-        if (commander == null || this.hasImmediateCombatPressure()) {
+        if (commander == null
+                || this.distanceToSqr(commander) > MUSTER_RADIUS_SQR
+                || this.hasImmediateCombatPressure()) {
             this.summonPoseLocked = false;
             return false;
         }

@@ -12,14 +12,18 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public final class ShadowNinjaSquadManager {
-    private static final int MAX_SUMMONED_NINJAS = 6;
+    private static final int INNER_RING_SUMMONED_NINJAS = 6;
+    private static final int OUTER_RING_SUMMONED_NINJAS = 10;
+    private static final int MAX_SUMMONED_NINJAS = INNER_RING_SUMMONED_NINJAS + OUTER_RING_SUMMONED_NINJAS;
+    private static final int MAX_ASSAULT_SUMMON_BATCH = 6;
     private static final int MAX_LEGION_NINJAS = 10;
+    private static final double KNEEL_COMMAND_RADIUS = 16.0D;
     private static final double BASE_SUMMON_RADIUS = 3.0D;
     private static final double RADIUS_STEP = 0.85D;
-    private static final double ANGLE_STEP = (Math.PI * 2.0D) / MAX_SUMMONED_NINJAS;
 
     private ShadowNinjaSquadManager() {
     }
@@ -60,13 +64,30 @@ public final class ShadowNinjaSquadManager {
         }
     }
 
+    public static void kneelNearby(ServerPlayer player) {
+        ServerLevel level = player.serverLevel();
+        LivingEntity commanderAnchor = OniMaskItem.getMaskAnchor(player);
+        if (commanderAnchor == null) {
+            return;
+        }
+
+        AABB commandArea = commanderAnchor.getBoundingBox().inflate(KNEEL_COMMAND_RADIUS);
+        for (ShadowNinjaEntity ninja : level.getEntitiesOfClass(ShadowNinjaEntity.class, commandArea, ShadowNinjaEntity::isAlive)) {
+            if (!ninja.isAlliedTo(player) && !ninja.isAlliedTo(commanderAnchor)) {
+                continue;
+            }
+
+            ninja.kneelForCommander(commanderAnchor);
+        }
+    }
+
     public static void summonAssault(ServerLevel level, LivingEntity summoner, LivingEntity target) {
         if (summoner == null || target == null || !target.isAlive()) {
             return;
         }
 
         int activeCount = getLegionNinjas(level.getServer(), summoner.getUUID()).size();
-        int summonCount = Math.min(MAX_SUMMONED_NINJAS, MAX_LEGION_NINJAS - activeCount);
+        int summonCount = Math.min(MAX_ASSAULT_SUMMON_BATCH, MAX_LEGION_NINJAS - activeCount);
         if (summonCount <= 0) {
             return;
         }
@@ -127,11 +148,15 @@ public final class ShadowNinjaSquadManager {
     }
 
     private static Vec3 findSpawnPosition(ServerLevel level, LivingEntity commanderAnchor, ShadowNinjaEntity ninja, int slot) {
-        double baseAngle = Math.toRadians(commanderAnchor.getYRot()) + slot * ANGLE_STEP;
+        int ringSize = slot < INNER_RING_SUMMONED_NINJAS ? INNER_RING_SUMMONED_NINJAS : OUTER_RING_SUMMONED_NINJAS;
+        int ringSlot = slot < INNER_RING_SUMMONED_NINJAS ? slot : slot - INNER_RING_SUMMONED_NINJAS;
+        double ringRadiusOffset = slot < INNER_RING_SUMMONED_NINJAS ? 0.0D : RADIUS_STEP * 2.0D;
+        double angleStep = (Math.PI * 2.0D) / ringSize;
+        double baseAngle = Math.toRadians(commanderAnchor.getYRot()) + ringSlot * angleStep;
         double baseY = commanderAnchor.getY();
 
         for (int radiusStep = 0; radiusStep < 3; radiusStep++) {
-            double radius = BASE_SUMMON_RADIUS + radiusStep * RADIUS_STEP;
+            double radius = BASE_SUMMON_RADIUS + ringRadiusOffset + radiusStep * RADIUS_STEP;
             double angle = baseAngle + radiusStep * 0.33D;
             double x = commanderAnchor.getX() + Math.cos(angle) * radius;
             double z = commanderAnchor.getZ() + Math.sin(angle) * radius;
@@ -160,11 +185,12 @@ public final class ShadowNinjaSquadManager {
         double baseAngle = preferredDirection.horizontalDistanceSqr() > 1.0E-6D
                 ? Math.atan2(preferredDirection.z, preferredDirection.x)
                 : Math.toRadians(summoner.getYRot());
+        double angleStep = (Math.PI * 2.0D) / MAX_ASSAULT_SUMMON_BATCH;
         double baseY = summoner.getY();
 
         for (int radiusStep = 0; radiusStep < 3; radiusStep++) {
             double radius = BASE_SUMMON_RADIUS + radiusStep * RADIUS_STEP;
-            double angle = baseAngle + Math.PI + slot * ANGLE_STEP + radiusStep * 0.33D;
+            double angle = baseAngle + Math.PI + slot * angleStep + radiusStep * 0.33D;
             double x = summoner.getX() + Math.cos(angle) * radius;
             double z = summoner.getZ() + Math.sin(angle) * radius;
 
