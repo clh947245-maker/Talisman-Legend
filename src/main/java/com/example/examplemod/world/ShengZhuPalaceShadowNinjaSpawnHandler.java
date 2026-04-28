@@ -16,7 +16,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -64,7 +63,6 @@ public final class ShengZhuPalaceShadowNinjaSpawnHandler {
     @SubscribeEvent
     public static void onLevelTickPost(LevelTickEvent.Post event) {
         if (!(event.getLevel() instanceof ServerLevel level)
-                || level.getDifficulty() == Difficulty.PEACEFUL
                 || level.getGameTime() % SPAWN_INTERVAL_TICKS != 0) {
             return;
         }

@@ -18,6 +18,7 @@ import org.joml.Matrix4f;
 public class PigLaserRenderer extends EntityRenderer<PigLaserEntity> {
 
     private static final ResourceLocation BEAM_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/beacon_beam.png");
+    private static final float TEXTURE_SCROLL_SPEED = 0.35F;
 
     public PigLaserRenderer(EntityRendererProvider.Context context) {
         super(context);
@@ -47,8 +48,8 @@ public class PigLaserRenderer extends EntityRenderer<PigLaserEntity> {
         double horizontalDistance = Math.sqrt(diff.x * diff.x + diff.z * diff.z);
         float yRot = (float) (Mth.atan2(diff.x, diff.z) * (180.0F / (float) Math.PI));
         float xRot = (float) (Mth.atan2(diff.y, horizontalDistance) * (180.0F / (float) Math.PI));
-        float textureOffset = -(entity.tickCount + partialTicks) * 0.7F;
-        float roll = (entity.tickCount + partialTicks) * 0.35F;
+        float textureOffset = -(entity.tickCount + partialTicks) * TEXTURE_SCROLL_SPEED;
+        float roll = 0.0F;
 
         poseStack.pushPose();
         poseStack.translate(localStart.x, localStart.y, localStart.z);

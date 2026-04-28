@@ -9,9 +9,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -30,7 +34,7 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
@@ -102,6 +106,7 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
     private static final double PERSONAL_SPACE_RADIUS_SQR = PERSONAL_SPACE_RADIUS * PERSONAL_SPACE_RADIUS;
     private static final double FRIENDLY_ASSIST_RADIUS = 20.0D;
     private static final double FRIENDLY_ASSIST_RADIUS_SQR = FRIENDLY_ASSIST_RADIUS * FRIENDLY_ASSIST_RADIUS;
+    private static final int PEACEFUL_TARGET_SCAN_INTERVAL = 10;
     private static final int COMMANDER_COMBAT_MEMORY_TICKS = 120;
     private static final int COMMANDER_IDLE_KNEEL_TICKS = 20 * 8;
     private static final int SELF_DEFENSE_MEMORY_TICKS = 120;
@@ -153,7 +158,12 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
     }
 
     public static boolean checkShadowNinjaSpawnRules(EntityType<ShadowNinjaEntity> entityType, ServerLevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random) {
-        return Monster.checkMonsterSpawnRules(entityType, level, spawnType, pos, random);
+        return Mob.checkMobSpawnRules(entityType, level, spawnType, pos, random);
+    }
+
+    @Override
+    protected boolean shouldDespawnInPeaceful() {
+        return false;
     }
 
     public boolean isFriendlyToPlayers() {
@@ -501,6 +511,9 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
             LivingEntity ambushTarget = this.getCollectiveAggroTarget();
             if (this.isRecentCollectiveAggroTarget(ambushTarget)) {
                 this.setTarget(ambushTarget);
+            } else if (this.level().getDifficulty() == Difficulty.PEACEFUL
+                    && this.tickCount % PEACEFUL_TARGET_SCAN_INTERVAL == 0) {
+                this.setTarget(this.findPeacefulHostileTarget());
             }
         }
 
@@ -536,10 +549,46 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
 
     @Override
     public boolean doHurtTarget(Entity target) {
-        boolean didHurt = super.doHurtTarget(target);
+        boolean didHurt = this.shouldUsePeacefulPlayerAttack(target)
+                ? this.doPeacefulPlayerAttack(target)
+                : super.doHurtTarget(target);
 
         if (didHurt && !this.level().isClientSide() && !this.isPerformingJumpKick() && !this.isTransitioning()) {
             this.triggerAnim(ATTACK_CONTROLLER, ATTACK_ANIMATIONS[this.random.nextInt(ATTACK_ANIMATIONS.length)]);
+        }
+
+        return didHurt;
+    }
+
+    private boolean shouldUsePeacefulPlayerAttack(Entity target) {
+        return this.level().getDifficulty() == Difficulty.PEACEFUL && target instanceof Player;
+    }
+
+    private boolean doPeacefulPlayerAttack(Entity target) {
+        float damage = (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE);
+        DamageSource damageSource = this.damageSources().source(DamageTypes.PLAYER_ATTACK);
+        if (this.level() instanceof ServerLevel serverLevel) {
+            damage = EnchantmentHelper.modifyDamage(serverLevel, this.getWeaponItem(), target, damageSource, damage);
+        }
+
+        boolean didHurt = target.hurt(damageSource, damage);
+        if (didHurt) {
+            float knockback = this.getKnockback(target, damageSource);
+            if (knockback > 0.0F && target instanceof LivingEntity livingEntity) {
+                livingEntity.knockback(
+                        knockback * 0.5F,
+                        Mth.sin(this.getYRot() * (float) (Math.PI / 180.0D)),
+                        -Mth.cos(this.getYRot() * (float) (Math.PI / 180.0D))
+                );
+                this.setDeltaMovement(this.getDeltaMovement().multiply(0.6D, 1.0D, 0.6D));
+            }
+
+            if (this.level() instanceof ServerLevel serverLevel) {
+                EnchantmentHelper.doPostAttackEffects(serverLevel, target, damageSource);
+            }
+
+            this.setLastHurtMob(target);
+            this.playAttackSound();
         }
 
         return didHurt;
@@ -921,6 +970,27 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
         }
 
         return null;
+    }
+
+    private LivingEntity findPeacefulHostileTarget() {
+        Player closest = null;
+        double closestDistance = Double.MAX_VALUE;
+        double followRange = this.getAttributeValue(Attributes.FOLLOW_RANGE);
+        double searchRadius = followRange > 0.0D ? followRange : FRIENDLY_ASSIST_RADIUS;
+
+        for (Player player : this.level().getEntitiesOfClass(Player.class, this.getBoundingBox().inflate(searchRadius))) {
+            if (!this.canAssistAgainst(player) || !this.getSensing().hasLineOfSight(player)) {
+                continue;
+            }
+
+            double distance = this.distanceToSqr(player);
+            if (distance < closestDistance) {
+                closest = player;
+                closestDistance = distance;
+            }
+        }
+
+        return closest;
     }
 
     private boolean isRecentCommanderTarget(LivingEntity commander, LivingEntity target, int timestamp) {

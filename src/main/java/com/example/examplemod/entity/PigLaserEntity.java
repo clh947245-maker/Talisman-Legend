@@ -13,8 +13,8 @@ import net.minecraft.world.phys.Vec3;
 
 public class PigLaserEntity extends Entity {
 
-    private static final int FULL_BEAM_LIFETIME = 2;
-    private static final int RETRACT_LIFETIME = 2;
+    private static final int FULL_BEAM_LIFETIME = 4;
+    private static final int RETRACT_LIFETIME = 6;
 
     private static final EntityDataAccessor<Float> DATA_LEFT_START_X = SynchedEntityData.defineId(PigLaserEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> DATA_LEFT_START_Y = SynchedEntityData.defineId(PigLaserEntity.class, EntityDataSerializers.FLOAT);
