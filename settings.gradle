@@ -10,4 +10,4 @@ plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
 }
 
-rootProject.name = 'forge-1.21.1'
+rootProject.name = 'forge-1.21.0'
