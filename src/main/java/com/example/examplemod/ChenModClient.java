@@ -4,9 +4,7 @@ import com.example.examplemod.client.ClientModEvents;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
@@ -20,8 +18,6 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
  */
 // @Mod 注解标记这是一个模组入口点，dist = Dist.CLIENT 表示只在客户端加载
 @Mod(value = ChenMod.MODID, dist = Dist.CLIENT)
-// @EventBusSubscriber 自动将此类中的静态 @SubscribeEvent 方法注册到模组事件总线 (Mod Event Bus)
-@EventBusSubscriber(modid = ChenMod.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class ChenModClient {
 
     /**
@@ -39,6 +35,7 @@ public class ChenModClient {
         modEventBus.addListener(ClientModEvents::registerRenderers);
         modEventBus.addListener(ClientModEvents::registerKeyMappings);
         modEventBus.addListener(ClientModEvents::onAddLayers);
+        modEventBus.addListener(ChenModClient::onClientSetup);
     }
 
     /**
@@ -49,7 +46,6 @@ public class ChenModClient {
      *
      * @param event 客户端设置事件
      */
-    @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
         // 示例：打印日志，证明客户端代码正在运行
         ChenMod.LOGGER.info("HELLO FROM CLIENT SETUP");
