@@ -44,7 +44,7 @@ repositories {
     maven { url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
 }
 
-// Mojang ships Java 21 to end users in 1.21.1, so mods should target Java 21.
+// Mojang ships Java 21 to end users in 1.21+, so mods should target Java 21.
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
@@ -120,6 +120,7 @@ dependencies {
 
 def generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
     inputs.properties(modMetadata)
+    filteringCharset = 'UTF-8'
     expand(modMetadata)
     from(layout.projectDirectory.dir('src/main/templates'))
     into(generatedModMetadataDir)

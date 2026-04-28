@@ -138,7 +138,7 @@ def title_slide(t: float) -> Image.Image:
     d = ImageDraw.Draw(img)
     text(d, (70, 210), "成龙历险记模组", TITLE, (255, 233, 166, 255))
     text(d, (73, 286), "十二符咒、黑影兵团与圣主宫殿", SUBTITLE)
-    draw_tags(d, ["NeoForge 1.21.1", "中文魔法冒险", "探索 / 收集 / 战斗"], 365)
+    draw_tags(d, ["NeoForge 1.21.0", "中文魔法冒险", "探索 / 收集 / 战斗"], 365)
     return img
 
 

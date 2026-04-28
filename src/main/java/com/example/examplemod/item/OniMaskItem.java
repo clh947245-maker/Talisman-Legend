@@ -15,7 +15,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,14 +35,6 @@ public class OniMaskItem extends ArmorItem {
             ensureMagicBinding(stack, level);
         }
         super.inventoryTick(stack, level, entity, slotId, isSelected);
-    }
-
-    @Override
-    public boolean supportsEnchantment(ItemStack stack, Holder<Enchantment> enchantment) {
-        if (enchantment.is(Enchantments.BINDING_CURSE)) {
-            return false;
-        }
-        return super.supportsEnchantment(stack, enchantment);
     }
 
     @Override
