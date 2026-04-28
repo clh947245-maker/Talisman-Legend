@@ -35,7 +35,7 @@ public class RoosterTalismanItem extends Item {
 
         if (!level.isClientSide) {
             // 给予鸡符咒效果
-            player.addEffect(new MobEffectInstance(ChenMod.ROOSTER_POWER, MAGIC_DURATION, 0, true, true, true));
+            player.addEffect(new MobEffectInstance(ChenMod.ROOSTER_POWER.getHolder().orElseThrow(), MAGIC_DURATION, 0, true, true, true));
             
             // 添加冷却时间
             player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);

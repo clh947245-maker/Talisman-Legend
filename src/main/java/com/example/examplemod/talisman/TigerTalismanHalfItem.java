@@ -54,7 +54,7 @@ public class TigerTalismanHalfItem extends Item {
         if (clone != null
                 && clone.level() == level
                 && clone.distanceToSqr(player) <= FUSION_DISTANCE * FUSION_DISTANCE
-                && player.hasEffect(ChenMod.TIGER_POWER)) {
+                && player.hasEffect(ChenMod.TIGER_POWER.getHolder().orElseThrow())) {
             TigerTalismanItem.mergeBack(level, player, usedHand, stack, clone);
         } else {
             Component tracker = buildTrackerMessage(player.getServer(), player, stack);

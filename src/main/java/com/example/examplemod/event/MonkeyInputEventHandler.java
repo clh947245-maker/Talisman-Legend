@@ -5,10 +5,10 @@ import com.example.examplemod.client.gui.MonkeyRadialMenu;
 import com.example.examplemod.talisman.MonkeyTalismanItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.InputEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.InputEvent;
 import org.lwjgl.glfw.GLFW;
 
 @EventBusSubscriber(modid = ChenMod.MODID, value = Dist.CLIENT)

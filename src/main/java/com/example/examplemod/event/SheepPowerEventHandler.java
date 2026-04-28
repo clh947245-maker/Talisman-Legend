@@ -7,27 +7,27 @@ import com.example.examplemod.magic.SheepPowerMagic;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.common.util.TriState;
-import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
-import net.neoforged.neoforge.event.entity.living.LivingEvent.LivingVisibilityEvent;
-import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
-import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
-import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
-import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingVisibilityEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.item.ItemTossEvent;
+import net.minecraftforge.event.entity.living.MobEffectEvent;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerContainerEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
 /**
- * 灵魂状态事件监听器（NeoForge 1.21）
+ * 灵魂状态事件监听器（Forge 1.21）
  */
 @EventBusSubscriber(modid = ChenMod.MODID)
 public class SheepPowerEventHandler {
 
     private static boolean isInSoulState(Player player) {
-        return player != null && player.hasEffect(ChenMod.SHEEP_POWER);
+        return player != null && player.hasEffect(ChenMod.SHEEP_POWER.getHolder().orElseThrow());
     }
 
     // ── 隐身：所有生物对玩家本体的可见性清零 ────────────────────────────
@@ -45,14 +45,40 @@ public class SheepPowerEventHandler {
 
     @SubscribeEvent
     public static void onLivingChangeTarget(LivingChangeTargetEvent event) {
-        if (!(event.getNewAboutToBeSetTarget() instanceof Player player)) return;
+        if (!(event.getNewTarget() instanceof Player player)) return;
         if (!isInSoulState(player)) return;
 
         SheepBodyEntity body = SheepPowerMagic.getTrackedBody(player);
-        if (body == null || !body.isAlive() || body.level() != event.getEntity().level()) return;
-        if (!event.getEntity().canAttack(body) || event.getEntity().isAlliedTo(body)) return;
+        if (body == null || !body.isAlive() || body.level() != event.getEntity().level()) {
+            event.setNewTarget(null);
+            return;
+        }
+        if (!event.getEntity().canAttack(body) || event.getEntity().isAlliedTo(body)) {
+            event.setNewTarget(null);
+            return;
+        }
 
-        event.setNewAboutToBeSetTarget(body);
+        event.setNewTarget(body);
+    }
+
+    @SubscribeEvent
+    public static void onLivingHurt(LivingHurtEvent event) {
+        if (!(event.getEntity() instanceof Player player) || !isInSoulState(player)) {
+            return;
+        }
+        if (!(event.getSource().getEntity() instanceof Mob mob)) {
+            return;
+        }
+
+        SheepBodyEntity body = SheepPowerMagic.getTrackedBody(player);
+        if (body == null || !body.isAlive() || body.level() != mob.level()) {
+            event.setCanceled(true);
+            return;
+        }
+
+        mob.setTarget(body);
+        body.hurt(event.getSource(), event.getAmount());
+        event.setCanceled(true);
     }
 
     // ── 禁止使用物品 ──────────────────────────────────────────────────────
@@ -91,11 +117,12 @@ public class SheepPowerEventHandler {
         if (isInSoulState(event.getEntity())) event.setCanceled(true);
     }
 
-    // ── 禁止打开物品栏 ────────────────────────────────────────────────────
+    // ── 禁止打开物品栏 ────────────────────────────────────────────────────    }
+
     @SubscribeEvent
-    public static void onItemEntityPickup(ItemEntityPickupEvent.Pre event) {
-        if (isInSoulState(event.getPlayer())) {
-            event.setCanPickup(TriState.FALSE);
+    public static void onItemPickup(EntityItemPickupEvent event) {
+        if (isInSoulState(event.getEntity())) {
+            event.setCanceled(true);
         }
     }
 
@@ -126,7 +153,7 @@ public class SheepPowerEventHandler {
     @SubscribeEvent
     public static void onEffectRemoved(MobEffectEvent.Remove event) {
         if (event.getEffectInstance() == null) return;
-        if (!event.getEffectInstance().is(ChenMod.SHEEP_POWER)) return;
+        if (!event.getEffectInstance().is(ChenMod.SHEEP_POWER.getHolder().orElseThrow())) return;
         if (!(event.getEntity() instanceof Player player)) return;
         if (SheepPowerMagic.consumeSkipRestore(player)) return;
         SheepPowerMagic.restorePlayer(player);
@@ -136,7 +163,7 @@ public class SheepPowerEventHandler {
     @SubscribeEvent
     public static void onEffectExpired(MobEffectEvent.Expired event) {
         if (event.getEffectInstance() == null) return;
-        if (!event.getEffectInstance().is(ChenMod.SHEEP_POWER)) return;
+        if (!event.getEffectInstance().is(ChenMod.SHEEP_POWER.getHolder().orElseThrow())) return;
         if (!(event.getEntity() instanceof Player player)) return;
         if (SheepPowerMagic.consumeSkipRestore(player)) return;
         SheepPowerMagic.restorePlayer(player);

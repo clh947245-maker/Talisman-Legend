@@ -11,10 +11,10 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RenderPlayerEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -77,11 +77,11 @@ public class ClientTransformationHandler {
     @SubscribeEvent
     public static void onRenderPlayerPre(RenderPlayerEvent.Pre event) {
         Player player = event.getEntity();
-        MobEffectInstance effect = player.getEffect(ChenMod.MONKEY_POWER);
+        MobEffectInstance effect = player.getEffect(ChenMod.MONKEY_POWER.getHolder().orElseThrow());
 
         if (effect != null) {
             // 如果玩家拥有蛇符咒效果（隐身），则不仅取消原版渲染，也不渲染替代模型
-            if (player.hasEffect(ChenMod.SNACK_POWER)) {
+            if (player.hasEffect(ChenMod.SNACK_POWER.getHolder().orElseThrow())) {
                 event.setCanceled(true);
                 return;
             }

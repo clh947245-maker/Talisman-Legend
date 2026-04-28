@@ -9,8 +9,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
-import net.neoforged.neoforge.event.entity.living.LivingEvent.LivingVisibilityEvent;
+import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingVisibilityEvent;
 
 import java.util.Map;
 import java.util.UUID;
@@ -41,7 +41,7 @@ public class SnackPowerMagic extends MobEffect {
         if (entity == null)
             return;
         entity.addEffect(new MobEffectInstance(
-                ChenMod.SNACK_POWER,
+                ChenMod.SNACK_POWER.getHolder().orElseThrow(),
                 duration,
                 0,
                 false,
@@ -53,7 +53,7 @@ public class SnackPowerMagic extends MobEffect {
      * 处理生物改变目标事件 (防止被瞄准)
      */
     public static void onChangeTarget(LivingChangeTargetEvent event) {
-        LivingEntity newTarget = event.getNewAboutToBeSetTarget();
+        LivingEntity newTarget = event.getNewTarget();
         if (newTarget != null && isSnackInvisible(newTarget)) {
             // 如果目标有蛇符咒效果，取消事件（即不让怪瞄准他）
             event.setCanceled(true);
@@ -71,7 +71,7 @@ public class SnackPowerMagic extends MobEffect {
     }
 
     public static void revealAfterAttack(Player player) {
-        if (player == null || !player.hasEffect(ChenMod.SNACK_POWER)) {
+        if (player == null || !player.hasEffect(ChenMod.SNACK_POWER.getHolder().orElseThrow())) {
             return;
         }
 
@@ -79,7 +79,7 @@ public class SnackPowerMagic extends MobEffect {
     }
 
     public static boolean isSnackInvisible(Entity entity) {
-        if (!(entity instanceof LivingEntity living) || !living.hasEffect(ChenMod.SNACK_POWER)) {
+        if (!(entity instanceof LivingEntity living) || !living.hasEffect(ChenMod.SNACK_POWER.getHolder().orElseThrow())) {
             return false;
         }
         return !isRevealed(living);

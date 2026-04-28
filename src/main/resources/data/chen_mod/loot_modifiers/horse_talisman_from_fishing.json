@@ -2,7 +2,7 @@
   "type": "chen_mod:horse_fishing_loot",
   "conditions": [
     {
-      "condition": "neoforge:loot_table_id",
+      "condition": "forge:loot_table_id",
       "loot_table_id": "minecraft:gameplay/fishing"
     }
   ],

@@ -2,13 +2,9 @@ package com.example.examplemod;
 
 import com.example.examplemod.client.ClientModEvents;
 import net.minecraft.client.Minecraft;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.gui.ConfigurationScreen;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 /**
  * 客户端模组主类 (ChenModClient)
@@ -17,7 +13,6 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
  * 它被标记为 {@link Dist#CLIENT}，因此不会在专用服务端加载，这保证了访问客户端代码（如渲染、GUI）时的安全性。
  */
 // @Mod 注解标记这是一个模组入口点，dist = Dist.CLIENT 表示只在客户端加载
-@Mod(value = ChenMod.MODID, dist = Dist.CLIENT)
 public class ChenModClient {
 
     /**
@@ -25,13 +20,9 @@ public class ChenModClient {
      *
      * 在模组加载早期被调用。这里主要用于注册配置屏幕工厂。
      *
-     * @param container 模组容器实例  ..
+     * @param modEventBus 模组容器实例  ..
      */
-    public ChenModClient(IEventBus modEventBus, ModContainer container) {
-        // 允许 NeoForge 为此模组创建配置屏幕。
-        // 玩家可以通过 "模组" 菜单 -> 选择本模组 -> 点击 "配置" 来访问。
-        // 注意：需要确保 en_us.json 文件中有对应的翻译键。
-        container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
+    public ChenModClient(IEventBus modEventBus) {
         modEventBus.addListener(ClientModEvents::registerRenderers);
         modEventBus.addListener(ClientModEvents::registerKeyMappings);
         modEventBus.addListener(ClientModEvents::onAddLayers);

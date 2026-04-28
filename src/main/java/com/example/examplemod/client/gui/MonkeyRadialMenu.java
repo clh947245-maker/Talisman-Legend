@@ -12,7 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.neoforged.neoforge.network.PacketDistributor;
+import com.example.examplemod.network.ModNetwork;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
@@ -280,7 +280,7 @@ public class MonkeyRadialMenu extends Screen {
     @Override
     public void onClose() {
         if (selectedIndex >= 0) {
-            PacketDistributor.sendToServer(new TransformationSelectionPayload(selectedIndex));
+            ModNetwork.sendToServer(new TransformationSelectionPayload(selectedIndex));
         }
         super.onClose();
     }

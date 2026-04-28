@@ -70,7 +70,7 @@ public class RoosterPowerMagic extends MobEffect {
         // visible: true (显示粒子)
         // showIcon: true (显示右上角图标)
         entity.addEffect(new MobEffectInstance(
-            ChenMod.ROOSTER_POWER, 
+            ChenMod.ROOSTER_POWER.getHolder().orElseThrow(), 
             duration, 
             0, 
             false, 
@@ -113,7 +113,7 @@ public class RoosterPowerMagic extends MobEffect {
         // isShiftKeyDown(): 玩家是否按下了潜行键 (Shift)
         boolean isShiftKeyDown = entity.isShiftKeyDown();
         // 检查是否同时拥有兔符咒 (Rabbit Power) - 用于触发组合技
-        boolean hasRabbitPower = entity.hasEffect(ChenMod.RABBIT_POWER);
+        boolean hasRabbitPower = entity.hasEffect(ChenMod.RABBIT_POWER.getHolder().orElseThrow());
 
         if (hasRabbitPower) {
             // ==================================================

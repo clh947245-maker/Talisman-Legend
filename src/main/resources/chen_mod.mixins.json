@@ -5,7 +5,9 @@
   "refmap": "chen_mod.refmap.json",
   "mixins": [
     "ArmorSlotMixin",
-    "EntityRendererMixin"
+    "EntityRendererMixin",
+    "SheepSoulHudMixin",
+    "WorldOpenFlowsMixin"
   ],
   "injectors": {
     "defaultRequire": 1

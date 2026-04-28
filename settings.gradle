@@ -1,6 +1,8 @@
 pluginManagement {
     repositories {
         gradlePluginPortal()
+        maven { url = 'https://maven.minecraftforge.net' }
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
     }
 }
 
@@ -8,4 +10,4 @@ plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
 }
 
-rootProject.name = '1.21.0NeoForge'
+rootProject.name = 'forge-1.21.1'

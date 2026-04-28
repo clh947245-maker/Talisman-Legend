@@ -1,6 +1,6 @@
 package com.example.examplemod.config;
 
-import net.neoforged.neoforge.common.ModConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 /**
  * 统一管理符咒在建筑奖励箱、考古战利品和生物掉落中的概率配置。
@@ -21,25 +21,25 @@ public final class ChenModLootConfig {
     public static final String SNAKE_ANCIENT_CITY = "snake_ancient_city";
     public static final String TIGER_NETHER_FORTRESS = "tiger_nether_fortress";
 
-    public static final ModConfigSpec SPEC;
+    public static final ForgeConfigSpec SPEC;
 
-    private static final ModConfigSpec.DoubleValue horseFishingChance;
-    private static final ModConfigSpec.DoubleValue mouseSimpleDungeonChance;
-    private static final ModConfigSpec.DoubleValue mouseAbandonedMineshaftChance;
-    private static final ModConfigSpec.DoubleValue mouseStrongholdCorridorChance;
-    private static final ModConfigSpec.DoubleValue mouseStrongholdCrossingChance;
-    private static final ModConfigSpec.DoubleValue mouseStrongholdLibraryChance;
-    private static final ModConfigSpec.DoubleValue monkeyOceanRuinWarmChance;
-    private static final ModConfigSpec.DoubleValue oxBastionChance;
-    private static final ModConfigSpec.DoubleValue rabbitTurtleChance;
-    private static final ModConfigSpec.DoubleValue dogEvokerChance;
-    private static final ModConfigSpec.DoubleValue dogTamedWolfChance;
-    private static final ModConfigSpec.DoubleValue sheepEndCityChance;
-    private static final ModConfigSpec.DoubleValue snakeAncientCityChance;
-    private static final ModConfigSpec.DoubleValue tigerNetherFortressChance;
+    private static final ForgeConfigSpec.DoubleValue horseFishingChance;
+    private static final ForgeConfigSpec.DoubleValue mouseSimpleDungeonChance;
+    private static final ForgeConfigSpec.DoubleValue mouseAbandonedMineshaftChance;
+    private static final ForgeConfigSpec.DoubleValue mouseStrongholdCorridorChance;
+    private static final ForgeConfigSpec.DoubleValue mouseStrongholdCrossingChance;
+    private static final ForgeConfigSpec.DoubleValue mouseStrongholdLibraryChance;
+    private static final ForgeConfigSpec.DoubleValue monkeyOceanRuinWarmChance;
+    private static final ForgeConfigSpec.DoubleValue oxBastionChance;
+    private static final ForgeConfigSpec.DoubleValue rabbitTurtleChance;
+    private static final ForgeConfigSpec.DoubleValue dogEvokerChance;
+    private static final ForgeConfigSpec.DoubleValue dogTamedWolfChance;
+    private static final ForgeConfigSpec.DoubleValue sheepEndCityChance;
+    private static final ForgeConfigSpec.DoubleValue snakeAncientCityChance;
+    private static final ForgeConfigSpec.DoubleValue tigerNetherFortressChance;
 
     static {
-        ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
+        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 
         builder.comment(
                 "符咒在建筑奖励箱、考古战利品和生物掉落中的概率配置。",

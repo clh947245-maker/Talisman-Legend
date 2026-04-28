@@ -58,9 +58,9 @@ public class HorseTalismanItem extends Item {
 
         if (!level.isClientSide) {
             // 给予马符咒效果
-            // 使用 .get() 从 DeferredHolder 获取 MobEffect 实例，或者直接传入如果支持
+            // 使用 .get() 从 RegistryObject 获取 MobEffect 实例，或者直接传入如果支持
             // 参考 SnackPowerMagic 使用方式
-            player.addEffect(new MobEffectInstance(ChenMod.HORSE_POWER, MAGIC_DURATION,
+            player.addEffect(new MobEffectInstance(ChenMod.HORSE_POWER.getHolder().orElseThrow(), MAGIC_DURATION,
                     0,
                     true,
                     true, true));

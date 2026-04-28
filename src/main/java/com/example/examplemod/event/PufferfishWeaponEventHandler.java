@@ -2,11 +2,11 @@ package com.example.examplemod.event;
 
 import com.example.examplemod.ChenMod;
 import com.example.examplemod.item.PufferfishWeaponItem;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 
 @EventBusSubscriber(modid = ChenMod.MODID)
 public final class PufferfishWeaponEventHandler {
@@ -36,6 +36,6 @@ public final class PufferfishWeaponEventHandler {
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
-        PufferfishWeaponItem.serverTickSenseMode(event.getEntity());
+        PufferfishWeaponItem.serverTickSenseMode(event.player);
     }
 }

@@ -22,7 +22,7 @@ public class DungeonLootTrackerSavedData extends SavedData {
     private static final Factory<DungeonLootTrackerSavedData> FACTORY = new Factory<>(
             DungeonLootTrackerSavedData::new,
             DungeonLootTrackerSavedData::load
-    );
+    , null);
 
     private final LongSet processedLocations;
 

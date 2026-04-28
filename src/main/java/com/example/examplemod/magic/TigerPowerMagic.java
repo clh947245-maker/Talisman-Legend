@@ -36,7 +36,7 @@ public class TigerPowerMagic extends MobEffect {
         }
 
         entity.addEffect(new MobEffectInstance(
-                ChenMod.TIGER_POWER,
+                ChenMod.TIGER_POWER.getHolder().orElseThrow(),
                 duration,
                 0,
                 true,

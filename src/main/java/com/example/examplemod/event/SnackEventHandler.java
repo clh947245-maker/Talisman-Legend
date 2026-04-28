@@ -2,11 +2,11 @@ package com.example.examplemod.event;
 
 import com.example.examplemod.ChenMod;
 import com.example.examplemod.magic.SnackPowerMagic;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
-import net.neoforged.neoforge.event.entity.living.LivingEvent.LivingVisibilityEvent;
-import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingVisibilityEvent;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
 
 /**
  * 处理服务端事件，如生物仇恨和可见性逻辑

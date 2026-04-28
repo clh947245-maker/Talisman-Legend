@@ -39,8 +39,8 @@ public class OxTalismanItem extends Item {
 
         if (!level.isClientSide) {
             // 给予牛符咒效果
-            // 使用 .get() 从 DeferredHolder 获取 MobEffect 实例
-            player.addEffect(new MobEffectInstance(ChenMod.OX_POWER, MAGIC_DURATION, 0, true, true, true));
+            // 使用 .get() 从 RegistryObject 获取 MobEffect 实例
+            player.addEffect(new MobEffectInstance(ChenMod.OX_POWER.getHolder().orElseThrow(), MAGIC_DURATION, 0, true, true, true));
 
             // 添加冷却时间
             player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);

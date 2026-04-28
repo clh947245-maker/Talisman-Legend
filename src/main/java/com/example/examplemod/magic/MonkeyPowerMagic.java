@@ -24,12 +24,12 @@ public class MonkeyPowerMagic extends MobEffect {
         if (entity == null) return;
         
         // 移除旧效果以更新 Amplifier
-        if (entity.hasEffect(ChenMod.MONKEY_POWER)) {
-            entity.removeEffect(ChenMod.MONKEY_POWER);
+        if (entity.hasEffect(ChenMod.MONKEY_POWER.getHolder().orElseThrow())) {
+            entity.removeEffect(ChenMod.MONKEY_POWER.getHolder().orElseThrow());
         }
 
         entity.addEffect(new MobEffectInstance(
-            ChenMod.MONKEY_POWER, 
+            ChenMod.MONKEY_POWER.getHolder().orElseThrow(), 
             duration, 
             transformationId, // Amplifier 用于存储变身ID
             false, 

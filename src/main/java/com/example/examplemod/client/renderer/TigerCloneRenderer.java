@@ -49,7 +49,7 @@ public class TigerCloneRenderer extends LivingEntityRenderer<TigerCloneEntity, P
             // 如果要获取真实皮肤，需要 SkinManager，但这通常只对 AbstractClientPlayer 有效
             // 对于非玩家实体，直接获取皮肤比较复杂，这里暂时使用 DefaultPlayerSkin 作为基础
             // 改进方案：如果需要显示玩家真实皮肤，需要手动请求 SkinManager 加载纹理，或者让 Entity 伪装成 AbstractClientPlayer（非常复杂）
-            // 目前 1.21 NeoForge 环境下，最简单的方式是使用 DefaultPlayerSkin 确保不紫黑丢失
+            // 目前 1.21 Forge 环境下，最简单的方式是使用 DefaultPlayerSkin 确保不紫黑丢失
             return DefaultPlayerSkin.get(ownerUUID).texture();
         }
         

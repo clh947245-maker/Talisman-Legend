@@ -37,7 +37,7 @@ public class RabbitPowerMagic extends MobEffect {
         // showIcon = false (不显示图标), visible = false (不显示粒子), ambient = false
         // 使用 IClientMobEffectExtensions 来完全隐藏图标
         entity.addEffect(new MobEffectInstance(
-                ChenMod.RABBIT_POWER,
+                ChenMod.RABBIT_POWER.getHolder().orElseThrow(),
                 duration,
                 0,
                 false,

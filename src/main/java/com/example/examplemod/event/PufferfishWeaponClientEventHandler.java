@@ -5,11 +5,11 @@ import com.example.examplemod.item.PufferfishWeaponItem;
 import com.example.examplemod.network.packet.PufferfishWeaponAttackPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.HitResult;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.TickEvent.ClientTickEvent;
+import com.example.examplemod.network.ModNetwork;
 
 @EventBusSubscriber(modid = ChenMod.MODID, value = Dist.CLIENT)
 public final class PufferfishWeaponClientEventHandler {
@@ -40,7 +40,7 @@ public final class PufferfishWeaponClientEventHandler {
         }
 
         if (attackKeyDown && !wasAttackKeyDown && (minecraft.hitResult == null || minecraft.hitResult.getType() == HitResult.Type.MISS)) {
-            PacketDistributor.sendToServer(new PufferfishWeaponAttackPayload());
+            ModNetwork.sendToServer(new PufferfishWeaponAttackPayload());
         }
 
         wasAttackKeyDown = attackKeyDown;

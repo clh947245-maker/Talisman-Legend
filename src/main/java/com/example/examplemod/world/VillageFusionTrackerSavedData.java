@@ -14,7 +14,7 @@ public class VillageFusionTrackerSavedData extends SavedData {
     private static final Factory<VillageFusionTrackerSavedData> FACTORY = new Factory<>(
             VillageFusionTrackerSavedData::new,
             VillageFusionTrackerSavedData::load
-    );
+    , null);
 
     private final LongSet processedVillageStarts;
 

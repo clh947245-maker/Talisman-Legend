@@ -5,10 +5,10 @@ import com.example.examplemod.item.OniMaskItem;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.GrindstoneEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.GrindstoneEvent;
 
 @EventBusSubscriber(modid = ChenMod.MODID)
 public final class MagicBindingEventHandler {

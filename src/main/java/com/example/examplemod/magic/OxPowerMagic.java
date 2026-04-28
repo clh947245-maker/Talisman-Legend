@@ -38,7 +38,7 @@ public class OxPowerMagic extends MobEffect {
         // showIcon = false (不显示图标), visible = false (不显示粒子), ambient = false
         // 使用 IClientMobEffectExtensions 来完全隐藏图标
         entity.addEffect(new MobEffectInstance(
-                ChenMod.OX_POWER,
+                ChenMod.OX_POWER.getHolder().orElseThrow(),
                 duration,
                 0,
                 false,

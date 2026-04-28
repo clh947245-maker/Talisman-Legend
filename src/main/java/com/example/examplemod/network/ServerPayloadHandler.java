@@ -12,16 +12,16 @@ import com.example.examplemod.network.packet.TransformationSelectionPayload;
 import com.example.examplemod.item.OniMaskItem;
 import com.example.examplemod.talisman.MonkeyTalismanItem;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.event.network.CustomPayloadEvent.Context;
 
 /**
  * 处理客户端发送到服务端的自定义网络包。
  */
 public class ServerPayloadHandler {
 
-    public static void handleTransformationSelection(final TransformationSelectionPayload payload, final IPayloadContext context) {
+    public static void handleTransformationSelection(final TransformationSelectionPayload payload, final Context context) {
         context.enqueueWork(() -> {
-            var player = context.player();
+            var player = context.getSender();
             ItemStack stack = player.getMainHandItem();
             // 优先检查主手，主手不是猴符咒时再回退到副手。
             if (!(stack.getItem() instanceof MonkeyTalismanItem)) {
@@ -38,10 +38,10 @@ public class ServerPayloadHandler {
         });
     }
 
-    public static void handleSheepReturn(final SheepReturnPayload payload, final IPayloadContext context) {
+    public static void handleSheepReturn(final SheepReturnPayload payload, final Context context) {
         context.enqueueWork(() -> {
-            var player = context.player();
-            if (!player.hasEffect(ChenMod.SHEEP_POWER)) {
+            var player = context.getSender();
+            if (!player.hasEffect(ChenMod.SHEEP_POWER.getHolder().orElseThrow())) {
                 return;
             }
 
@@ -52,14 +52,14 @@ public class ServerPayloadHandler {
 
             // 先记录准备回归的身体，再移除效果触发后续回归流程。
             SheepPowerMagic.setPendingReturnBody(player, targetBody);
-            player.removeEffect(ChenMod.SHEEP_POWER);
+            player.removeEffect(ChenMod.SHEEP_POWER.getHolder().orElseThrow());
         });
     }
 
-    public static void handleSheepSuicide(final SheepSuicidePayload payload, final IPayloadContext context) {
+    public static void handleSheepSuicide(final SheepSuicidePayload payload, final Context context) {
         context.enqueueWork(() -> {
-            var player = context.player();
-            if (!player.hasEffect(ChenMod.SHEEP_POWER)) {
+            var player = context.getSender();
+            if (!player.hasEffect(ChenMod.SHEEP_POWER.getHolder().orElseThrow())) {
                 return;
             }
 
@@ -67,14 +67,14 @@ public class ServerPayloadHandler {
             SheepPowerMagic.markSkipRestore(player);
             SheepPowerMagic.discardTrackedBody(player);
             SheepPowerMagic.clearSoulState(player);
-            player.removeEffect(ChenMod.SHEEP_POWER);
+            player.removeEffect(ChenMod.SHEEP_POWER.getHolder().orElseThrow());
             player.hurt(player.damageSources().magic(), 999999.0F);
         });
     }
 
-    public static void handleShadowNinjaCommand(final ShadowNinjaCommandPayload payload, final IPayloadContext context) {
+    public static void handleShadowNinjaCommand(final ShadowNinjaCommandPayload payload, final Context context) {
         context.enqueueWork(() -> {
-            if (!(context.player() instanceof net.minecraft.server.level.ServerPlayer player)) {
+            if (!(context.getSender() instanceof net.minecraft.server.level.ServerPlayer player)) {
                 return;
             }
 
@@ -93,7 +93,7 @@ public class ServerPayloadHandler {
         });
     }
 
-    public static void handlePufferfishWeaponAttack(final com.example.examplemod.network.packet.PufferfishWeaponAttackPayload payload, final IPayloadContext context) {
-        context.enqueueWork(() -> PufferfishWeaponItem.fireFromMainHand(context.player()));
+    public static void handlePufferfishWeaponAttack(final com.example.examplemod.network.packet.PufferfishWeaponAttackPayload payload, final Context context) {
+        context.enqueueWork(() -> PufferfishWeaponItem.fireFromMainHand(context.getSender()));
     }
 }

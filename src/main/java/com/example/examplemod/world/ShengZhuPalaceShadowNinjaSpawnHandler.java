@@ -24,10 +24,10 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.entity.living.MobSpawnEvent;
+import net.minecraftforge.event.TickEvent.LevelTickEvent;
 
 @EventBusSubscriber(modid = ChenMod.MODID)
 public final class ShengZhuPalaceShadowNinjaSpawnHandler {
@@ -48,7 +48,7 @@ public final class ShengZhuPalaceShadowNinjaSpawnHandler {
     @SubscribeEvent
     public static void onSpawnPlacementCheck(MobSpawnEvent.SpawnPlacementCheck event) {
         if (event.getEntityType() != ChenMod.SHADOW_NINJA.get() && isInsidePalace(event.getLevel(), event.getPos())) {
-            event.setResult(MobSpawnEvent.SpawnPlacementCheck.Result.FAIL);
+            event.setResult(net.minecraftforge.eventbus.api.Event.Result.DENY);
         }
     }
 
@@ -56,13 +56,13 @@ public final class ShengZhuPalaceShadowNinjaSpawnHandler {
     public static void onPositionCheck(MobSpawnEvent.PositionCheck event) {
         if (event.getEntity().getType() != ChenMod.SHADOW_NINJA.get()
                 && isInsidePalace(event.getLevel(), BlockPos.containing(event.getX(), event.getY(), event.getZ()))) {
-            event.setResult(MobSpawnEvent.PositionCheck.Result.FAIL);
+            event.setResult(net.minecraftforge.eventbus.api.Event.Result.DENY);
         }
     }
 
     @SubscribeEvent
     public static void onLevelTickPost(LevelTickEvent.Post event) {
-        if (!(event.getLevel() instanceof ServerLevel level)
+        if (!(event.level instanceof ServerLevel level)
                 || level.getGameTime() % SPAWN_INTERVAL_TICKS != 0) {
             return;
         }

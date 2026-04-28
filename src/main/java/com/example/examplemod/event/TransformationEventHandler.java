@@ -14,12 +14,11 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.EntityEvent;
-import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
-import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
+import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
+import com.example.examplemod.network.ModNetwork;
 
 @EventBusSubscriber(modid = ChenMod.MODID)
 public class TransformationEventHandler {
@@ -31,43 +30,7 @@ public class TransformationEventHandler {
      * 当玩家拥有猴符咒效果时，修改其碰撞箱尺寸
      */
     @SubscribeEvent
-    public static void onEntitySize(EntityEvent.Size event) {
-        try {
-            if (event.getEntity() instanceof LivingEntity entity) {
-                if (entity instanceof SheepBodyEntity bodyEntity) {
-                    int transformationId = bodyEntity.getMonkeyTransformationId();
-                    ITransformation transformation = TransformationManager.getTransformation(transformationId);
-                    if (transformation != null) {
-                        EntityDimensions newDims = transformation.getDimensions(event.getPose(), event.getOldSize());
-                        float newEyeHeight = transformation.getEyeHeight(event.getPose(), newDims);
-                        event.setNewSize(newDims.withEyeHeight(newEyeHeight));
-                    }
-                    return;
-                }
-                // 确保效果已注册
-                if (ChenMod.MONKEY_POWER == null || !ChenMod.MONKEY_POWER.isBound()) return;
-
-                MobEffectInstance effect = entity.getEffect(ChenMod.MONKEY_POWER);
-                if (effect != null) {
-                    // 获取当前变身 ID
-                    int transformationId = effect.getAmplifier();
-                    ITransformation transformation = TransformationManager.getTransformation(transformationId);
-                    
-                    if (transformation != null) {
-                        EntityDimensions newDims = transformation.getDimensions(event.getPose(), event.getOldSize());
-                        // 显式设置 EyeHeight，因为在 Size 事件中设置 NewSize 会影响 EyeHeight
-                        float newEyeHeight = transformation.getEyeHeight(event.getPose(), newDims);
-                        event.setNewSize(newDims.withEyeHeight(newEyeHeight)); 
-                    }
-                }
-            }
-        } catch (Exception e) {
-            // 忽略错误，避免崩溃
-        }
-    }
-
-    @SubscribeEvent
-    public static void onMobEffectAdded(net.neoforged.neoforge.event.entity.living.MobEffectEvent.Added event) {
+    public static void onMobEffectAdded(net.minecraftforge.event.entity.living.MobEffectEvent.Added event) {
         if (event.getEffectInstance().getEffect().value() == ChenMod.MONKEY_POWER.get()) {
              event.getEntity().refreshDimensions();
              updateHealthAttribute(event.getEntity(), event.getEffectInstance().getAmplifier());
@@ -75,21 +38,21 @@ public class TransformationEventHandler {
     }
 
     @SubscribeEvent
-    public static void onMobEffectRemove(net.neoforged.neoforge.event.entity.living.MobEffectEvent.Remove event) {
+    public static void onMobEffectRemove(net.minecraftforge.event.entity.living.MobEffectEvent.Remove event) {
         handleEffectRemove(event.getEntity(), event.getEffectInstance());
     }
 
     @SubscribeEvent
-    public static void onMobEffectExpired(net.neoforged.neoforge.event.entity.living.MobEffectEvent.Expired event) {
+    public static void onMobEffectExpired(net.minecraftforge.event.entity.living.MobEffectEvent.Expired event) {
         handleEffectRemove(event.getEntity(), event.getEffectInstance());
     }
 
     @SubscribeEvent
     public static void onLivingChangeTarget(LivingChangeTargetEvent event) {
-        LivingEntity newTarget = event.getNewAboutToBeSetTarget();
+        LivingEntity newTarget = event.getNewTarget();
         // 检查新目标是否拥有猴符咒效果
-        if (newTarget != null && newTarget.hasEffect(ChenMod.MONKEY_POWER)) {
-            MobEffectInstance effect = newTarget.getEffect(ChenMod.MONKEY_POWER);
+        if (newTarget != null && newTarget.hasEffect(ChenMod.MONKEY_POWER.getHolder().orElseThrow())) {
+            MobEffectInstance effect = newTarget.getEffect(ChenMod.MONKEY_POWER.getHolder().orElseThrow());
             if (effect != null) {
                 int id = effect.getAmplifier();
                 // 只要不是变回原形 (Revert)，且不是主动攻击导致的仇恨，就取消目标
@@ -109,9 +72,9 @@ public class TransformationEventHandler {
     }
 
     @SubscribeEvent
-    public static void onLivingFall(net.neoforged.neoforge.event.entity.living.LivingFallEvent event) {
-        if (event.getEntity().hasEffect(ChenMod.MONKEY_POWER)) {
-            MobEffectInstance effect = event.getEntity().getEffect(ChenMod.MONKEY_POWER);
+    public static void onLivingFall(net.minecraftforge.event.entity.living.LivingFallEvent event) {
+        if (event.getEntity().hasEffect(ChenMod.MONKEY_POWER.getHolder().orElseThrow())) {
+            MobEffectInstance effect = event.getEntity().getEffect(ChenMod.MONKEY_POWER.getHolder().orElseThrow());
             if (effect != null && effect.getAmplifier() == TransformationManager.ID_CAT) {
                 event.setDistance(0);
                 event.setCanceled(true);
@@ -126,7 +89,7 @@ public class TransformationEventHandler {
             // Check if item is cookie
             if (event.getItem().is(Items.COOKIE)) {
                 // Check if player has Monkey Power
-                MobEffectInstance effect = player.getEffect(ChenMod.MONKEY_POWER);
+                MobEffectInstance effect = player.getEffect(ChenMod.MONKEY_POWER.getHolder().orElseThrow());
                 if (effect != null) {
                     // Check if transformation is Parrot
                     if (effect.getAmplifier() == TransformationManager.ID_PARROT) {
@@ -177,7 +140,7 @@ public class TransformationEventHandler {
                      
                      // 2. 发送数据包给客户端强制刷新
                      if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
-                         PacketDistributor.sendToPlayer(serverPlayer, new TransformationRestorePayload());
+                         ModNetwork.sendToPlayer(serverPlayer, new TransformationRestorePayload());
                      }
                  }));
              }

@@ -39,7 +39,7 @@ public class EntityRendererMixin {
             cir.setReturnValue(0.0f);
             return;
         }
-        if (entity instanceof LivingEntity living && living.hasEffect(ChenMod.SNACK_POWER)) {
+        if (entity instanceof LivingEntity living && living.hasEffect(ChenMod.SNACK_POWER.getHolder().orElseThrow())) {
             // 如果满足条件，将返回值设为 0.0f（无阴影）
             // 设置返回值会自动取消原方法的后续执行
             cir.setReturnValue(0.0f);

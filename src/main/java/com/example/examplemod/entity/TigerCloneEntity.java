@@ -35,7 +35,7 @@ import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.CommonHooks;
+import net.minecraftforge.common.ForgeHooks;
 
 import java.util.List;
 import java.util.Optional;
@@ -74,7 +74,7 @@ public class TigerCloneEntity extends Zombie {
 
         float backlashDamage = owner.getHealth() / 2.0F;
         owner.hurt(this.damageSources().magic(), backlashDamage);
-        owner.removeEffect(ChenMod.TIGER_POWER);
+        owner.removeEffect(ChenMod.TIGER_POWER.getHolder().orElseThrow());
         TigerTalismanHalfItem.restoreLinkedHalf(owner, this.getUUID());
         owner.displayClientMessage(Component.translatable("message.chen_mod.tiger_clone_died"), true);
     }
@@ -135,7 +135,7 @@ public class TigerCloneEntity extends Zombie {
         }
 
         Player owner = this.level().getPlayerByUUID(ownerUUID);
-        if (owner == null || !owner.hasEffect(ChenMod.TIGER_POWER)) {
+        if (owner == null || !owner.hasEffect(ChenMod.TIGER_POWER.getHolder().orElseThrow())) {
             this.discard();
             return;
         }
@@ -241,7 +241,7 @@ public class TigerCloneEntity extends Zombie {
     }
 
     private boolean isCloneProvokingEnderMan(EnderMan enderMan, Player owner) {
-        if (CommonHooks.shouldSuppressEnderManAnger(enderMan, owner, this.getItemBySlot(EquipmentSlot.HEAD))) {
+        if (ForgeHooks.shouldSuppressEnderManAnger(enderMan, owner, this.getItemBySlot(EquipmentSlot.HEAD))) {
             return false;
         }
 

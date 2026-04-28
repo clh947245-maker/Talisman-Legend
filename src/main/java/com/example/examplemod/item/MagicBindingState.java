@@ -18,6 +18,6 @@ public final class MagicBindingState {
     }
 
     private static boolean hasSpecialRemovalEffect(LivingEntity livingEntity) {
-        return livingEntity.hasEffect(ChenMod.MASK_RELEASE);
+        return livingEntity.hasEffect(ChenMod.MASK_RELEASE.getHolder().orElseThrow());
     }
 }

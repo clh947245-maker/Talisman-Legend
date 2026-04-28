@@ -20,8 +20,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.NeoForgeMod;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.common.ForgeMod;
+import com.example.examplemod.network.ModNetwork;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -71,7 +71,7 @@ public class SheepPowerMagic extends MobEffect {
         if (entity == null) {
             return;
         }
-        entity.addEffect(new MobEffectInstance(ChenMod.SHEEP_POWER, duration, 0, false, false, true));
+        entity.addEffect(new MobEffectInstance(ChenMod.SHEEP_POWER.getHolder().orElseThrow(), duration, 0, false, false, true));
     }
 
     public static void spawnBody(Player player) {
@@ -117,16 +117,7 @@ public class SheepPowerMagic extends MobEffect {
         if (!player.getAbilities().invulnerable) {
             player.getAbilities().invulnerable = true;
             player.onUpdateAbilities();
-        }
-
-        var flightAttribute = player.getAttribute(NeoForgeMod.CREATIVE_FLIGHT);
-        if (flightAttribute != null && !flightAttribute.hasModifier(SHEEP_FLIGHT_ID)) {
-            flightAttribute.addTransientModifier(
-                    new AttributeModifier(SHEEP_FLIGHT_ID, 1.0D, AttributeModifier.Operation.ADD_VALUE)
-            );
-        }
-
-        var speedAttribute = player.getAttribute(Attributes.MOVEMENT_SPEED);
+        }var speedAttribute = player.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speedAttribute != null && !speedAttribute.hasModifier(SHEEP_SPEED_ID)) {
             speedAttribute.addTransientModifier(
                     new AttributeModifier(
@@ -190,14 +181,7 @@ public class SheepPowerMagic extends MobEffect {
 
         if (!player.isCreative() && !player.isSpectator()) {
             player.getAbilities().invulnerable = false;
-        }
-
-        var flightAttribute = player.getAttribute(NeoForgeMod.CREATIVE_FLIGHT);
-        if (flightAttribute != null) {
-            flightAttribute.removeModifier(SHEEP_FLIGHT_ID);
-        }
-
-        var speedAttribute = player.getAttribute(Attributes.MOVEMENT_SPEED);
+        }var speedAttribute = player.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speedAttribute != null) {
             speedAttribute.removeModifier(SHEEP_SPEED_ID);
         }
@@ -349,7 +333,7 @@ public class SheepPowerMagic extends MobEffect {
     private void removeAllOtherEffects(Player player) {
         List<MobEffectInstance> activeEffects = new ArrayList<>(player.getActiveEffects());
         for (MobEffectInstance effectInstance : activeEffects) {
-            if (effectInstance.is(ChenMod.SHEEP_POWER)) {
+            if (effectInstance.is(ChenMod.SHEEP_POWER.getHolder().orElseThrow())) {
                 continue;
             }
             Holder<MobEffect> effectHolder = effectInstance.getEffect();
@@ -472,7 +456,7 @@ public class SheepPowerMagic extends MobEffect {
         }
 
         DisguiseIdentity disguiseIdentity = DISGUISED_IDENTITIES.get(target.getUUID());
-        PacketDistributor.sendToPlayer(recipient, createDisguisePayload(target.getUUID(), disguiseIdentity));
+        ModNetwork.sendToPlayer(recipient, createDisguisePayload(target.getUUID(), disguiseIdentity));
     }
 
     public static void syncAllDisguiseIdentitiesTo(ServerPlayer recipient) {
@@ -481,7 +465,7 @@ public class SheepPowerMagic extends MobEffect {
         }
 
         for (Map.Entry<UUID, DisguiseIdentity> entry : DISGUISED_IDENTITIES.entrySet()) {
-            PacketDistributor.sendToPlayer(recipient, createDisguisePayload(entry.getKey(), entry.getValue()));
+            ModNetwork.sendToPlayer(recipient, createDisguisePayload(entry.getKey(), entry.getValue()));
         }
     }
 
@@ -499,7 +483,7 @@ public class SheepPowerMagic extends MobEffect {
 
         SheepDisguisePayload payload = createDisguisePayload(player.getUUID(), DISGUISED_IDENTITIES.get(player.getUUID()));
         for (ServerPlayer serverPlayer : player.getServer().getPlayerList().getPlayers()) {
-            PacketDistributor.sendToPlayer(serverPlayer, payload);
+            ModNetwork.sendToPlayer(serverPlayer, payload);
         }
     }
 
@@ -525,11 +509,11 @@ public class SheepPowerMagic extends MobEffect {
         }
 
         if (snapshot == null) {
-            PacketDistributor.sendToPlayer(player, new SheepBodyTrackerPayload(false, false, 0.0D, 0.0D, 0.0D, ""));
+            ModNetwork.sendToPlayer(player, new SheepBodyTrackerPayload(false, false, 0.0D, 0.0D, 0.0D, ""));
             return;
         }
 
-        PacketDistributor.sendToPlayer(
+        ModNetwork.sendToPlayer(
                 player,
                 new SheepBodyTrackerPayload(
                         true,

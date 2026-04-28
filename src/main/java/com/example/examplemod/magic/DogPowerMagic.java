@@ -5,7 +5,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
-import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
 
 /**
  * 狗的能力魔法实现。
@@ -20,16 +20,16 @@ public class DogPowerMagic extends MobEffect {
     /**
      * Caps post-mitigation damage so the holder never drops below half a heart.
      */
-    public static void clampDamageToHalfHeart(LivingDamageEvent.Pre event) {
+    public static void clampDamageToHalfHeart(LivingDamageEvent event) {
         LivingEntity entity = event.getEntity();
-        if (!entity.hasEffect(ChenMod.DOG_POWER)) {
+        if (!entity.hasEffect(ChenMod.DOG_POWER.getHolder().orElseThrow())) {
             return;
         }
 
         float currentHealth = entity.getHealth();
         float maxDamage = Math.max(currentHealth - MIN_HEALTH, 0.0F);
-        if (event.getNewDamage() > maxDamage) {
-            event.setNewDamage(maxDamage);
+        if (event.getAmount() > maxDamage) {
+            event.setAmount(maxDamage);
         }
     }
 
@@ -42,7 +42,7 @@ public class DogPowerMagic extends MobEffect {
         }
 
         entity.addEffect(new MobEffectInstance(
-                ChenMod.DOG_POWER,
+                ChenMod.DOG_POWER.getHolder().orElseThrow(),
                 duration,
                 0,
                 false,

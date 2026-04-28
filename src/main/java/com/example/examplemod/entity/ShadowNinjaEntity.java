@@ -566,7 +566,7 @@ public class ShadowNinjaEntity extends Monster implements GeoEntity {
 
     private boolean doPeacefulPlayerAttack(Entity target) {
         float damage = (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE);
-        DamageSource damageSource = this.damageSources().source(DamageTypes.PLAYER_ATTACK);
+        DamageSource damageSource = this.damageSources().mobAttack(this);
         if (this.level() instanceof ServerLevel serverLevel) {
             damage = EnchantmentHelper.modifyDamage(serverLevel, this.getWeaponItem(), target, damageSource, damage);
         }

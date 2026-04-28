@@ -16,8 +16,8 @@ import net.minecraft.client.renderer.entity.ChickenRenderer;
 import net.minecraft.client.renderer.entity.PigRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.PlayerSkin;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 
 public class ClientModEvents {
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
@@ -43,7 +43,7 @@ public class ClientModEvents {
         SheepClientEventHandler.initDisguiseRenderers(event.getContext());
 
         for (PlayerSkin.Model skin : event.getSkins()) {
-            PlayerRenderer renderer = event.getSkin(skin);
+            PlayerRenderer renderer = event.getPlayerSkin(skin);
             if (renderer != null) {
                 renderer.addLayer(new OniMaskFaceLayer(renderer));
             }

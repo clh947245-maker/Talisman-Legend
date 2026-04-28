@@ -5,11 +5,11 @@ import com.example.examplemod.client.ShadowNinjaKeyMappings;
 import com.example.examplemod.item.OniMaskItem;
 import com.example.examplemod.network.packet.ShadowNinjaCommandPayload;
 import net.minecraft.client.Minecraft;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.TickEvent.ClientTickEvent;
+import com.example.examplemod.network.ModNetwork;
 
 @EventBusSubscriber(modid = ChenMod.MODID, value = Dist.CLIENT)
 public final class ShadowNinjaClientEventHandler {
@@ -34,15 +34,15 @@ public final class ShadowNinjaClientEventHandler {
         }
 
         while (ShadowNinjaKeyMappings.SUMMON.consumeClick()) {
-            PacketDistributor.sendToServer(new ShadowNinjaCommandPayload(ShadowNinjaCommandPayload.ACTION_SUMMON));
+            ModNetwork.sendToServer(new ShadowNinjaCommandPayload(ShadowNinjaCommandPayload.ACTION_SUMMON));
         }
 
         while (ShadowNinjaKeyMappings.DISMISS.consumeClick()) {
-            PacketDistributor.sendToServer(new ShadowNinjaCommandPayload(ShadowNinjaCommandPayload.ACTION_DISMISS));
+            ModNetwork.sendToServer(new ShadowNinjaCommandPayload(ShadowNinjaCommandPayload.ACTION_DISMISS));
         }
 
         while (ShadowNinjaKeyMappings.KNEEL.consumeClick()) {
-            PacketDistributor.sendToServer(new ShadowNinjaCommandPayload(ShadowNinjaCommandPayload.ACTION_KNEEL));
+            ModNetwork.sendToServer(new ShadowNinjaCommandPayload(ShadowNinjaCommandPayload.ACTION_KNEEL));
         }
     }
 }

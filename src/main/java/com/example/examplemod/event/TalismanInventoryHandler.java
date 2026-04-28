@@ -9,9 +9,9 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 
 /**
  * 符咒背包检测处理器
@@ -31,47 +31,47 @@ public class TalismanInventoryHandler {
      */
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
-        Player player = event.getEntity();
+        Player player = event.player;
         if (player.level().isClientSide) return;
         maintainOniMaskBlessing(player);
 
         // 检测马符咒
-        if (player.hasEffect(ChenMod.HORSE_POWER)) {
-            checkTalismanInInventory(player, ChenMod.HORSE_POWER, ChenMod.HORSE_TALISMAN.get());
+        if (player.hasEffect(ChenMod.HORSE_POWER.getHolder().orElseThrow())) {
+            checkTalismanInInventory(player, ChenMod.HORSE_POWER.getHolder().orElseThrow(), ChenMod.HORSE_TALISMAN.get());
         }
         
         // 检测牛符咒
-        if (player.hasEffect(ChenMod.OX_POWER)) {
-            checkTalismanInInventory(player, ChenMod.OX_POWER, ChenMod.OX_TALISMAN.get());
+        if (player.hasEffect(ChenMod.OX_POWER.getHolder().orElseThrow())) {
+            checkTalismanInInventory(player, ChenMod.OX_POWER.getHolder().orElseThrow(), ChenMod.OX_TALISMAN.get());
         }
 
         // 检测兔符咒
-        if (player.hasEffect(ChenMod.RABBIT_POWER)) {
-            checkTalismanInInventory(player, ChenMod.RABBIT_POWER, ChenMod.RABBIT_TALISMAN.get());
+        if (player.hasEffect(ChenMod.RABBIT_POWER.getHolder().orElseThrow())) {
+            checkTalismanInInventory(player, ChenMod.RABBIT_POWER.getHolder().orElseThrow(), ChenMod.RABBIT_TALISMAN.get());
         }
 
         // 检测蛇符咒
-        if (player.hasEffect(ChenMod.SNACK_POWER)) {
-            checkTalismanInInventory(player, ChenMod.SNACK_POWER, ChenMod.SNACK_TALISMAN.get());
+        if (player.hasEffect(ChenMod.SNACK_POWER.getHolder().orElseThrow())) {
+            checkTalismanInInventory(player, ChenMod.SNACK_POWER.getHolder().orElseThrow(), ChenMod.SNACK_TALISMAN.get());
         }
 
         // 检测狗符咒
-        if (player.hasEffect(ChenMod.DOG_POWER)) {
-            checkTalismanInInventory(player, ChenMod.DOG_POWER, ChenMod.DOG_TALISMAN.get());
+        if (player.hasEffect(ChenMod.DOG_POWER.getHolder().orElseThrow())) {
+            checkTalismanInInventory(player, ChenMod.DOG_POWER.getHolder().orElseThrow(), ChenMod.DOG_TALISMAN.get());
         }
 
         // 检测鸡符咒
-        if (player.hasEffect(ChenMod.ROOSTER_POWER)) {
-            checkTalismanInInventory(player, ChenMod.ROOSTER_POWER, ChenMod.ROOSTER_TALISMAN.get());
+        if (player.hasEffect(ChenMod.ROOSTER_POWER.getHolder().orElseThrow())) {
+            checkTalismanInInventory(player, ChenMod.ROOSTER_POWER.getHolder().orElseThrow(), ChenMod.ROOSTER_TALISMAN.get());
         }
 
         // 检测猴符咒
-        if (ChenMod.MONKEY_POWER.isBound() && player.hasEffect(ChenMod.MONKEY_POWER)) {
-            checkTalismanInInventory(player, ChenMod.MONKEY_POWER, ChenMod.MONKEY_TALISMAN.get());
+        if (ChenMod.MONKEY_POWER.isPresent() && player.hasEffect(ChenMod.MONKEY_POWER.getHolder().orElseThrow())) {
+            checkTalismanInInventory(player, ChenMod.MONKEY_POWER.getHolder().orElseThrow(), ChenMod.MONKEY_TALISMAN.get());
         }
 
         // 检测虎符咒
-        if (ChenMod.TIGER_POWER.isBound() && player.hasEffect(ChenMod.TIGER_POWER)) {
+        if (ChenMod.TIGER_POWER.isPresent() && player.hasEffect(ChenMod.TIGER_POWER.getHolder().orElseThrow())) {
             checkTigerTalismanInInventory(player);
             if (TigerTalismanHalfItem.getHeldTigerHalf(player) != null && player.tickCount % 20 == 0) {
                 TigerTalismanHalfItem.showTracker(player);
@@ -81,12 +81,12 @@ public class TalismanInventoryHandler {
 
     private static void maintainOniMaskBlessing(Player player) {
         ItemStack helmet = player.getItemBySlot(EquipmentSlot.HEAD);
-        MobEffectInstance blessing = player.getEffect(ChenMod.SHADOW_GENERAL_BLESSING);
+        MobEffectInstance blessing = player.getEffect(ChenMod.SHADOW_GENERAL_BLESSING.getHolder().orElseThrow());
 
         if (!OniMaskItem.isOniMask(helmet)) {
             if (blessing != null && blessing.getDuration() > ONI_MASK_BLESSING_DECAY_DURATION) {
                 player.addEffect(new MobEffectInstance(
-                        ChenMod.SHADOW_GENERAL_BLESSING,
+                        ChenMod.SHADOW_GENERAL_BLESSING.getHolder().orElseThrow(),
                         ONI_MASK_BLESSING_DECAY_DURATION,
                         blessing.getAmplifier(),
                         blessing.isAmbient(),
@@ -99,7 +99,7 @@ public class TalismanInventoryHandler {
 
         if (blessing == null || blessing.getDuration() <= ONI_MASK_REFRESH_THRESHOLD) {
             player.addEffect(new MobEffectInstance(
-                    ChenMod.SHADOW_GENERAL_BLESSING,
+                    ChenMod.SHADOW_GENERAL_BLESSING.getHolder().orElseThrow(),
                     ONI_MASK_BLESSING_WORN_DURATION,
                     0,
                     false,
@@ -166,14 +166,14 @@ public class TalismanInventoryHandler {
         }
 
         if (!hasItem) {
-            MobEffectInstance instance = player.getEffect(ChenMod.TIGER_POWER);
+            MobEffectInstance instance = player.getEffect(ChenMod.TIGER_POWER.getHolder().orElseThrow());
             if (instance != null && instance.getDuration() > 10) {
                 int amplifier = instance.getAmplifier();
                 boolean ambient = instance.isAmbient();
                 boolean visible = instance.isVisible();
                 boolean showIcon = instance.showIcon();
-                player.removeEffect(ChenMod.TIGER_POWER);
-                player.addEffect(new MobEffectInstance(ChenMod.TIGER_POWER, 10, amplifier, ambient, visible, showIcon));
+                player.removeEffect(ChenMod.TIGER_POWER.getHolder().orElseThrow());
+                player.addEffect(new MobEffectInstance(ChenMod.TIGER_POWER.getHolder().orElseThrow(), 10, amplifier, ambient, visible, showIcon));
             }
         }
     }

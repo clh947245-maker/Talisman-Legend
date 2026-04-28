@@ -68,7 +68,7 @@ public class MonkeyTalismanItem extends Item {
             // 如果选择的是“恢复原形” (ID_REVERT)
             if (selectedId == TransformationManager.ID_REVERT) {
                 // 移除猴符咒的魔法效果 (变回原形)
-                player.removeEffect(ChenMod.MONKEY_POWER);
+                player.removeEffect(ChenMod.MONKEY_POWER.getHolder().orElseThrow());
                 // 发送ActionBar消息提示玩家已变回原形
                 player.displayClientMessage(Component.translatable("message.chen_mod.monkey_revert"), true);
             } else {

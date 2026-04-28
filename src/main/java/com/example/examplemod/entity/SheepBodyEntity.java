@@ -34,7 +34,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.CommonHooks;
+import net.minecraftforge.common.ForgeHooks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +55,7 @@ import java.util.UUID;
  */
 public class SheepBodyEntity extends PathfinderMob {
     /** 普通敌对生物仇恨刷新间隔，单位为 tick（20 tick = 1 秒）。 */
-    private static final int HOSTILE_ATTRACTION_INTERVAL = 10;
+    private static final int HOSTILE_ATTRACTION_INTERVAL = 2;
     /** 史莱姆/岩浆怪目标刷新更频繁，避免这类近战弹跳怪丢失目标。 */
     private static final int SLIME_ATTRACTION_INTERVAL = 2;
     /** 搜索附近敌对生物时使用的半径。 */
@@ -113,7 +113,7 @@ public class SheepBodyEntity extends PathfinderMob {
     private void attractNearbyHostileMobs() {
         Player owner = this.getOwnerPlayer();
         if (owner == null || !owner.isAlive()) {
-            
+            return;
         }
         this.level().getEntitiesOfClass(
                 Mob.class,
@@ -143,8 +143,9 @@ public class SheepBodyEntity extends PathfinderMob {
      */
     private void tryRetargetHostileMob(Mob mob, Player owner) {
         LivingEntity currentTarget = mob.getTarget();
+        boolean targetingSoulOwner = currentTarget == owner;
         // 怪物已经在追击其他有效目标时，不强行改写，避免干扰其正常战斗行为。
-        if (currentTarget != null && currentTarget != this && currentTarget != owner && currentTarget.isAlive()) {
+        if (currentTarget != null && currentTarget != this && !targetingSoulOwner && currentTarget.isAlive()) {
             return;
         }
 
@@ -165,7 +166,7 @@ public class SheepBodyEntity extends PathfinderMob {
         }
 
         // 需要对身体有视线，避免隔墙强制拉怪。
-        if (!mob.getSensing().hasLineOfSight(this)) {
+        if (!targetingSoulOwner && !mob.getSensing().hasLineOfSight(this)) {
             return;
         }
 
@@ -224,7 +225,7 @@ public class SheepBodyEntity extends PathfinderMob {
     private boolean isBodyProvokingEnderMan(EnderMan enderMan, Player owner) {
         // 如果头盔等装备可抑制末影人仇恨，则不触发挑衅。
         ItemStack headItem = this.getItemBySlot(EquipmentSlot.HEAD);
-        if (CommonHooks.shouldSuppressEnderManAnger(enderMan, owner, headItem)) {
+        if (ForgeHooks.shouldSuppressEnderManAnger(enderMan, owner, headItem)) {
             return false;
         }
 
@@ -346,7 +347,7 @@ public class SheepBodyEntity extends PathfinderMob {
         this.setOwnerUUID(player.getUUID());
         this.setAppearanceUUID(SheepPowerMagic.getCurrentAppearanceUUID(player));
         this.setMonkeyTransformationId(resolveCurrentMonkeyTransformationId(player));
-        this.setSnackInvisible(player.hasEffect(ChenMod.SNACK_POWER));
+        this.setSnackInvisible(player.hasEffect(ChenMod.SNACK_POWER.getHolder().orElseThrow()));
 
         // 同步位置与朝向，保证身体留在玩家离开的原地。
         this.setPos(player.getX(), player.getY(), player.getZ());
@@ -426,7 +427,7 @@ public class SheepBodyEntity extends PathfinderMob {
     }
 
     private static int resolveCurrentMonkeyTransformationId(Player player) {
-        MobEffectInstance monkeyEffect = player.getEffect(ChenMod.MONKEY_POWER);
+        MobEffectInstance monkeyEffect = player.getEffect(ChenMod.MONKEY_POWER.getHolder().orElseThrow());
         return monkeyEffect == null ? TransformationManager.ID_REVERT : monkeyEffect.getAmplifier();
     }
 
@@ -488,7 +489,7 @@ public class SheepBodyEntity extends PathfinderMob {
      */
     private void copyEffects(Player player) {
         for (MobEffectInstance effectInstance : player.getActiveEffects()) {
-            if (effectInstance.is(ChenMod.SHEEP_POWER)) {
+            if (effectInstance.is(ChenMod.SHEEP_POWER.getHolder().orElseThrow())) {
                 continue;
             }
             this.addEffect(new MobEffectInstance(effectInstance));
@@ -502,14 +503,14 @@ public class SheepBodyEntity extends PathfinderMob {
     private void restoreEffects(Player player) {
         List<MobEffectInstance> existingEffects = new ArrayList<>(player.getActiveEffects());
         for (MobEffectInstance effectInstance : existingEffects) {
-            if (effectInstance.is(ChenMod.SHEEP_POWER)) {
+            if (effectInstance.is(ChenMod.SHEEP_POWER.getHolder().orElseThrow())) {
                 continue;
             }
             player.removeEffect(effectInstance.getEffect());
         }
 
         for (MobEffectInstance effectInstance : this.getActiveEffects()) {
-            if (effectInstance.is(ChenMod.SHEEP_POWER)) {
+            if (effectInstance.is(ChenMod.SHEEP_POWER.getHolder().orElseThrow())) {
                 continue;
             }
             player.addEffect(new MobEffectInstance(effectInstance));
@@ -562,7 +563,7 @@ public class SheepBodyEntity extends PathfinderMob {
      * 这里不依赖它们主动攻击事件，而是直接检测碰撞箱重叠来模拟贴身伤害。
      */
     private void syncSnackInvisibility() {
-        boolean shouldBeInvisible = this.hasEffect(ChenMod.SNACK_POWER);
+        boolean shouldBeInvisible = this.hasEffect(ChenMod.SNACK_POWER.getHolder().orElseThrow());
         if (this.isSnackInvisible() != shouldBeInvisible) {
             this.setSnackInvisible(shouldBeInvisible);
         }

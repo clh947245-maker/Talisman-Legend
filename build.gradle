@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.126'
+    id 'net.minecraftforge.gradle' version '6.0.36'
     id 'idea'
 }
 
@@ -14,7 +14,8 @@ def requiredProperty = { String name -> providers.gradleProperty(name).get() }
 def modPropertyKeys = [
         'minecraft_version',
         'minecraft_version_range',
-        'neo_version',
+        'forge_version',
+        'forge_version_range',
         'loader_version_range',
         'mod_id',
         'mod_name',
@@ -27,11 +28,7 @@ def modPropertyKeys = [
 def modId = requiredProperty('mod_id')
 def generatedResourcesDir = layout.projectDirectory.dir('src/generated/resources')
 def mainResourcesDir = layout.projectDirectory.dir('src/main/resources')
-def generatedModMetadataDir = layout.buildDirectory.dir('generated/resources/modMetadata')
 def modMetadata = modPropertyKeys.collectEntries { key -> [(key): requiredProperty(key)] }.asImmutable()
-def enableGameTestNamespace = { runConfig ->
-    runConfig.systemProperty 'neoforge.enabledGameTestNamespaces', modId
-}
 
 group = requiredProperty('mod_group_id')
 version = requiredProperty('mod_version')
@@ -41,7 +38,19 @@ base {
 }
 
 repositories {
+    mavenCentral()
+    maven { url = 'https://maven.minecraftforge.net' }
+    maven { url = 'https://libraries.minecraft.net' }
     maven { url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Sponge'
+                url = 'https://repo.spongepowered.org/repository/maven-public'
+            }
+        }
+        filter { includeGroupAndSubgroups('org.spongepowered') }
+    }
 }
 
 // Mojang ships Java 21 to end users in 1.21+, so mods should target Java 21.
@@ -49,54 +58,42 @@ java {
     toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
 
-neoForge {
-    version = requiredProperty('neo_version')
-
-    parchment {
-        mappingsVersion = requiredProperty('parchment_mappings_version')
-        minecraftVersion = requiredProperty('parchment_minecraft_version')
-    }
+minecraft {
+    mappings channel: 'official', version: requiredProperty('minecraft_version')
+    reobf = false
+    copyIdeResources = true
 
     // Access Transformers are automatically detected if present.
-    // accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
+    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     runs {
         configureEach {
-            systemProperty 'forge.logging.markers', 'REGISTRIES'
-            logLevel = org.slf4j.event.Level.DEBUG
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
         }
 
         client {
-            client()
-            enableGameTestNamespace(delegate)
+            property 'forge.enabledGameTestNamespaces', modId
         }
 
         server {
-            server()
-            programArgument '--nogui'
-            enableGameTestNamespace(delegate)
+            property 'forge.enabledGameTestNamespaces', modId
+            args '--nogui'
         }
 
         gameTestServer {
-            type = 'gameTestServer'
-            enableGameTestNamespace(delegate)
+            property 'forge.enabledGameTestNamespaces', modId
         }
 
         data {
-            data()
-
-            programArguments.addAll(
+            workingDirectory project.file('run-data')
+            args(
                     '--mod', modId,
                     '--all',
                     '--output', generatedResourcesDir.asFile.absolutePath,
                     '--existing', mainResourcesDir.asFile.absolutePath
             )
-        }
-    }
-
-    mods {
-        "${modId}" {
-            sourceSet(sourceSets.main)
         }
     }
 }
@@ -114,8 +111,13 @@ configurations {
     runtimeClasspath.extendsFrom(localRuntime)
 }
 
+configurations.configureEach {
+    resolutionStrategy.force 'net.sf.jopt-simple:jopt-simple:5.0.4'
+}
+
 dependencies {
-    implementation "software.bernie.geckolib:geckolib-neoforge-${requiredProperty('minecraft_version')}:${requiredProperty('geckolib_version')}"
+    minecraft "net.minecraftforge:forge:${requiredProperty('minecraft_version')}-${requiredProperty('forge_version')}"
+    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-${requiredProperty('minecraft_version')}:${requiredProperty('geckolib_version')}")
 }
 
 def generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
@@ -123,11 +125,10 @@ def generateModMetadata = tasks.register('generateModMetadata', ProcessResources
     filteringCharset = 'UTF-8'
     expand(modMetadata)
     from(layout.projectDirectory.dir('src/main/templates'))
-    into(generatedModMetadataDir)
+    into(layout.buildDirectory.dir('generated/resources/modMetadata'))
 }
 
 sourceSets.main.resources.srcDir generateModMetadata
-neoForge.ideSyncTask generateModMetadata
 
 publishing {
     publications {
@@ -145,6 +146,12 @@ publishing {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     logging.captureStandardError(LogLevel.DEBUG)
+}
+
+sourceSets.each {
+    def dir = layout.buildDirectory.dir("sourceSets/$it.name")
+    it.output.resourcesDir = dir
+    it.java.destinationDirectory = dir
 }
 
 idea {

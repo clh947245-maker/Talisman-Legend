@@ -3,7 +3,7 @@ package com.example.examplemod.magic.transformation;
 import com.example.examplemod.ChenMod;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.common.NeoForgeMod;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.resources.ResourceLocation;
 
@@ -37,13 +37,7 @@ public abstract class AbstractFlyingTransformation implements ITransformation {
     @Override
     public void onTick(LivingEntity entity) {
         if (entity instanceof Player player) {
-            // 1. 始终赋予飞行能力 (类似创造模式飞行)
-            var flightAttribute = player.getAttribute(NeoForgeMod.CREATIVE_FLIGHT);
-            if (flightAttribute != null && !flightAttribute.hasModifier(CREATIVE_FLIGHT_ID)) {
-                flightAttribute.addTransientModifier(new AttributeModifier(CREATIVE_FLIGHT_ID, 1.0, AttributeModifier.Operation.ADD_VALUE));
-            }
-
-            // 2. "单键起飞" 逻辑 (按下空格键直接飞行)
+            // 1. 始终赋予飞行能力 (类似创造模式飞行)// 2. "单键起飞" 逻辑 (按下空格键直接飞行)
             boolean isJumping = false;
             try {
                 if (jumpingField != null) {
@@ -66,13 +60,7 @@ public abstract class AbstractFlyingTransformation implements ITransformation {
     public void onRemove(LivingEntity entity) {
         if (entity instanceof Player player) {
             // 如果玩家不是创造模式或旁观者模式，移除飞行能力
-            if (!player.isCreative() && !player.isSpectator()) {
-                var flightAttribute = player.getAttribute(NeoForgeMod.CREATIVE_FLIGHT);
-                if (flightAttribute != null) {
-                    flightAttribute.removeModifier(CREATIVE_FLIGHT_ID);
-                }
-
-                player.getAbilities().flying = false;
+            if (!player.isCreative() && !player.isSpectator()) {player.getAbilities().flying = false;
                 player.onUpdateAbilities();
             }
         }

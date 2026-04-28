@@ -20,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class OniMaskItem extends ArmorItem {
     public OniMaskItem(Holder<ArmorMaterial> material) {
-        super(material, Type.HELMET, new Item.Properties().stacksTo(1).setNoRepair());
+        super(material, Type.HELMET, new Item.Properties().stacksTo(1));
     }
 
     @Override
@@ -52,7 +52,7 @@ public class OniMaskItem extends ArmorItem {
     }
 
     public static boolean isWearingOniMask(@Nullable LivingEntity entity) {
-        if (entity instanceof net.minecraft.world.entity.player.Player player && player.hasEffect(ChenMod.SHEEP_POWER)) {
+        if (entity instanceof net.minecraft.world.entity.player.Player player && player.hasEffect(ChenMod.SHEEP_POWER.getHolder().orElseThrow())) {
             return false;
         }
 
@@ -67,7 +67,7 @@ public class OniMaskItem extends ArmorItem {
 
         if (entity instanceof net.minecraft.world.entity.player.Player player) {
             SheepBodyEntity body = SheepPowerMagic.getTrackedBody(player);
-            if (player.hasEffect(ChenMod.SHEEP_POWER)) {
+            if (player.hasEffect(ChenMod.SHEEP_POWER.getHolder().orElseThrow())) {
                 return body != null && body.isAlive() && hasEquippedOniMask(body) ? body : null;
             }
 

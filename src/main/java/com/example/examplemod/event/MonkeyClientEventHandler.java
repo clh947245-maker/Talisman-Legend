@@ -9,11 +9,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.InputEvent;
+import com.example.examplemod.network.ModNetwork;
 import org.lwjgl.glfw.GLFW;
 
 @EventBusSubscriber(modid = ChenMod.MODID, value = Dist.CLIENT)
@@ -47,7 +47,7 @@ public class MonkeyClientEventHandler {
                 // Calculate direction
                 // Actually, scrollY > 0 is UP. Let's make UP -> Next (+1), DOWN -> Prev (-1)
                 // Adjust based on preference. Standard hotbar: Scroll DOWN -> Next slot (right), Scroll UP -> Prev slot (left)
-                int change = (event.getScrollDeltaY() > 0) ? -1 : 1; 
+                int change = (event.getDeltaY() > 0) ? -1 : 1; 
 
                 // Get current ID
                 int currentId = MonkeyTalismanItem.getSelectedTransformation(stack);
@@ -58,7 +58,7 @@ public class MonkeyClientEventHandler {
                 if (newId < 0) newId += count;
 
                 // Send Packet
-                PacketDistributor.sendToServer(new TransformationSelectionPayload(newId));
+                ModNetwork.sendToServer(new TransformationSelectionPayload(newId));
                 
                 // Update Client Side Item NBT (Optimistic update for immediate feedback, though packet handles server side)
                 MonkeyTalismanItem.setSelectedTransformation(stack, newId);

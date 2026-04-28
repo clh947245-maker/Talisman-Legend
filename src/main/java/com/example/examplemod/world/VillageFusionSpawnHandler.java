@@ -25,11 +25,11 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.level.ChunkEvent;
-import net.neoforged.neoforge.event.level.LevelEvent;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.level.ChunkEvent;
+import net.minecraftforge.event.level.LevelEvent;
+import net.minecraftforge.event.TickEvent.LevelTickEvent;
 
 @EventBusSubscriber(modid = ChenMod.MODID)
 public final class VillageFusionSpawnHandler {
@@ -65,7 +65,7 @@ public final class VillageFusionSpawnHandler {
 
     @SubscribeEvent
     public static void onLevelTickPost(LevelTickEvent.Post event) {
-        if (!(event.getLevel() instanceof ServerLevel serverLevel)) {
+        if (!(event.level instanceof ServerLevel serverLevel)) {
             return;
         }
 

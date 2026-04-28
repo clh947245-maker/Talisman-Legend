@@ -39,7 +39,7 @@ public class TigerTalismanItem extends Item {
             return InteractionResultHolder.success(itemStack);
         }
 
-        if (player.hasEffect(ChenMod.TIGER_POWER)) {
+        if (player.hasEffect(ChenMod.TIGER_POWER.getHolder().orElseThrow())) {
             TigerCloneEntity clone = findNearbyOwnedClone(level, player);
             if (clone != null) {
                 mergeBack(level, player, usedHand, itemStack, clone);
@@ -66,7 +66,7 @@ public class TigerTalismanItem extends Item {
                 SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.PLAYERS, 1.0F, 1.0F);
 
         clone.discard();
-        player.removeEffect(ChenMod.TIGER_POWER);
+        player.removeEffect(ChenMod.TIGER_POWER.getHolder().orElseThrow());
         player.setItemInHand(usedHand, TigerTalismanHalfItem.restoreFullTalisman(currentStack));
         player.displayClientMessage(Component.translatable("message.chen_mod.tiger_merge"), true);
     }
