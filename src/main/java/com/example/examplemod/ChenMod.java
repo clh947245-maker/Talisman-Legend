@@ -17,7 +17,6 @@ import com.example.examplemod.item.OniMaskItem;
 import com.example.examplemod.config.ChenModLootConfig;
 import com.example.examplemod.structure.BuildingConstructorItem;
 import com.example.examplemod.structure.ShengZhuPalaceStructure;
-import com.example.examplemod.loot.DogTalismanLootModifier;
 import com.example.examplemod.loot.HorseFishingLootModifier;
 import com.example.examplemod.loot.MonkeyOceanRuinLootModifier;
 import com.example.examplemod.loot.MouseDungeonLootModifier;
@@ -596,8 +595,6 @@ public class ChenMod {
             LOOT_MODIFIER_SERIALIZERS.register("ox_bastion_loot", () -> OxBastionLootModifier.CODEC);
     public static final RegistryObject<MapCodec<RabbitTurtleLootModifier>> RABBIT_TURTLE_LOOT_MODIFIER =
             LOOT_MODIFIER_SERIALIZERS.register("rabbit_turtle_loot", () -> RabbitTurtleLootModifier.CODEC);
-    public static final RegistryObject<MapCodec<DogTalismanLootModifier>> DOG_TALISMAN_LOOT_MODIFIER =
-            LOOT_MODIFIER_SERIALIZERS.register("dog_talisman_loot", () -> DogTalismanLootModifier.CODEC);
     public static final RegistryObject<MapCodec<SheepEndCityLootModifier>> SHEEP_END_CITY_LOOT_MODIFIER =
             LOOT_MODIFIER_SERIALIZERS.register("sheep_end_city_loot", () -> SheepEndCityLootModifier.CODEC);
     public static final RegistryObject<MapCodec<SnakeAncientCityLootModifier>> SNAKE_ANCIENT_CITY_LOOT_MODIFIER =
