@@ -6,10 +6,10 @@
       "request": "launch",
       "name": "Client",
       "presentation": {
-        "group": "Mod Development - 1.21.1NeoForge",
+        "group": "Mod Development - 1.21.0NeoForge",
         "order": 0
       },
-      "projectName": "1.21.1NeoForge",
+      "projectName": "1.21.0NeoForge",
       "mainClass": "net.neoforged.devlaunch.Main",
       "args": [
         "@E:\\desk\\1.21.1NeoForge\\build\\moddev\\clientRunProgramArgs.txt"
@@ -28,10 +28,10 @@
       "request": "launch",
       "name": "Data",
       "presentation": {
-        "group": "Mod Development - 1.21.1NeoForge",
+        "group": "Mod Development - 1.21.0NeoForge",
         "order": 1
       },
-      "projectName": "1.21.1NeoForge",
+      "projectName": "1.21.0NeoForge",
       "mainClass": "net.neoforged.devlaunch.Main",
       "args": [
         "@E:\\desk\\1.21.1NeoForge\\build\\moddev\\dataRunProgramArgs.txt"
@@ -50,10 +50,10 @@
       "request": "launch",
       "name": "GameTestServer",
       "presentation": {
-        "group": "Mod Development - 1.21.1NeoForge",
+        "group": "Mod Development - 1.21.0NeoForge",
         "order": 2
       },
-      "projectName": "1.21.1NeoForge",
+      "projectName": "1.21.0NeoForge",
       "mainClass": "net.neoforged.devlaunch.Main",
       "args": [
         "@E:\\desk\\1.21.1NeoForge\\build\\moddev\\gameTestServerRunProgramArgs.txt"
@@ -72,10 +72,10 @@
       "request": "launch",
       "name": "Server",
       "presentation": {
-        "group": "Mod Development - 1.21.1NeoForge",
+        "group": "Mod Development - 1.21.0NeoForge",
         "order": 3
       },
-      "projectName": "1.21.1NeoForge",
+      "projectName": "1.21.0NeoForge",
       "mainClass": "net.neoforged.devlaunch.Main",
       "args": [
         "@E:\\desk\\1.21.1NeoForge\\build\\moddev\\serverRunProgramArgs.txt"
