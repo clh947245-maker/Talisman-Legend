@@ -22,7 +22,8 @@ def modPropertyKeys = [
         'mod_license',
         'mod_version',
         'mod_authors',
-        'mod_description'
+        'mod_description',
+        'geckolib_version_range'
 ]
 
 def modId = requiredProperty('mod_id')
@@ -118,6 +119,13 @@ configurations.configureEach {
 dependencies {
     minecraft "net.minecraftforge:forge:${requiredProperty('minecraft_version')}-${requiredProperty('forge_version')}"
     implementation fg.deobf("software.bernie.geckolib:geckolib-forge-${requiredProperty('minecraft_version')}:${requiredProperty('geckolib_version')}")
+    jarJar(group: 'software.bernie.geckolib', name: "geckolib-forge-${requiredProperty('minecraft_version')}", version: requiredProperty('geckolib_version')) {
+        jarJar.ranged(it, requiredProperty('geckolib_version_range'))
+    }
+}
+
+tasks.named('assemble').configure {
+    dependsOn tasks.named('jarJar')
 }
 
 def generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
