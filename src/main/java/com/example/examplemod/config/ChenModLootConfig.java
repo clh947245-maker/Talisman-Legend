@@ -15,8 +15,7 @@ public final class ChenModLootConfig {
     public static final String MONKEY_OCEAN_RUIN_WARM = "monkey_ocean_ruin_warm";
     public static final String OX_BASTION = "ox_bastion";
     public static final String RABBIT_TURTLE = "rabbit_turtle";
-    public static final String DOG_EVOKER = "dog_evoker";
-    public static final String DOG_TAMED_WOLF = "dog_tamed_wolf";
+    public static final String DOG_WOLF_TAMING = "dog_wolf_taming";
     public static final String SHEEP_END_CITY = "sheep_end_city";
     public static final String SNAKE_ANCIENT_CITY = "snake_ancient_city";
     public static final String TIGER_NETHER_FORTRESS = "tiger_nether_fortress";
@@ -32,8 +31,7 @@ public final class ChenModLootConfig {
     private static final ForgeConfigSpec.DoubleValue monkeyOceanRuinWarmChance;
     private static final ForgeConfigSpec.DoubleValue oxBastionChance;
     private static final ForgeConfigSpec.DoubleValue rabbitTurtleChance;
-    private static final ForgeConfigSpec.DoubleValue dogEvokerChance;
-    private static final ForgeConfigSpec.DoubleValue dogTamedWolfChance;
+    private static final ForgeConfigSpec.DoubleValue dogWolfTamingChance;
     private static final ForgeConfigSpec.DoubleValue sheepEndCityChance;
     private static final ForgeConfigSpec.DoubleValue snakeAncientCityChance;
     private static final ForgeConfigSpec.DoubleValue tigerNetherFortressChance;
@@ -71,9 +69,8 @@ public final class ChenModLootConfig {
         rabbitTurtleChance = builder.defineInRange("turtle_drop", 0.1D, 0.0D, 1.0D);
         builder.pop();
 
-        builder.comment("Dog talisman drop chances from evoker totems and tamed wolves.").push("dog_talisman");
-        dogEvokerChance = builder.defineInRange("evoker_totem_replace", 0.05D, 0.0D, 1.0D);
-        dogTamedWolfChance = builder.defineInRange("tamed_wolf_drop", 0.05D, 0.0D, 1.0D);
+        builder.comment("Dog talisman drop chance when a wolf is successfully tamed.").push("dog_talisman");
+        dogWolfTamingChance = builder.defineInRange("wolf_taming", 0.05D, 0.0D, 1.0D);
         builder.pop();
 
         builder.comment("羊符咒在末地城宝箱中的出现概率。").push("sheep_talisman");
@@ -113,8 +110,7 @@ public final class ChenModLootConfig {
             case MONKEY_OCEAN_RUIN_WARM -> monkeyOceanRuinWarmChance.get().floatValue();
             case OX_BASTION -> oxBastionChance.get().floatValue();
             case RABBIT_TURTLE -> rabbitTurtleChance.get().floatValue();
-            case DOG_EVOKER -> dogEvokerChance.get().floatValue();
-            case DOG_TAMED_WOLF -> dogTamedWolfChance.get().floatValue();
+            case DOG_WOLF_TAMING -> dogWolfTamingChance.get().floatValue();
             case SHEEP_END_CITY -> sheepEndCityChance.get().floatValue();
             case SNAKE_ANCIENT_CITY -> snakeAncientCityChance.get().floatValue();
             case TIGER_NETHER_FORTRESS -> tigerNetherFortressChance.get().floatValue();
